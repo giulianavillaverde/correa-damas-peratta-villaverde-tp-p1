@@ -11,10 +11,16 @@ public class Juego extends InterfaceJuego
     cuadricula cuadricula;
     regalos[] regalo;
     planta[] plantas;
+    Zombie[] zombies;
+    BolaFuego[] disparos;
     int contadorPlantas;
+    int zombiesEliminados;
+    int zombiesTotales;
+    boolean juegoGanado;
+    boolean juegoPerdido;
     
-    Juego(){
-        this.entorno = new Entorno(this, "Proyecto para TP", 1034, 585);
+    public Juego(){
+        this.entorno = new Entorno(this, "Zombies Grinch", 1034, 585);
         this.cuadricula = new cuadricula(50, 150, entorno);
         this.banner = new Banner(entorno);
         
@@ -28,9 +34,17 @@ public class Juego extends InterfaceJuego
         this.plantas = new planta[30];
         this.contadorPlantas = 0;
         
+        this.zombies = new Zombie[15];
+        this.disparos = new BolaFuego[50]; // Array para disparos
+        this.zombiesEliminados = 0;
+        this.zombiesTotales = 10;
+        this.juegoGanado = false;
+        this.juegoPerdido = false;
+        
         // Crear plantas iniciales en el banner
         crearGirasolEnBanner(50, 40);
         crearPlantaDeHieloEnBanner(150, 40);
+        crearRoseBladeEnBanner(250, 40);
         
         this.entorno.iniciar();
     }
@@ -48,8 +62,20 @@ public class Juego extends InterfaceJuego
             contadorPlantas++;
         }
     }
+    
+    private void crearRoseBladeEnBanner(double x, double y) {
+        if (contadorPlantas < plantas.length) {
+            plantas[contadorPlantas] = new RoseBlade(x, y, entorno);
+            contadorPlantas++;
+        }
+    }
 
     public void tick(){
+        if (juegoGanado || juegoPerdido) {
+            dibujarPantallaFin();
+            return;
+        }
+        
         entorno.colorFondo(Color.GREEN);
         
         this.banner.dibujar();
@@ -59,37 +85,123 @@ public class Juego extends InterfaceJuego
             r.dibujar();
         }
         
+        // ACTUALIZAR Y DIBUJAR PLANTAS
         for(planta p: this.plantas) {
             if(p != null) {
                 p.dibujar();
+                
+                // Si es RoseBlade y está plantada, actualizar y hacerla disparar
+                if (p instanceof RoseBlade && p.plantada) {
+                    RoseBlade rose = (RoseBlade) p;
+                    rose.actualizar(entorno.numeroDeTick());
+                    BolaFuego nuevoDisparo = rose.disparar(entorno.numeroDeTick());
+                    if (nuevoDisparo != null) {
+                        agregarDisparo(nuevoDisparo);
+                    }
+                }
             }
         }
+        
+        // GENERAR ZOMBIES
+        generarZombie();
+        
+        // ACTUALIZAR Y DIBUJAR ZOMBIES
+        actualizarZombies();
+        
+        // ACTUALIZAR Y DIBUJAR DISPAROS
+        actualizarDisparos();
+        
+        // VERIFICAR COLISIONES
+        verificarColisiones();
         
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
         
-        // Debug
-        entorno.cambiarFont("Arial", 12, Color.WHITE);
-        entorno.escribirTexto("Mouse: " + entorno.mouseX() + "," + entorno.mouseY(), 10, 570);
-        entorno.escribirTexto("Plantas: " + contadorPlantas, 300, 570);
+        verificarFinJuego();
+        dibujarUI();
+    }
+    
+    private void agregarDisparo(BolaFuego disparo) {
+        for (int i = 0; i < disparos.length; i++) {
+            if (disparos[i] == null) {
+                disparos[i] = disparo;
+                break;
+            }
+        }
+    }
+    
+    private void generarZombie() {
+        if (Math.random() < 0.005 && zombiesEliminados < zombiesTotales) {
+            for (int i = 0; i < zombies.length; i++) {
+                if (zombies[i] == null) {
+                    int fila = (int)(Math.random() * 5);
+                    zombies[i] = new Zombie(fila, entorno);
+                    break;
+                }
+            }
+        }
+    }
+    
+    private void actualizarZombies() {
+        for (int i = 0; i < zombies.length; i++) {
+            if (zombies[i] != null) {
+                zombies[i].mover();
+                zombies[i].dibujar();
+                
+                if (zombies[i].llegoARegalos()) {
+                    juegoPerdido = true;
+                }
+                
+                if (!zombies[i].vivo) {
+                    zombies[i] = null;
+                    zombiesEliminados++;
+                }
+            }
+        }
+    }
+    
+    private void actualizarDisparos() {
+        for (int i = 0; i < disparos.length; i++) {
+            if (disparos[i] != null) {
+                disparos[i].mover();
+                disparos[i].dibujar();
+                
+                // Eliminar disparos inactivos
+                if (!disparos[i].activa) {
+                    disparos[i] = null;
+                }
+            }
+        }
+    }
+    
+    private void verificarColisiones() {
+        for (int i = 0; i < disparos.length; i++) {
+            if (disparos[i] != null && disparos[i].activa) {
+                for (int j = 0; j < zombies.length; j++) {
+                    if (zombies[j] != null && zombies[j].vivo && 
+                        disparos[i].colisionaCon(zombies[j])) {
+                        zombies[j].recibirDanio();
+                        disparos[i].activa = false;
+                        disparos[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
     }
     
     private void manejarSeleccionYPlantado() {
-        // SELECCIÓN CON MOUSE
+        // ... (mantener el mismo código de selección y plantado)
         if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
-            // Deseleccionar todas primero
             for (int i = 0; i < plantas.length; i++) {
                 if (plantas[i] != null) {
                     plantas[i].seleccionada = false;
                 }
             }
             
-            // Seleccionar la planta clickeada
             for (int i = 0; i < plantas.length; i++) {
                 if (plantas[i] != null && plantas[i].encima(entorno.mouseX(), entorno.mouseY())) {
                     plantas[i].seleccionada = true;
-                    
-                    // Si está plantada, liberar su casilla temporalmente
                     if (plantas[i].plantada) {
                         int indiceX = cuadricula.cercanoL(plantas[i].x, plantas[i].y).x;
                         int indiceY = cuadricula.cercanoL(plantas[i].x, plantas[i].y).y;
@@ -100,7 +212,6 @@ public class Juego extends InterfaceJuego
             }
         }
         
-        // ARRASTRE
         if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
             for (planta p : plantas) {
                 if (p != null && p.seleccionada) {
@@ -109,36 +220,30 @@ public class Juego extends InterfaceJuego
             }
         }
         
-        // SOLTAR - PLANTAR O VOLVER AL BANNER
         if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
             for (int i = 0; i < plantas.length; i++) {
                 if (plantas[i] != null && plantas[i].seleccionada) {
-                    
                     if (entorno.mouseY() < 70) {
-                        // Volver al banner - posición original
                         plantas[i].x = plantas[i].xInicial;
                         plantas[i].y = plantas[i].yInicial;
                         plantas[i].plantada = false;
-                        
                     } else {
-                        // Intentar plantar en cuadrícula
                         int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                         int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                         
                         if (!cuadricula.ocupado[indiceX][indiceY]) {
-                            // CENTRAR la planta en la casilla
                             cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
                             cuadricula.ocupado[indiceX][indiceY] = true;
                             plantas[i].plantada = true;
                             
-                            // CREAR NUEVA PLANTA EN EL BANNER
                             if (plantas[i] instanceof PlantaDeHielo) {
                                 crearPlantaDeHieloEnBanner(150, 40);
+                            } else if (plantas[i] instanceof RoseBlade) {
+                                crearRoseBladeEnBanner(250, 40);
                             } else {
                                 crearGirasolEnBanner(50, 40);
                             }
                         } else {
-                            // Casilla ocupada, volver al banner
                             plantas[i].x = plantas[i].xInicial;
                             plantas[i].y = plantas[i].yInicial;
                             plantas[i].plantada = false;
@@ -150,9 +255,9 @@ public class Juego extends InterfaceJuego
     }
     
     private void manejarMovimientoTeclado() {
-        for (planta p : plantas) {
-            if (p != null && p.seleccionada && p.plantada) {
-                moverPlantaConTeclado(p);
+        for (int i = 0; i < plantas.length; i++) {
+            if (plantas[i] != null && plantas[i].seleccionada && plantas[i].plantada) {
+                moverPlantaConTeclado(plantas[i]);
             }
         }
     }
@@ -177,13 +282,34 @@ public class Juego extends InterfaceJuego
     
     private void moverPlanta(planta planta, int xActual, int yActual, int xNuevo, int yNuevo) {
         cuadricula.ocupado[xActual][yActual] = false;
-        // Usar el método centrar para mantener la planta centrada
-        cuadricula.centrarPlanta(planta, xNuevo, yNuevo);
+        planta.x = cuadricula.coorX[xNuevo];
+        planta.y = cuadricula.coorY[yNuevo];
         cuadricula.ocupado[xNuevo][yNuevo] = true;
     }
+    
+    private void dibujarUI() {
+        entorno.cambiarFont("Arial", 20, Color.WHITE);
+        entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 800, 30);
+    }
+    
+    private void verificarFinJuego() {
+        if (zombiesEliminados >= zombiesTotales) {
+            juegoGanado = true;
+        }
+    }
+    
+    private void dibujarPantallaFin() {
+        entorno.colorFondo(Color.BLACK);
+        if (juegoGanado) {
+            entorno.cambiarFont("Arial", 40, Color.GREEN);
+            entorno.escribirTexto("¡VICTORIA!", 400, 300);
+        } else if (juegoPerdido) {
+            entorno.cambiarFont("Arial", 40, Color.RED);
+            entorno.escribirTexto("¡DERROTA!", 400, 300);
+        }
+    }
 
-    @SuppressWarnings("unused")
     public static void main(String[] args) {
-        Juego juego = new Juego();
+        new Juego();
     }
 }
