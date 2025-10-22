@@ -28,9 +28,9 @@ public cuadricula(double x, double y, Entorno e) {
 	double[] aux2 = {135,235,335,435,535};
 	this.coorX = aux1;
 	this.coorY = aux2;
-	this.ocupado = new boolean [this.coorX.length] [this.coorY.length];
-	for( int  j=0 ; j < this.coorX.length; j++) {
-		for (int i=0; i < this.coorY.length; i++) {
+	this.ocupado = new boolean [10] [5];
+	for( int  j=0 ; j < 10; j++) {
+		for (int i=0; i < 5; i++) {
 			this.ocupado [j][i] = false;
 			if (j==0) {
 				this.ocupado[j][i] = true;
@@ -42,15 +42,15 @@ public cuadricula(double x, double y, Entorno e) {
 }
 public void dibujar( ) {
 	Image img;
-	for (int i=0; i < coorY.length ; i++) {
-		for (int j=0; j < coorX.length ; j++) {
+	for (int i=0; i < 10 ; i++) {
+		for (int j=0; j < 5 ; j++) {
 			if ( (i+j) % 2 == 0) {
 				img = imagen1;
 			}else {
 				img= imagen2;
 			}
 		
-		e.dibujarImagen(img, this.coorX[j],  this.coorY[i], 0, escala);
+		e.dibujarImagen(img, this.coorX[i],  this.coorY[j], 0, escala);
 	}
 }
 	
@@ -62,7 +62,7 @@ public double distancia (double x1, double y1, double x2, double y2) {
 public Point cercanoL (double xM, double yM) {
 	int im = 0;
 	int jm = 0;
-	for (int j=0; j < 10; j++) {
+	for (int j=1; j < 10; j++) {
 		for (int i=0; i < 5; i++) {
 			if(!ocupado[j][i]) {
 				im = i;
@@ -72,7 +72,7 @@ public Point cercanoL (double xM, double yM) {
 		}
 	}
 	double distanciaM = distancia(xM, yM, coorX[jm], coorY[im]);
-	for (int j=0; j < 10; j++) {
+	for (int j=1; j < 10; j++) {
 		for (int i=0; i < 5; i++) {
 			if (distancia(xM, yM, coorX[j], coorY[i]) < distanciaM && !ocupado[j][i]) {
 				im = i;
@@ -81,6 +81,21 @@ public Point cercanoL (double xM, double yM) {
 			}
 		}
 	} return new Point(jm, im);
+}
+public Point cercano(double xM, double yM) {
+	int im =4;
+	int jm =7;
+	double distanciaM = distancia(xM,yM,coorX[jm],coorY[im]);
+	for(int j=1;j< 8;j++) {
+		for(int i=0; i < 5; i++) {
+			if(distancia(xM,yM,coorX[j],coorY[i]) < distanciaM) {
+				im = i;
+				jm = j;
+				distanciaM = distancia(xM,yM,coorX[j],coorY[i]);
+			}
+		}
+	}
+	return new Point(jm,im);
 }
 }
 
