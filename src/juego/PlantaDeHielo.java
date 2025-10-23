@@ -2,13 +2,13 @@ package juego;
 import entorno.Entorno;
 
 public class PlantaDeHielo extends planta {
-    private int tiempoRecarga;
-    private int tiempoUltimoDisparo;
+    public int tiempoRecarga; // Cambiado a público
+    public int tiempoUltimoDisparo; // Cambiado a público
     private boolean puedeDisparar;
     
     public PlantaDeHielo(double x, double y, Entorno e) {
         super(x, y, e, "plantaHielo.png", "plantaHielo.png", 0.12);
-        this.tiempoRecarga = 80;
+        this.tiempoRecarga = 180; // 30 segundos (180 ticks a 6 ticks por segundo)
         this.tiempoUltimoDisparo = 0;
         this.puedeDisparar = true;
     }

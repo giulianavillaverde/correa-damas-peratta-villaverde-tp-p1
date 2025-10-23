@@ -221,26 +221,66 @@ public class Juego extends InterfaceJuego
     private void dibujarBarrasRecarga() {
         int tickActual = entorno.numeroDeTick();
         
-        // Barra para PlantaDeHielo
+        // Barra para PlantaDeHielo (30 segundos)
         if (hieloBanner instanceof PlantaDeHielo) {
             PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
             double porcentaje = hielo.porcentajeRecarga(tickActual);
-            dibujarBarraRecarga(150, 70, porcentaje, Color.CYAN, "Hielo");
+            dibujarBarraRecargaConTiempo(150, 70, porcentaje, Color.CYAN, "Hielo", hielo, tickActual);
         }
         
-        // Barra para RoseBlade
+        // Barra para RoseBlade (15 segundos)
         if (roseBanner instanceof RoseBlade) {
             RoseBlade rose = (RoseBlade) roseBanner;
             double porcentaje = rose.porcentajeRecarga(tickActual);
-            dibujarBarraRecarga(250, 70, porcentaje, Color.ORANGE, "Fuego");
+            dibujarBarraRecargaConTiempo(250, 70, porcentaje, Color.ORANGE, "Fuego", rose, tickActual);
         }
         
-        // WallNut siempre disponible (sin recarga) - CORREGIDO: usar color marrón personalizado
+        // WallNut siempre disponible (sin recarga)
         Color marron = new Color(139, 69, 19); // Color marrón
         dibujarBarraRecarga(50, 70, 1.0, marron, "WallNut");
     }
     
-    // NUEVO: Método para dibujar una barra de recarga
+    // NUEVO: Método para dibujar una barra de recarga con tiempo
+    private void dibujarBarraRecargaConTiempo(double x, double y, double porcentaje, Color color, String texto, planta planta, int tickActual) {
+        double anchoBarra = 80;
+        double altoBarra = 8;
+        
+        // Fondo de la barra
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.GRAY);
+        
+        // Barra de progreso
+        double anchoProgreso = anchoBarra * porcentaje;
+        entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
+        
+        // Texto del nombre
+        entorno.cambiarFont("Arial", 12, Color.WHITE);
+        entorno.escribirTexto(texto, x - 25, y - 5);
+        
+        // Mostrar tiempo restante si está en recarga
+        if (porcentaje < 1.0) {
+            int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
+            entorno.cambiarFont("Arial", 10, Color.WHITE);
+            entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 15);
+        }
+    }
+    
+    // NUEVO: Método para calcular segundos restantes
+    private int calcularSegundosRestantes(planta planta, int tickActual) {
+        if (planta instanceof PlantaDeHielo) {
+            PlantaDeHielo hielo = (PlantaDeHielo) planta;
+            int tiempoTranscurrido = tickActual - hielo.tiempoUltimoDisparo;
+            int tiempoRestante = Math.max(0, hielo.tiempoRecarga - tiempoTranscurrido);
+            return (int) Math.ceil(tiempoRestante / 6.0); // Convertir ticks a segundos (aprox 6 ticks por segundo)
+        } else if (planta instanceof RoseBlade) {
+            RoseBlade rose = (RoseBlade) planta;
+            int tiempoTranscurrido = tickActual - rose.tiempoUltimoDisparo;
+            int tiempoRestante = Math.max(0, rose.tiempoRecarga - tiempoTranscurrido);
+            return (int) Math.ceil(tiempoRestante / 6.0); // Convertir ticks a segundos (aprox 6 ticks por segundo)
+        }
+        return 0;
+    }
+    
+    // Método original para dibujar barra simple (para WallNut)
     private void dibujarBarraRecarga(double x, double y, double porcentaje, Color color, String texto) {
         double anchoBarra = 80;
         double altoBarra = 8;

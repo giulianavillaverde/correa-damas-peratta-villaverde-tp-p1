@@ -2,13 +2,13 @@ package juego;
 import entorno.Entorno;
 
 public class RoseBlade extends planta {
-    private int tiempoRecarga;
-    private int tiempoUltimoDisparo;
+    public int tiempoRecarga; // Cambiado a público
+    public int tiempoUltimoDisparo; // Cambiado a público
     private boolean puedeDisparar;
     
     public RoseBlade(double x, double y, Entorno e) {
         super(x, y, e, "roseblade.png", "roseblade.png", 0.10);
-        this.tiempoRecarga = 60;
+        this.tiempoRecarga = 90; // 15 segundos (90 ticks a 6 ticks por segundo)
         this.tiempoUltimoDisparo = 0;
         this.puedeDisparar = true;
     }
