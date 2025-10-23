@@ -35,7 +35,7 @@ public class Zombie {
         this.ticksRalentizacion = 0;
         this.golpesEscarcha = 0;
         this.tiempoUltimoAtaque = 0;
-        this.cooldownAtaque = 60; // 1 segundo entre ataques (60 ticks)
+        this.cooldownAtaque = 180; // 3 segundos entre ataques (180 ticks)
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");

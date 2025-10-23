@@ -189,35 +189,42 @@ public class Juego extends InterfaceJuego
         plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
     }
     
-    // Verificar cuando los zombies atacan plantas
+    // Verificar cuando los zombies atacan plantas (CON COOLDOWN MEJORADO)
     private void verificarAtaquesZombies() {
+        int tickActual = entorno.numeroDeTick();
+        
         for (int i = 0; i < zombies.length; i++) {
             if (zombies[i] != null && zombies[i].vivo) {
                 for (int j = 0; j < plantas.length; j++) {
                     if (plantas[j] != null && plantas[j].plantada && 
                         zombies[i].colisionaConPlanta(plantas[j])) {
                         
-                        // El zombie ataca la planta
-                        if (plantas[j] instanceof WallNut) {
-                            WallNut wallnut = (WallNut) plantas[j];
-                            wallnut.recibirAtaque();
-                            System.out.println("WallNut recibió ataque, resistencia: " + wallnut.resistencia);
-                            // Si la WallNut muere, eliminarla
-                            if (wallnut.resistencia <= 0) {
-                                System.out.println("WallNut destruida!");
-                                // Liberar la casilla en la cuadrícula
+                        // Verificar si el zombie puede atacar (cooldown)
+                        if (zombies[i].puedeAtacar(tickActual)) {
+                            // El zombie ataca la planta
+                            if (plantas[j] instanceof WallNut) {
+                                WallNut wallnut = (WallNut) plantas[j];
+                                wallnut.recibirAtaque();
+                                System.out.println("WallNut recibió ataque, resistencia: " + wallnut.resistencia + "/180");
+                                // Si la WallNut muere, eliminarla
+                                if (wallnut.resistencia <= 0) {
+                                    System.out.println("WallNut destruida después de 3 minutos de ataque!");
+                                    // Liberar la casilla en la cuadrícula
+                                    int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                                    int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                                    cuadricula.ocupado[indiceX][indiceY] = false;
+                                    plantas[j] = null;
+                                }
+                            } else {
+                                // Otras plantas mueren instantáneamente
+                                System.out.println("Planta destruida por zombie!");
                                 int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                                 int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                                 cuadricula.ocupado[indiceX][indiceY] = false;
                                 plantas[j] = null;
                             }
-                        } else {
-                            // Otras plantas mueren instantáneamente
-                            System.out.println("Planta destruida por zombie!");
-                            int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
-                            int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                            cuadricula.ocupado[indiceX][indiceY] = false;
-                            plantas[j] = null;
+                            // Registrar el ataque del zombie
+                            zombies[i].registrarAtaque(tickActual);
                         }
                         break; // El zombie solo ataca una planta a la vez
                     }
@@ -488,7 +495,8 @@ public class Juego extends InterfaceJuego
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
-                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                    // Verificar que no sea la primera columna (columna 0)
+                    if (indiceX > 0 && !cuadricula.ocupado[indiceX][indiceY]) {
                         // Crear NUEVA planta para la cuadrícula
                         WallNut nuevaWallnut = new WallNut(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                         nuevaWallnut.plantada = true;
@@ -524,7 +532,8 @@ public class Juego extends InterfaceJuego
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
-                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                    // Verificar que no sea la primera columna (columna 0)
+                    if (indiceX > 0 && !cuadricula.ocupado[indiceX][indiceY]) {
                         // Crear NUEVA planta para la cuadrícula
                         PlantaDeHielo nuevaHielo = new PlantaDeHielo(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                         nuevaHielo.plantada = true;
@@ -560,7 +569,8 @@ public class Juego extends InterfaceJuego
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
-                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                    // Verificar que no sea la primera columna (columna 0)
+                    if (indiceX > 0 && !cuadricula.ocupado[indiceX][indiceY]) {
                         // Crear NUEVA planta para la cuadrícula
                         RoseBlade nuevaRose = new RoseBlade(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                         nuevaRose.plantada = true;
@@ -597,14 +607,14 @@ public class Juego extends InterfaceJuego
                     int indiceYAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).y;
                     cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = false;
                     
-                    // Ocupar la nueva casilla si está libre
-                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                    // Ocupar la nueva casilla si está libre y no es la primera columna
+                    if (indiceX > 0 && !cuadricula.ocupado[indiceX][indiceY]) {
                         cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
                         cuadricula.ocupado[indiceX][indiceY] = true;
                         plantas[i].xInicial = plantas[i].x;
                         plantas[i].yInicial = plantas[i].y;
                     } else {
-                        // Si la nueva casilla está ocupada, regresar a la posición original
+                        // Si la nueva casilla está ocupada o es la primera columna, regresar a la posición original
                         plantas[i].x = plantas[i].xInicial;
                         plantas[i].y = plantas[i].yInicial;
                         cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = true;
