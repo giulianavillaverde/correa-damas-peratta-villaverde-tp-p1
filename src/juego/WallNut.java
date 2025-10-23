@@ -9,10 +9,10 @@ public class WallNut extends planta {
     
     public WallNut(double x, double y, Entorno e) {
         super(x, y, e, "wallnut.png", "wallnut.png", 0.11);
-        this.tiempoRecargaPlantado = 360; // 1 minuto para volver a plantar
+        this.tiempoRecargaPlantado = 0; // siempre se puede volver a plantar
         this.tiempoUltimoUso = -100;
         this.disponibleParaPlantar = true;
-        this.resistencia = 5; // Soporta 5 ataques
+        this.resistencia = 10; // AUMENTADO: Soporta 10 ataques
     }
     
     public boolean estaEnRecarga(int tickActual) {
@@ -38,5 +38,6 @@ public class WallNut extends planta {
     
     public void recibirAtaque() {
         this.resistencia--;
+        System.out.println("WallNut recibió ataque, resistencia restante: " + resistencia);
     }
 }

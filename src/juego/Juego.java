@@ -201,8 +201,10 @@ public class Juego extends InterfaceJuego
                         if (plantas[j] instanceof WallNut) {
                             WallNut wallnut = (WallNut) plantas[j];
                             wallnut.recibirAtaque();
+                            System.out.println("WallNut recibió ataque, resistencia: " + wallnut.resistencia);
                             // Si la WallNut muere, eliminarla
                             if (wallnut.resistencia <= 0) {
+                                System.out.println("WallNut destruida!");
                                 // Liberar la casilla en la cuadrícula
                                 int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                                 int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
@@ -211,6 +213,7 @@ public class Juego extends InterfaceJuego
                             }
                         } else {
                             // Otras plantas mueren instantáneamente
+                            System.out.println("Planta destruida por zombie!");
                             int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                             int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                             cuadricula.ocupado[indiceX][indiceY] = false;

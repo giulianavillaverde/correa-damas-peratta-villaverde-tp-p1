@@ -18,7 +18,8 @@ public class Zombie {
     public boolean ralentizado;
     public int ticksRalentizacion;
     public int golpesEscarcha;
-    public int tiempoUltimoAtaque; // NUEVO: controlar frecuencia de ataques
+    public int tiempoUltimoAtaque;
+    public int cooldownAtaque;
     
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
@@ -33,7 +34,8 @@ public class Zombie {
         this.ralentizado = false;
         this.ticksRalentizacion = 0;
         this.golpesEscarcha = 0;
-        this.tiempoUltimoAtaque = 0; // NUEVO
+        this.tiempoUltimoAtaque = 0;
+        this.cooldownAtaque = 60; // 1 segundo entre ataques (60 ticks)
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -75,6 +77,16 @@ public class Zombie {
         
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 40; // Radio de colisión con plantas
+    }
+    
+    // NUEVO: Método para atacar plantas con cooldown
+    public boolean puedeAtacar(int tickActual) {
+        return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
+    }
+    
+    // NUEVO: Método para registrar ataque
+    public void registrarAtaque(int tickActual) {
+        this.tiempoUltimoAtaque = tickActual;
     }
     
     public void recibirDanio() {

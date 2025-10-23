@@ -38,7 +38,7 @@ public class cuadricula {
         this.escala = 0.143;
         this.ancho = 100;
         this.alto = 100;
-        double[] aux1 = {70,170,270,370,470,570,670,770,870,980};
+        double[] aux1 = {70,170,270,370,470,570,670,770,870,970};
         double[] aux2 = {135,235,335,435,535};
         this.coorX = aux1;
         this.coorY = aux2;
@@ -47,7 +47,8 @@ public class cuadricula {
         for( int  j=0 ; j < 10; j++) {
             for (int i=0; i < 5; i++) {
                 this.ocupado [j][i] = false;
-                if (j==0) {
+                // Bloquear la primera columna (j=0) donde están los regalos
+                if (j == 0) {
                     this.ocupado[j][i] = true;
                 }
             }
@@ -80,23 +81,16 @@ public class cuadricula {
     
     public Point cercanoL (double xM, double yM) {
         int im = 0;
-        int jm = 0;
-        for (int j=1; j < 10; j++) {
+        int jm = 1; // Empezar desde la columna 1 (no la 0 que está bloqueada)
+        double distanciaM = 10000;
+        
+        for (int j=1; j < 10; j++) { // Solo buscar desde columna 1 en adelante
             for (int i=0; i < 5; i++) {
-                if(!ocupado[j][i]) {
+                double dist = distancia(xM, yM, coorX[j], coorY[i]);
+                if (dist < distanciaM) {
                     im = i;
                     jm = j;
-                    break;
-                }
-            }
-        }
-        double distanciaM = distancia(xM, yM, coorX[jm], coorY[im]);
-        for (int j=1; j < 10; j++) {
-            for (int i=0; i < 5; i++) {
-                if (distancia(xM, yM, coorX[j], coorY[i]) < distanciaM && !ocupado[j][i]) {
-                    im = i;
-                    jm = j;
-                    distanciaM = distancia(xM, yM, coorX[j], coorY[i]);
+                    distanciaM = dist;
                 }
             }
         } 
@@ -104,23 +98,27 @@ public class cuadricula {
     }
     
     public Point cercano(double xM, double yM) {
-        int im = 4;
-        int jm = 7;
-        double distanciaM = distancia(xM,yM,coorX[jm],coorY[im]);
-        for(int j=1;j< 8;j++) {
+        int im = 0;
+        int jm = 1; // Empezar desde la columna 1
+        double distanciaM = 10000;
+        
+        for(int j=1; j < 10; j++) { // Solo buscar desde columna 1 en adelante
             for(int i=0; i < 5; i++) {
-                if(distancia(xM,yM,coorX[j],coorY[i]) < distanciaM) {
+                double dist = distancia(xM, yM, coorX[j], coorY[i]);
+                if(dist < distanciaM) {
                     im = i;
                     jm = j;
-                    distanciaM = distancia(xM,yM,coorX[j],coorY[i]);
+                    distanciaM = dist;
                 }
             }
         }
-        return new Point(jm,im);
+        return new Point(jm, im);
     }
     
     public void centrarPlanta(planta p, int indiceX, int indiceY) {
         p.x = this.coorX[indiceX];
         p.y = this.coorY[indiceY];
+        p.xInicial = p.x;
+        p.yInicial = p.y;
     }
-} 
+}
