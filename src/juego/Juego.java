@@ -111,9 +111,6 @@ public class Juego extends InterfaceJuego
         // DIBUJAR PLANTAS DEL BANNER SOLO SI NO ESTÁN EN RECARGA
         dibujarPlantasBanner();
         
-        // RESETEAR PLANTAS DEL BANNER CUANDO TERMINAN LA RECARGA
-        resetearPlantasBanner();
-        
         generarZombie();
         actualizarZombies();
         actualizarDisparos();
@@ -128,66 +125,28 @@ public class Juego extends InterfaceJuego
         dibujarBarrasRecarga();
     }
     
-    // NUEVO MÉTODO: Resetear plantas del banner cuando terminan la recarga
-    private void resetearPlantasBanner() {
-        int tickActual = entorno.numeroDeTick();
-        
-        // Resetear WallNut
-        if (wallnutBanner instanceof WallNut && wallnutBanner.plantada) {
-            WallNut wallnut = (WallNut) wallnutBanner;
-            if (!wallnut.estaEnRecarga(tickActual)) {
-                // La recarga terminó, resetear la planta al banner
-                wallnutBanner.plantada = false;
-                wallnutBanner.x = wallnutBanner.xInicial;
-                wallnutBanner.y = wallnutBanner.yInicial;
-            }
-        }
-        
-        // Resetear PlantaDeHielo
-        if (hieloBanner instanceof PlantaDeHielo && hieloBanner.plantada) {
-            PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
-            if (!hielo.estaEnRecarga(tickActual)) {
-                // La recarga terminó, resetear la planta al banner
-                hieloBanner.plantada = false;
-                hieloBanner.x = hieloBanner.xInicial;
-                hieloBanner.y = hieloBanner.yInicial;
-            }
-        }
-        
-        // Resetear RoseBlade
-        if (roseBanner instanceof RoseBlade && roseBanner.plantada) {
-            RoseBlade rose = (RoseBlade) roseBanner;
-            if (!rose.estaEnRecarga(tickActual)) {
-                // La recarga terminó, resetear la planta al banner
-                roseBanner.plantada = false;
-                roseBanner.x = roseBanner.xInicial;
-                roseBanner.y = roseBanner.yInicial;
-            }
-        }
-    }
-    
     // MÉTODO: Dibujar plantas del banner solo si no están en recarga
     private void dibujarPlantasBanner() {
         int tickActual = entorno.numeroDeTick();
         
-        // Dibujar WallNut del banner si no está plantada Y no está en recarga
-        if (wallnutBanner instanceof WallNut && !wallnutBanner.plantada) {
+        // Dibujar WallNut del banner si no está en recarga
+        if (wallnutBanner instanceof WallNut) {
             WallNut wallnut = (WallNut) wallnutBanner;
             if (!wallnut.estaEnRecarga(tickActual)) {
                 wallnutBanner.dibujar();
             }
         }
         
-        // Dibujar PlantaDeHielo del banner si no está plantada Y no está en recarga
-        if (hieloBanner instanceof PlantaDeHielo && !hieloBanner.plantada) {
+        // Dibujar PlantaDeHielo del banner si no está en recarga
+        if (hieloBanner instanceof PlantaDeHielo) {
             PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
             if (!hielo.estaEnRecarga(tickActual)) {
                 hieloBanner.dibujar();
             }
         }
         
-        // Dibujar RoseBlade del banner si no está plantada Y no está en recarga
-        if (roseBanner instanceof RoseBlade && !roseBanner.plantada) {
+        // Dibujar RoseBlade del banner si no está en recarga
+        if (roseBanner instanceof RoseBlade) {
             RoseBlade rose = (RoseBlade) roseBanner;
             if (!rose.estaEnRecarga(tickActual)) {
                 roseBanner.dibujar();
@@ -206,11 +165,11 @@ public class Juego extends InterfaceJuego
             }
         }
         
-        if (plantaSeleccionada == null || plantaSeleccionada.plantada) {
-            return; // No hay planta seleccionada o ya está plantada
+        if (plantaSeleccionada == null) {
+            return; // No hay planta seleccionada
         }
         
-        // Mover con teclas WASD
+        // Mover con teclas WASD (tanto plantas del banner como plantadas)
         double velocidad = 3;
         if (entorno.estaPresionada('w') || entorno.estaPresionada(entorno.TECLA_ARRIBA)) {
             plantaSeleccionada.y -= velocidad;
@@ -464,6 +423,7 @@ public class Juego extends InterfaceJuego
     
     private void manejarSeleccionYPlantado() {
         if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
+            // Deseleccionar todas primero
             for (int i = 0; i < plantas.length; i++) {
                 if (plantas[i] != null) {
                     plantas[i].seleccionada = false;
@@ -473,51 +433,46 @@ public class Juego extends InterfaceJuego
             int tickActual = entorno.numeroDeTick();
             
             // Verificar si se hizo click en alguna planta del banner (SOLO SI NO ESTÁ EN RECARGA DE PLANTADO)
-            if (wallnutBanner != null && !wallnutBanner.plantada && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+            if (wallnutBanner != null && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                 WallNut wallnut = (WallNut) wallnutBanner;
                 if (!wallnut.estaEnRecarga(tickActual)) {
                     wallnutBanner.seleccionada = true;
                 }
             } 
-            else if (hieloBanner != null && !hieloBanner.plantada && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+            else if (hieloBanner != null && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                 PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
                 if (!hielo.estaEnRecarga(tickActual)) {
                     hieloBanner.seleccionada = true;
                 }
             } 
-            else if (roseBanner != null && !roseBanner.plantada && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+            else if (roseBanner != null && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                 RoseBlade rose = (RoseBlade) roseBanner;
                 if (!rose.estaEnRecarga(tickActual)) {
                     roseBanner.seleccionada = true;
                 }
             }
+            // Verificar si se hizo click en una planta ya plantada para moverla
+            else {
+                for (int i = 0; i < plantas.length; i++) {
+                    if (plantas[i] != null && plantas[i].plantada && plantas[i].encima(entorno.mouseX(), entorno.mouseY())) {
+                        plantas[i].seleccionada = true;
+                        break;
+                    }
+                }
+            }
         }
         
         if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
-            // Mover la planta seleccionada del banner (SOLO SI NO ESTÁ EN RECARGA DE PLANTADO)
-            if (wallnutBanner != null && wallnutBanner.seleccionada) {
-                int tickActual = entorno.numeroDeTick();
-                WallNut wallnut = (WallNut) wallnutBanner;
-                if (!wallnut.estaEnRecarga(tickActual)) {
-                    wallnutBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
-                }
-            } else if (hieloBanner != null && hieloBanner.seleccionada) {
-                int tickActual = entorno.numeroDeTick();
-                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
-                if (!hielo.estaEnRecarga(tickActual)) {
-                    hieloBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
-                }
-            } else if (roseBanner != null && roseBanner.seleccionada) {
-                int tickActual = entorno.numeroDeTick();
-                RoseBlade rose = (RoseBlade) roseBanner;
-                if (!rose.estaEnRecarga(tickActual)) {
-                    roseBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+            // Mover plantas seleccionadas (tanto del banner como plantadas)
+            for (int i = 0; i < plantas.length; i++) {
+                if (plantas[i] != null && plantas[i].seleccionada) {
+                    plantas[i].arrastrar(entorno.mouseX(), entorno.mouseY());
                 }
             }
         }
         
         if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
-            // Procesar plantado para WallNut
+            // Procesar plantado para WallNut del banner
             if (wallnutBanner != null && wallnutBanner.seleccionada) {
                 WallNut wallnut = (WallNut) wallnutBanner;
                 
@@ -525,83 +480,135 @@ public class Juego extends InterfaceJuego
                     // Si se suelta en el banner, regresar a su posición original
                     wallnutBanner.x = wallnutBanner.xInicial;
                     wallnutBanner.y = wallnutBanner.yInicial;
-                    wallnutBanner.plantada = false;
                 } else {
                     // Intentar plantar en la cuadrícula
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
                     if (!cuadricula.ocupado[indiceX][indiceY]) {
-                        cuadricula.centrarPlanta(wallnutBanner, indiceX, indiceY);
-                        cuadricula.ocupado[indiceX][indiceY] = true;
-                        wallnutBanner.plantada = true;
+                        // Crear NUEVA planta para la cuadrícula
+                        WallNut nuevaWallnut = new WallNut(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+                        nuevaWallnut.plantada = true;
                         
-                        // Marcar como usada - NO crear nueva planta
+                        // Buscar espacio en el array de plantas
+                        for (int i = 0; i < plantas.length; i++) {
+                            if (plantas[i] == null) {
+                                plantas[i] = nuevaWallnut;
+                                break;
+                            }
+                        }
+                        
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        
+                        // Marcar como usada en el banner
                         wallnut.usar(entorno.numeroDeTick());
-                    } else {
-                        // Si la casilla está ocupada, regresar al banner
-                        wallnutBanner.x = wallnutBanner.xInicial;
-                        wallnutBanner.y = wallnutBanner.yInicial;
-                        wallnutBanner.plantada = false;
                     }
+                    // Regresar la planta del banner a su posición original
+                    wallnutBanner.x = wallnutBanner.xInicial;
+                    wallnutBanner.y = wallnutBanner.yInicial;
                 }
                 wallnutBanner.seleccionada = false;
             }
             
-            // Procesar plantado para PlantaDeHielo
+            // Procesar plantado para PlantaDeHielo del banner
             else if (hieloBanner != null && hieloBanner.seleccionada) {
                 PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
                 
                 if (entorno.mouseY() < 70) {
                     hieloBanner.x = hieloBanner.xInicial;
                     hieloBanner.y = hieloBanner.yInicial;
-                    hieloBanner.plantada = false;
                 } else {
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
                     if (!cuadricula.ocupado[indiceX][indiceY]) {
-                        cuadricula.centrarPlanta(hieloBanner, indiceX, indiceY);
-                        cuadricula.ocupado[indiceX][indiceY] = true;
-                        hieloBanner.plantada = true;
+                        // Crear NUEVA planta para la cuadrícula
+                        PlantaDeHielo nuevaHielo = new PlantaDeHielo(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+                        nuevaHielo.plantada = true;
                         
-                        // Marcar como usada - NO crear nueva planta
+                        // Buscar espacio en el array de plantas
+                        for (int i = 0; i < plantas.length; i++) {
+                            if (plantas[i] == null) {
+                                plantas[i] = nuevaHielo;
+                                break;
+                            }
+                        }
+                        
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        
+                        // Marcar como usada en el banner
                         hielo.usar(entorno.numeroDeTick());
-                    } else {
-                        hieloBanner.x = hieloBanner.xInicial;
-                        hieloBanner.y = hieloBanner.yInicial;
-                        hieloBanner.plantada = false;
                     }
+                    // Regresar la planta del banner a su posición original
+                    hieloBanner.x = hieloBanner.xInicial;
+                    hieloBanner.y = hieloBanner.yInicial;
                 }
                 hieloBanner.seleccionada = false;
             }
             
-            // Procesar plantado para RoseBlade
+            // Procesar plantado para RoseBlade del banner
             else if (roseBanner != null && roseBanner.seleccionada) {
                 RoseBlade rose = (RoseBlade) roseBanner;
                 
                 if (entorno.mouseY() < 70) {
                     roseBanner.x = roseBanner.xInicial;
                     roseBanner.y = roseBanner.yInicial;
-                    roseBanner.plantada = false;
                 } else {
                     int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
                     int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
                     
                     if (!cuadricula.ocupado[indiceX][indiceY]) {
-                        cuadricula.centrarPlanta(roseBanner, indiceX, indiceY);
-                        cuadricula.ocupado[indiceX][indiceY] = true;
-                        roseBanner.plantada = true;
+                        // Crear NUEVA planta para la cuadrícula
+                        RoseBlade nuevaRose = new RoseBlade(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+                        nuevaRose.plantada = true;
                         
-                        // Marcar como usada - NO crear nueva planta
+                        // Buscar espacio en el array de plantas
+                        for (int i = 0; i < plantas.length; i++) {
+                            if (plantas[i] == null) {
+                                plantas[i] = nuevaRose;
+                                break;
+                            }
+                        }
+                        
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        
+                        // Marcar como usada en el banner
                         rose.usar(entorno.numeroDeTick());
-                    } else {
-                        roseBanner.x = roseBanner.xInicial;
-                        roseBanner.y = roseBanner.yInicial;
-                        roseBanner.plantada = false;
                     }
+                    // Regresar la planta del banner a su posición original
+                    roseBanner.x = roseBanner.xInicial;
+                    roseBanner.y = roseBanner.yInicial;
                 }
                 roseBanner.seleccionada = false;
+            }
+            
+            // Procesar movimiento de plantas ya plantadas
+            for (int i = 0; i < plantas.length; i++) {
+                if (plantas[i] != null && plantas[i].plantada && plantas[i].seleccionada) {
+                    // Cuando se suelta una planta plantada, centrarla en la cuadrícula más cercana
+                    int indiceX = cuadricula.cercanoL(plantas[i].x, plantas[i].y).x;
+                    int indiceY = cuadricula.cercanoL(plantas[i].x, plantas[i].y).y;
+                    
+                    // Liberar la casilla anterior
+                    int indiceXAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).x;
+                    int indiceYAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).y;
+                    cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = false;
+                    
+                    // Ocupar la nueva casilla si está libre
+                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                        cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        plantas[i].xInicial = plantas[i].x;
+                        plantas[i].yInicial = plantas[i].y;
+                    } else {
+                        // Si la nueva casilla está ocupada, regresar a la posición original
+                        plantas[i].x = plantas[i].xInicial;
+                        plantas[i].y = plantas[i].yInicial;
+                        cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = true;
+                    }
+                    
+                    plantas[i].seleccionada = false;
+                }
             }
         }
     }

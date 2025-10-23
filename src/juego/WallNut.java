@@ -12,7 +12,7 @@ public class WallNut extends planta {
         this.tiempoRecargaPlantado = 360; // 1 minuto para volver a plantar
         this.tiempoUltimoUso = -100;
         this.disponibleParaPlantar = true;
-        this.resistencia = 5;
+        this.resistencia = 5; // Soporta 5 ataques
     }
     
     public boolean estaEnRecarga(int tickActual) {
