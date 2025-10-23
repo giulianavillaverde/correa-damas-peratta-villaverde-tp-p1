@@ -17,7 +17,7 @@ public class RoseBlade extends planta {
         
         // TIEMPOS SEPARADOS
         this.tiempoRecargaPlantado = 360;  // 1 minuto para volver a plantar
-        this.tiempoRecargaDisparo = 15;    // Tiempo entre disparos
+        this.tiempoRecargaDisparo = 80;    // Tiempo entre disparos
         
         this.tiempoUltimoPlantado = -100;
         this.tiempoUltimoDisparo = -100;

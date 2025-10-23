@@ -4,6 +4,7 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.InterfaceJuego;
 
+
 public class Juego extends InterfaceJuego
 {
     Entorno entorno;
@@ -21,6 +22,9 @@ public class Juego extends InterfaceJuego
     boolean juegoGanado;
     boolean juegoPerdido;
     int ticksParaColosal;
+    
+    
+
     
     // Plantas en el banner para controlar recarga
     planta wallnutBanner;
@@ -72,6 +76,7 @@ public class Juego extends InterfaceJuego
 
     public void tick(){
         if (juegoGanado || juegoPerdido) {
+            
             dibujarPantallaFin();
             return;
         }
@@ -433,7 +438,7 @@ public class Juego extends InterfaceJuego
     private void agregarDisparo(BolaFuego disparo) {
         for (int i = 0; i < disparos.length; i++) {
             if (disparos[i] == null) {
-                disparos[i] = disparo;
+                disparos[i] = disparo; 
                 break;
             }
         }
@@ -731,8 +736,8 @@ public class Juego extends InterfaceJuego
     
     private void dibujarUI() {
         entorno.cambiarFont("Arial", 20, Color.WHITE);
-        entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 800, 30);
-        entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 800, 60);
+        entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 400, 40);
+        entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 400, 80);
         
         // Mostrar plantas activas
         int plantasActivas = 0;
@@ -741,7 +746,7 @@ public class Juego extends InterfaceJuego
                 plantasActivas++;
             }
         }
-        entorno.escribirTexto("Plantas: " + plantasActivas, 800, 90);
+        entorno.escribirTexto("Plantas: " + plantasActivas, 400, 20);
         
         // Mostrar zombies en pantalla
         int zombiesEnPantalla = 0;
@@ -750,16 +755,16 @@ public class Juego extends InterfaceJuego
                 zombiesEnPantalla++;
             }
         }
-        entorno.escribirTexto("En pantalla: " + zombiesEnPantalla, 800, 120);
+        entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
         
         // NUEVO: Mostrar advertencia del colosal
         if (zombieColosal != null && zombieColosal.vivo) {
-            entorno.cambiarFont("Arial", 16, Color.RED);
-            entorno.escribirTexto("¡ZOMBIE COLOSAL!", 800, 150);
+            entorno.cambiarFont("Arial", 50, Color.RED);
+            entorno.escribirTexto("¡ZOMBIE COLOSAL!", 212, 300);
         } else if (ticksParaColosal > 0) {
             int segundosRestantes = ticksParaColosal / 6;
-            entorno.cambiarFont("Arial", 12, Color.YELLOW);
-            entorno.escribirTexto("Colosal en: " + segundosRestantes + "s", 800, 150);
+            entorno.cambiarFont("Arial", 20, Color.red);
+            entorno.escribirTexto("Zombie colosal aparece en: " + segundosRestantes + "s", 600, 84);
         }
     }
     

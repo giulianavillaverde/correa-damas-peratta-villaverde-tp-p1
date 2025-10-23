@@ -26,7 +26,7 @@ public class ZombieColosal {
         this.y = 335; // Centro vertical (entre las 5 filas)
         this.velocidadNormal = 0.15; // Más lento que los zombies normales
         this.velocidad = velocidadNormal;
-        this.resistenciaMaxima = 20; // Muy resistente
+        this.resistenciaMaxima = 30; // Muy resistente
         this.resistencia = resistenciaMaxima;
         this.vivo = true;
         this.ralentizado = false;
@@ -149,7 +149,7 @@ public class ZombieColosal {
         this.velocidad = velocidadNormal * 0.3; // Más lento cuando está ralentizado
         
         golpesEscarcha++;
-        if (golpesEscarcha >= 8) { // Necesita más golpes de hielo
+        if (golpesEscarcha >= 7) { // Necesita más golpes de hielo
             recibirDanioFuerte();
         }
     }

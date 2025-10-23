@@ -99,10 +99,10 @@ public class Zombie {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.4;
+        this.velocidad = velocidadNormal * 0.2; // Más lento cuando está ralentizado
         
         golpesEscarcha++;
-        if (golpesEscarcha >= 4) {
+        if (golpesEscarcha >= 6) {
             morir();
         }
     }
