@@ -12,6 +12,7 @@ public class Juego extends InterfaceJuego
     regalos[] regalo;
     planta[] plantas;
     Zombie[] zombies;
+    ZombieColosal zombieColosal;
     BolaFuego[] disparos;
     BolaEscarcha[] disparosHielo;
     int contadorPlantas;
@@ -19,6 +20,7 @@ public class Juego extends InterfaceJuego
     int zombiesTotales;
     boolean juegoGanado;
     boolean juegoPerdido;
+    int ticksParaColosal;
     
     // Plantas en el banner para controlar recarga
     planta wallnutBanner;
@@ -41,12 +43,14 @@ public class Juego extends InterfaceJuego
         this.contadorPlantas = 0;
         
         this.zombies = new Zombie[15];
+        this.zombieColosal = null;
         this.disparos = new BolaFuego[50];
         this.disparosHielo = new BolaEscarcha[50];
         this.zombiesEliminados = 0;
         this.zombiesTotales = 50;
         this.juegoGanado = false;
         this.juegoPerdido = false;
+        this.ticksParaColosal = 1800; // Aparece después de 5 minutos (1800 ticks)
         
         // Crear plantas del banner
         crearPlantasBanner();
@@ -112,17 +116,116 @@ public class Juego extends InterfaceJuego
         dibujarPlantasBanner();
         
         generarZombie();
+        generarZombieColosal();
         actualizarZombies();
+        actualizarZombieColosal();
         actualizarDisparos();
         actualizarDisparosHielo();
         verificarColisiones();
         verificarColisionesHielo();
+        verificarColisionesConColosal();
         verificarAtaquesZombies();
+        verificarAtaquesZombieColosal();
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
         verificarFinJuego();
         dibujarUI();
         dibujarBarrasRecarga();
+    }
+    
+    // MÉTODO: Generar zombie colosal
+    private void generarZombieColosal() {
+        if (zombieColosal == null && ticksParaColosal > 0) {
+            ticksParaColosal--;
+            if (ticksParaColosal <= 0) {
+                zombieColosal = new ZombieColosal(entorno);
+                System.out.println("¡CUIDADO! ¡Zombie Colosal aparece!");
+            }
+        }
+    }
+    
+    // MÉTODO: Actualizar zombie colosal
+    private void actualizarZombieColosal() {
+        if (zombieColosal != null) {
+            zombieColosal.mover();
+            zombieColosal.dibujar();
+            
+            if (zombieColosal.llegoARegalos()) {
+                juegoPerdido = true;
+                System.out.println("¡JUEGO PERDIDO! El Zombie Colosal llegó a los regalos!");
+            }
+            
+            if (!zombieColosal.vivo) {
+                zombieColosal = null;
+                zombiesEliminados += 5; // Vale por 5 zombies normales
+                System.out.println("¡Zombie Colosal eliminado! +5 puntos");
+            }
+        }
+    }
+    
+    // MÉTODO: Verificar colisiones con el zombie colosal
+    private void verificarColisionesConColosal() {
+        if (zombieColosal == null || !zombieColosal.vivo) return;
+        
+        // Colisiones con bolas de fuego
+        for (int i = 0; i < disparos.length; i++) {
+            if (disparos[i] != null && disparos[i].activa) {
+                double distancia = Math.sqrt(Math.pow(disparos[i].x - zombieColosal.getX(), 2) + 
+                                           Math.pow(disparos[i].y - zombieColosal.getY(), 2));
+                if (distancia < 70) { // Radio mayor por ser más grande
+                    zombieColosal.recibirDanio();
+                    disparos[i].activa = false;
+                    disparos[i] = null;
+                    break;
+                }
+            }
+        }
+        
+        // Colisiones con bolas de hielo
+        for (int i = 0; i < disparosHielo.length; i++) {
+            if (disparosHielo[i] != null && disparosHielo[i].activa) {
+                double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombieColosal.getX(), 2) + 
+                                           Math.pow(disparosHielo[i].y - zombieColosal.getY(), 2));
+                if (distancia < 70) {
+                    zombieColosal.ralentizar(disparosHielo[i].duracionRalentizacion);
+                    disparosHielo[i].activa = false;
+                    disparosHielo[i] = null;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // MÉTODO: Verificar ataques del zombie colosal
+    private void verificarAtaquesZombieColosal() {
+        if (zombieColosal == null || !zombieColosal.vivo) return;
+        
+        int tickActual = entorno.numeroDeTick();
+        
+        for (int j = 0; j < plantas.length; j++) {
+            if (plantas[j] != null && plantas[j].plantada && 
+                zombieColosal.colisionaConPlanta(plantas[j])) {
+                
+                if (zombieColosal.puedeAtacar(tickActual)) {
+                    // El zombie colosal ataca la planta
+                    if (plantas[j] instanceof WallNut) {
+                        WallNut wallnut = (WallNut) plantas[j];
+                        wallnut.recibirAtaque();
+                        wallnut.recibirAtaque(); // Doble daño del colosal
+                        System.out.println("WallNut recibió DOBLE ataque del Colosal!");
+                    } else {
+                        // Otras plantas mueren instantáneamente contra el colosal
+                        System.out.println("Planta destruida por Zombie Colosal!");
+                        int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                        int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                        cuadricula.ocupado[indiceX][indiceY] = false;
+                        plantas[j] = null;
+                    }
+                    zombieColosal.registrarAtaque(tickActual);
+                }
+                break;
+            }
+        }
     }
     
     // MÉTODO: Dibujar plantas del banner solo si no están en recarga
@@ -648,6 +751,16 @@ public class Juego extends InterfaceJuego
             }
         }
         entorno.escribirTexto("En pantalla: " + zombiesEnPantalla, 800, 120);
+        
+        // NUEVO: Mostrar advertencia del colosal
+        if (zombieColosal != null && zombieColosal.vivo) {
+            entorno.cambiarFont("Arial", 16, Color.RED);
+            entorno.escribirTexto("¡ZOMBIE COLOSAL!", 800, 150);
+        } else if (ticksParaColosal > 0) {
+            int segundosRestantes = ticksParaColosal / 6;
+            entorno.cambiarFont("Arial", 12, Color.YELLOW);
+            entorno.escribirTexto("Colosal en: " + segundosRestantes + "s", 800, 150);
+        }
     }
     
     private void verificarFinJuego() {
