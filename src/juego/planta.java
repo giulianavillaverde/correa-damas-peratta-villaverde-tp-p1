@@ -45,7 +45,7 @@ public class planta {
     
     public void dibujar() {
         if (seleccionada) {
-            // SOLO cambia la imagen, sin círculo amarillo
+            
             if (imagenSeleccionada != null) {
                 e.dibujarImagen(imagenSeleccionada, x, y, 0, escala);
             } else if (imagen != null) {

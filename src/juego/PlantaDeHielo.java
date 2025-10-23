@@ -19,7 +19,7 @@ public class PlantaDeHielo extends planta {
         }
     }
     
-    // CAMBIADO: Ahora devuelve BolaEscarcha
+    
     public BolaEscarcha disparar(int tickActual) {
         if (puedeDisparar && plantada) {
             puedeDisparar = false;

@@ -13,7 +13,7 @@ public class Juego extends InterfaceJuego
     planta[] plantas;
     Zombie[] zombies;
     BolaFuego[] disparos;
-    BolaEscarcha[] disparosHielo; // DESCOMENTADO - sistema de escarcha
+    BolaEscarcha[] disparosHielo;//Sistema de escarcha
     int contadorPlantas;
     int zombiesEliminados;
     int zombiesTotales;
@@ -37,7 +37,7 @@ public class Juego extends InterfaceJuego
         
         this.zombies = new Zombie[15];
         this.disparos = new BolaFuego[50];
-        this.disparosHielo = new BolaEscarcha[50]; // DESCOMENTADO
+        this.disparosHielo = new BolaEscarcha[50]; 
         this.zombiesEliminados = 0;
         this.zombiesTotales = 10;
         this.juegoGanado = false;
@@ -85,7 +85,7 @@ public class Juego extends InterfaceJuego
             r.dibujar();
         }
         
-        // ACTUALIZAR Y DIBUJAR PLANTAS
+        // Actualizar y dibujar plantas
         for(planta p: this.plantas) {
             if(p != null) {
                 p.dibujar();
@@ -98,7 +98,7 @@ public class Juego extends InterfaceJuego
                         agregarDisparo(nuevoDisparo);
                     }
                 }
-                // Disparos de PlantaDeHielo (con BolaEscarcha real)
+                // Disparos de PlantaDeHielo (con BolaEscarcha)
                 else if (p instanceof PlantaDeHielo && p.plantada) {
                     PlantaDeHielo plantaHielo = (PlantaDeHielo) p;
                     plantaHielo.actualizar(entorno.numeroDeTick());
@@ -113,9 +113,9 @@ public class Juego extends InterfaceJuego
         generarZombie();
         actualizarZombies();
         actualizarDisparos();
-        actualizarDisparosHielo(); // DESCOMENTADO
+        actualizarDisparosHielo(); 
         verificarColisiones();
-        verificarColisionesHielo(); // DESCOMENTADO
+        verificarColisionesHielo(); 
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
         verificarFinJuego();

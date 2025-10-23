@@ -17,7 +17,7 @@ public class Zombie {
     public boolean vivo;
     public boolean ralentizado;
     public int ticksRalentizacion;
-    public int golpesEscarcha; // NUEVO: contador de golpes de escarcha
+    public int golpesEscarcha; //Contador de golpes de escarcha
     
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
@@ -31,7 +31,7 @@ public class Zombie {
         this.vivo = true;
         this.ralentizado = false;
         this.ticksRalentizacion = 0;
-        this.golpesEscarcha = 0; // NUEVO: inicializar contador
+        this.golpesEscarcha = 0; //Inicializar contador
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -80,7 +80,7 @@ public class Zombie {
         this.ticksRalentizacion = duracion;
         this.velocidad = velocidadNormal * 0.4; // 60% más lento
         
-        // NUEVO: contar golpes de escarcha y matar después de 4
+        // Contar golpes de escarcha y matar después de 4
         golpesEscarcha++;
         if (golpesEscarcha >= 4) {
             morir();
