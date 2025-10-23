@@ -21,7 +21,7 @@ public class Juego extends InterfaceJuego
     boolean juegoPerdido;
     
     // Plantas en el banner para controlar recarga
-    planta wallnutBanner; // CAMBIADO: Girasol por WallNut
+    planta wallnutBanner;
     planta hieloBanner; 
     planta roseBanner;
     
@@ -54,7 +54,7 @@ public class Juego extends InterfaceJuego
         this.entorno.iniciar();
     }
     
-    // NUEVO: Método para crear plantas del banner
+    // Método para crear plantas del banner
     private void crearPlantasBanner() {
         this.wallnutBanner = new WallNut(50, 40, entorno);
         this.hieloBanner = new PlantaDeHielo(150, 40, entorno);
@@ -64,34 +64,6 @@ public class Juego extends InterfaceJuego
         plantas[contadorPlantas++] = wallnutBanner;
         plantas[contadorPlantas++] = hieloBanner;
         plantas[contadorPlantas++] = roseBanner;
-    }
-    
-    // CAMBIADO: crearWallNutEnBanner en lugar de crearGirasolEnBanner
-    private void crearWallNutEnBanner() {
-        if (contadorPlantas < plantas.length) {
-            WallNut nuevaWallnut = new WallNut(50, 40, entorno);
-            plantas[contadorPlantas] = nuevaWallnut;
-            wallnutBanner = nuevaWallnut;
-            contadorPlantas++;
-        }
-    }
-    
-    private void crearPlantaDeHieloEnBanner() {
-        if (contadorPlantas < plantas.length) {
-            PlantaDeHielo nuevaHielo = new PlantaDeHielo(150, 40, entorno);
-            plantas[contadorPlantas] = nuevaHielo;
-            hieloBanner = nuevaHielo;
-            contadorPlantas++;
-        }
-    }
-    
-    private void crearRoseBladeEnBanner() {
-        if (contadorPlantas < plantas.length) {
-            RoseBlade nuevaRose = new RoseBlade(250, 40, entorno);
-            plantas[contadorPlantas] = nuevaRose;
-            roseBanner = nuevaRose;
-            contadorPlantas++;
-        }
     }
 
     public void tick(){
@@ -108,23 +80,25 @@ public class Juego extends InterfaceJuego
             r.dibujar();
         }
         
-        // ACTUALIZAR Y DIBUJAR PLANTAS
+        // ACTUALIZAR Y DIBUJAR PLANTAS (solo las plantadas en la cuadrícula)
         for(planta p: this.plantas) {
-            if(p != null) {
+            if(p != null && p.plantada) {  // SOLO dibujar plantas plantadas
                 p.dibujar();
                 
-                if (p instanceof RoseBlade && p.plantada) {
+                if (p instanceof RoseBlade) {
                     RoseBlade rose = (RoseBlade) p;
                     rose.actualizar(entorno.numeroDeTick());
+                    // Usar tiempoRecargaDisparo internamente, no afecta al banner
                     BolaFuego nuevoDisparo = rose.disparar(entorno.numeroDeTick());
                     if (nuevoDisparo != null) {
                         agregarDisparo(nuevoDisparo);
                     }
                 }
                 // Disparos de PlantaDeHielo (con BolaEscarcha real)
-                else if (p instanceof PlantaDeHielo && p.plantada) {
+                else if (p instanceof PlantaDeHielo) {
                     PlantaDeHielo plantaHielo = (PlantaDeHielo) p;
                     plantaHielo.actualizar(entorno.numeroDeTick());
+                    // Usar tiempoRecargaDisparo internamente, no afecta al banner
                     BolaEscarcha nuevoDisparoHielo = plantaHielo.disparar(entorno.numeroDeTick());
                     if (nuevoDisparoHielo != null) {
                         agregarDisparoHielo(nuevoDisparoHielo);
@@ -134,13 +108,19 @@ public class Juego extends InterfaceJuego
             }
         }
         
+        // DIBUJAR PLANTAS DEL BANNER SOLO SI NO ESTÁN EN RECARGA
+        dibujarPlantasBanner();
+        
+        // RESETEAR PLANTAS DEL BANNER CUANDO TERMINAN LA RECARGA
+        resetearPlantasBanner();
+        
         generarZombie();
         actualizarZombies();
         actualizarDisparos();
         actualizarDisparosHielo();
         verificarColisiones();
         verificarColisionesHielo();
-        verificarAtaquesZombies(); // NUEVO: Verificar ataques de zombies a plantas
+        verificarAtaquesZombies();
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
         verificarFinJuego();
@@ -148,7 +128,74 @@ public class Juego extends InterfaceJuego
         dibujarBarrasRecarga();
     }
     
-    // NUEVO: Método para manejar movimiento con teclado
+    // NUEVO MÉTODO: Resetear plantas del banner cuando terminan la recarga
+    private void resetearPlantasBanner() {
+        int tickActual = entorno.numeroDeTick();
+        
+        // Resetear WallNut
+        if (wallnutBanner instanceof WallNut && wallnutBanner.plantada) {
+            WallNut wallnut = (WallNut) wallnutBanner;
+            if (!wallnut.estaEnRecarga(tickActual)) {
+                // La recarga terminó, resetear la planta al banner
+                wallnutBanner.plantada = false;
+                wallnutBanner.x = wallnutBanner.xInicial;
+                wallnutBanner.y = wallnutBanner.yInicial;
+            }
+        }
+        
+        // Resetear PlantaDeHielo
+        if (hieloBanner instanceof PlantaDeHielo && hieloBanner.plantada) {
+            PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+            if (!hielo.estaEnRecarga(tickActual)) {
+                // La recarga terminó, resetear la planta al banner
+                hieloBanner.plantada = false;
+                hieloBanner.x = hieloBanner.xInicial;
+                hieloBanner.y = hieloBanner.yInicial;
+            }
+        }
+        
+        // Resetear RoseBlade
+        if (roseBanner instanceof RoseBlade && roseBanner.plantada) {
+            RoseBlade rose = (RoseBlade) roseBanner;
+            if (!rose.estaEnRecarga(tickActual)) {
+                // La recarga terminó, resetear la planta al banner
+                roseBanner.plantada = false;
+                roseBanner.x = roseBanner.xInicial;
+                roseBanner.y = roseBanner.yInicial;
+            }
+        }
+    }
+    
+    // MÉTODO: Dibujar plantas del banner solo si no están en recarga
+    private void dibujarPlantasBanner() {
+        int tickActual = entorno.numeroDeTick();
+        
+        // Dibujar WallNut del banner si no está plantada Y no está en recarga
+        if (wallnutBanner instanceof WallNut && !wallnutBanner.plantada) {
+            WallNut wallnut = (WallNut) wallnutBanner;
+            if (!wallnut.estaEnRecarga(tickActual)) {
+                wallnutBanner.dibujar();
+            }
+        }
+        
+        // Dibujar PlantaDeHielo del banner si no está plantada Y no está en recarga
+        if (hieloBanner instanceof PlantaDeHielo && !hieloBanner.plantada) {
+            PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+            if (!hielo.estaEnRecarga(tickActual)) {
+                hieloBanner.dibujar();
+            }
+        }
+        
+        // Dibujar RoseBlade del banner si no está plantada Y no está en recarga
+        if (roseBanner instanceof RoseBlade && !roseBanner.plantada) {
+            RoseBlade rose = (RoseBlade) roseBanner;
+            if (!rose.estaEnRecarga(tickActual)) {
+                roseBanner.dibujar();
+            }
+        }
+    }
+    
+    // Método para manejar movimiento con teclado
     private void manejarMovimientoTeclado() {
         // Buscar la planta seleccionada
         planta plantaSeleccionada = null;
@@ -183,7 +230,7 @@ public class Juego extends InterfaceJuego
         plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
     }
     
-    // NUEVO: Verificar cuando los zombies atacan plantas
+    // Verificar cuando los zombies atacan plantas
     private void verificarAtaquesZombies() {
         for (int i = 0; i < zombies.length; i++) {
             if (zombies[i] != null && zombies[i].vivo) {
@@ -217,40 +264,49 @@ public class Juego extends InterfaceJuego
         }
     }
     
-    // NUEVO: Dibujar barras de recarga para plantas del banner
+    // Dibujar barras de recarga para plantas del banner (SOLO TIEMPO DE PLANTADO)
     private void dibujarBarrasRecarga() {
         int tickActual = entorno.numeroDeTick();
         
-        // Barra para PlantaDeHielo (30 segundos)
+        // Barra para WallNut (TIEMPO DE PLANTADO)
+        if (wallnutBanner instanceof WallNut) {
+            WallNut wallnut = (WallNut) wallnutBanner;
+            double porcentaje = wallnut.porcentajeRecarga(tickActual);
+            Color marron = new Color(139, 69, 19);
+            dibujarBarraRecargaConTiempo(50, 70, porcentaje, marron, "WallNut", wallnut, tickActual);
+        }
+        
+        // Barra para PlantaDeHielo (TIEMPO DE PLANTADO)
         if (hieloBanner instanceof PlantaDeHielo) {
             PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
             double porcentaje = hielo.porcentajeRecarga(tickActual);
             dibujarBarraRecargaConTiempo(150, 70, porcentaje, Color.CYAN, "Hielo", hielo, tickActual);
         }
         
-        // Barra para RoseBlade (15 segundos)
+        // Barra para RoseBlade (TIEMPO DE PLANTADO)
         if (roseBanner instanceof RoseBlade) {
             RoseBlade rose = (RoseBlade) roseBanner;
             double porcentaje = rose.porcentajeRecarga(tickActual);
             dibujarBarraRecargaConTiempo(250, 70, porcentaje, Color.ORANGE, "Fuego", rose, tickActual);
         }
-        
-        // WallNut siempre disponible (sin recarga)
-        Color marron = new Color(139, 69, 19); // Color marrón
-        dibujarBarraRecarga(50, 70, 1.0, marron, "WallNut");
     }
     
-    // NUEVO: Método para dibujar una barra de recarga con tiempo
+    // Método para dibujar una barra de recarga con tiempo (SOLO PLANTADO)
     private void dibujarBarraRecargaConTiempo(double x, double y, double porcentaje, Color color, String texto, planta planta, int tickActual) {
         double anchoBarra = 80;
         double altoBarra = 8;
         
         // Fondo de la barra
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.GRAY);
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.DARK_GRAY);
         
-        // Barra de progreso
+        // Barra de progreso que se llena gradualmente
         double anchoProgreso = anchoBarra * porcentaje;
-        entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
+        if (anchoProgreso > 0) {
+            entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
+        }
+        
+        // Borde de la barra
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.BLACK);
         
         // Texto del nombre
         entorno.cambiarFont("Arial", 12, Color.WHITE);
@@ -260,41 +316,46 @@ public class Juego extends InterfaceJuego
         if (porcentaje < 1.0) {
             int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
             entorno.cambiarFont("Arial", 10, Color.WHITE);
+            
+            // Cambiar color del texto según el tiempo restante
+            if (segundosRestantes <= 5) {
+                entorno.cambiarFont("Arial", 10, Color.YELLOW);
+            } else if (segundosRestantes <= 10) {
+                entorno.cambiarFont("Arial", 10, Color.ORANGE);
+            }
+            
             entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 15);
+            
+            // Efecto visual adicional: parpadeo cuando está por terminar
+            if (segundosRestantes <= 3 && tickActual % 10 < 5) {
+                entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, new Color(255, 255, 255, 100));
+            }
+        } else {
+            // Planta disponible
+            entorno.cambiarFont("Arial", 10, Color.GREEN);
+            entorno.escribirTexto("Listo", x - 12, y + 15);
         }
     }
     
-    // NUEVO: Método para calcular segundos restantes
+    // Método para calcular segundos restantes (SOLO PLANTADO)
     private int calcularSegundosRestantes(planta planta, int tickActual) {
         if (planta instanceof PlantaDeHielo) {
             PlantaDeHielo hielo = (PlantaDeHielo) planta;
-            int tiempoTranscurrido = tickActual - hielo.tiempoUltimoDisparo;
-            int tiempoRestante = Math.max(0, hielo.tiempoRecarga - tiempoTranscurrido);
-            return (int) Math.ceil(tiempoRestante / 6.0); // Convertir ticks a segundos (aprox 6 ticks por segundo)
+            int tiempoTranscurrido = tickActual - hielo.tiempoUltimoPlantado;
+            int tiempoRestante = Math.max(0, hielo.tiempoRecargaPlantado - tiempoTranscurrido);
+            return (int) Math.ceil(tiempoRestante / 6.0);
         } else if (planta instanceof RoseBlade) {
             RoseBlade rose = (RoseBlade) planta;
-            int tiempoTranscurrido = tickActual - rose.tiempoUltimoDisparo;
-            int tiempoRestante = Math.max(0, rose.tiempoRecarga - tiempoTranscurrido);
-            return (int) Math.ceil(tiempoRestante / 6.0); // Convertir ticks a segundos (aprox 6 ticks por segundo)
+            int tiempoTranscurrido = tickActual - rose.tiempoUltimoPlantado;
+            int tiempoRestante = Math.max(0, rose.tiempoRecargaPlantado - tiempoTranscurrido);
+            return (int) Math.ceil(tiempoRestante / 6.0);
+        } else if (planta instanceof WallNut) {
+            WallNut wallnut = (WallNut) planta;
+            int tiempoTranscurrido = tickActual - wallnut.tiempoUltimoUso;
+            int tiempoRestante = Math.max(0, wallnut.tiempoRecargaPlantado - tiempoTranscurrido);
+            return (int) Math.ceil(tiempoRestante / 6.0);
         }
         return 0;
-    }
-    
-    // Método original para dibujar barra simple (para WallNut)
-    private void dibujarBarraRecarga(double x, double y, double porcentaje, Color color, String texto) {
-        double anchoBarra = 80;
-        double altoBarra = 8;
-        
-        // Fondo de la barra
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.GRAY);
-        
-        // Barra de progreso
-        double anchoProgreso = anchoBarra * porcentaje;
-        entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
-        
-        // Texto
-        entorno.cambiarFont("Arial", 12, Color.WHITE);
-        entorno.escribirTexto(texto, x - 25, y - 5);
     }
     
     private void agregarDisparo(BolaFuego disparo) {
@@ -409,36 +470,57 @@ public class Juego extends InterfaceJuego
                 }
             }
             
-            // Verificar si se hizo click en alguna planta del banner
-            if (wallnutBanner != null && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
-                wallnutBanner.seleccionada = true;
-            } else if (hieloBanner != null && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+            int tickActual = entorno.numeroDeTick();
+            
+            // Verificar si se hizo click en alguna planta del banner (SOLO SI NO ESTÁ EN RECARGA DE PLANTADO)
+            if (wallnutBanner != null && !wallnutBanner.plantada && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+                WallNut wallnut = (WallNut) wallnutBanner;
+                if (!wallnut.estaEnRecarga(tickActual)) {
+                    wallnutBanner.seleccionada = true;
+                }
+            } 
+            else if (hieloBanner != null && !hieloBanner.plantada && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                 PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
-                if (!hielo.estaEnRecarga(entorno.numeroDeTick())) {
+                if (!hielo.estaEnRecarga(tickActual)) {
                     hieloBanner.seleccionada = true;
                 }
-            } else if (roseBanner != null && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+            } 
+            else if (roseBanner != null && !roseBanner.plantada && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                 RoseBlade rose = (RoseBlade) roseBanner;
-                if (!rose.estaEnRecarga(entorno.numeroDeTick())) {
+                if (!rose.estaEnRecarga(tickActual)) {
                     roseBanner.seleccionada = true;
                 }
             }
         }
         
         if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
-            // Mover la planta seleccionada del banner
+            // Mover la planta seleccionada del banner (SOLO SI NO ESTÁ EN RECARGA DE PLANTADO)
             if (wallnutBanner != null && wallnutBanner.seleccionada) {
-                wallnutBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                int tickActual = entorno.numeroDeTick();
+                WallNut wallnut = (WallNut) wallnutBanner;
+                if (!wallnut.estaEnRecarga(tickActual)) {
+                    wallnutBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                }
             } else if (hieloBanner != null && hieloBanner.seleccionada) {
-                hieloBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                int tickActual = entorno.numeroDeTick();
+                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+                if (!hielo.estaEnRecarga(tickActual)) {
+                    hieloBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                }
             } else if (roseBanner != null && roseBanner.seleccionada) {
-                roseBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                int tickActual = entorno.numeroDeTick();
+                RoseBlade rose = (RoseBlade) roseBanner;
+                if (!rose.estaEnRecarga(tickActual)) {
+                    roseBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+                }
             }
         }
         
         if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
             // Procesar plantado para WallNut
             if (wallnutBanner != null && wallnutBanner.seleccionada) {
+                WallNut wallnut = (WallNut) wallnutBanner;
+                
                 if (entorno.mouseY() < 70) {
                     // Si se suelta en el banner, regresar a su posición original
                     wallnutBanner.x = wallnutBanner.xInicial;
@@ -454,8 +536,8 @@ public class Juego extends InterfaceJuego
                         cuadricula.ocupado[indiceX][indiceY] = true;
                         wallnutBanner.plantada = true;
                         
-                        // Crear nueva WallNut en el banner
-                        crearWallNutEnBanner();
+                        // Marcar como usada - NO crear nueva planta
+                        wallnut.usar(entorno.numeroDeTick());
                     } else {
                         // Si la casilla está ocupada, regresar al banner
                         wallnutBanner.x = wallnutBanner.xInicial;
@@ -468,6 +550,8 @@ public class Juego extends InterfaceJuego
             
             // Procesar plantado para PlantaDeHielo
             else if (hieloBanner != null && hieloBanner.seleccionada) {
+                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+                
                 if (entorno.mouseY() < 70) {
                     hieloBanner.x = hieloBanner.xInicial;
                     hieloBanner.y = hieloBanner.yInicial;
@@ -481,8 +565,8 @@ public class Juego extends InterfaceJuego
                         cuadricula.ocupado[indiceX][indiceY] = true;
                         hieloBanner.plantada = true;
                         
-                        // Crear nueva PlantaDeHielo en el banner
-                        crearPlantaDeHieloEnBanner();
+                        // Marcar como usada - NO crear nueva planta
+                        hielo.usar(entorno.numeroDeTick());
                     } else {
                         hieloBanner.x = hieloBanner.xInicial;
                         hieloBanner.y = hieloBanner.yInicial;
@@ -494,6 +578,8 @@ public class Juego extends InterfaceJuego
             
             // Procesar plantado para RoseBlade
             else if (roseBanner != null && roseBanner.seleccionada) {
+                RoseBlade rose = (RoseBlade) roseBanner;
+                
                 if (entorno.mouseY() < 70) {
                     roseBanner.x = roseBanner.xInicial;
                     roseBanner.y = roseBanner.yInicial;
@@ -507,8 +593,8 @@ public class Juego extends InterfaceJuego
                         cuadricula.ocupado[indiceX][indiceY] = true;
                         roseBanner.plantada = true;
                         
-                        // Crear nueva RoseBlade en el banner
-                        crearRoseBladeEnBanner();
+                        // Marcar como usada - NO crear nueva planta
+                        rose.usar(entorno.numeroDeTick());
                     } else {
                         roseBanner.x = roseBanner.xInicial;
                         roseBanner.y = roseBanner.yInicial;
