@@ -1,14 +1,14 @@
 package juego;
 import entorno.Entorno;
 
-public class PlantaDeHielo extends planta {
+public class RoseBlade extends planta {
     private int tiempoRecarga;
     private int tiempoUltimoDisparo;
     private boolean puedeDisparar;
     
-    public PlantaDeHielo(double x, double y, Entorno e) {
-        super(x, y, e, "plantaHielo.png", "plantaHielo.png", 0.12);
-        this.tiempoRecarga = 80;
+    public RoseBlade(double x, double y, Entorno e) {
+        super(x, y, e, "roseblade.png", "roseblade.png", 0.10);
+        this.tiempoRecarga = 60;
         this.tiempoUltimoDisparo = 0;
         this.puedeDisparar = true;
     }
@@ -19,12 +19,11 @@ public class PlantaDeHielo extends planta {
         }
     }
     
-    // CAMBIADO: Ahora devuelve BolaEscarcha
-    public BolaEscarcha disparar(int tickActual) {
+    public BolaFuego disparar(int tickActual) {
         if (puedeDisparar && plantada) {
             puedeDisparar = false;
             tiempoUltimoDisparo = tickActual;
-            return new BolaEscarcha(x + 40, y, e);
+            return new BolaFuego(x + 40, y, e);
         }
         return null;
     }

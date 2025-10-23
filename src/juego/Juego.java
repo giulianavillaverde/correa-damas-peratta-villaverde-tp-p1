@@ -13,6 +13,7 @@ public class Juego extends InterfaceJuego
     planta[] plantas;
     Zombie[] zombies;
     BolaFuego[] disparos;
+    BolaEscarcha[] disparosHielo; // DESCOMENTADO - sistema de escarcha
     int contadorPlantas;
     int zombiesEliminados;
     int zombiesTotales;
@@ -35,13 +36,13 @@ public class Juego extends InterfaceJuego
         this.contadorPlantas = 0;
         
         this.zombies = new Zombie[15];
-        this.disparos = new BolaFuego[50]; // Array para disparos
+        this.disparos = new BolaFuego[50];
+        this.disparosHielo = new BolaEscarcha[50]; // DESCOMENTADO
         this.zombiesEliminados = 0;
         this.zombiesTotales = 10;
         this.juegoGanado = false;
         this.juegoPerdido = false;
         
-        // Crear plantas iniciales en el banner
         crearGirasolEnBanner(50, 40);
         crearPlantaDeHieloEnBanner(150, 40);
         crearRoseBladeEnBanner(250, 40);
@@ -51,7 +52,7 @@ public class Juego extends InterfaceJuego
     
     private void crearGirasolEnBanner(double x, double y) {
         if (contadorPlantas < plantas.length) {
-            plantas[contadorPlantas] = new planta(x, y, entorno, "planta1.jpg", "plantaSeleccionada.jpg", 0.10);
+            plantas[contadorPlantas] = new planta(x, y, entorno, "planta1.jpg", "planta1.jpg", 0.10);
             contadorPlantas++;
         }
     }
@@ -77,7 +78,6 @@ public class Juego extends InterfaceJuego
         }
         
         entorno.colorFondo(Color.GREEN);
-        
         this.banner.dibujar();
         this.cuadricula.dibujar();
         
@@ -90,7 +90,6 @@ public class Juego extends InterfaceJuego
             if(p != null) {
                 p.dibujar();
                 
-                // Si es RoseBlade y está plantada, actualizar y hacerla disparar
                 if (p instanceof RoseBlade && p.plantada) {
                     RoseBlade rose = (RoseBlade) p;
                     rose.actualizar(entorno.numeroDeTick());
@@ -99,24 +98,26 @@ public class Juego extends InterfaceJuego
                         agregarDisparo(nuevoDisparo);
                     }
                 }
+                // Disparos de PlantaDeHielo (con BolaEscarcha real)
+                else if (p instanceof PlantaDeHielo && p.plantada) {
+                    PlantaDeHielo plantaHielo = (PlantaDeHielo) p;
+                    plantaHielo.actualizar(entorno.numeroDeTick());
+                    BolaEscarcha nuevoDisparoHielo = plantaHielo.disparar(entorno.numeroDeTick());
+                    if (nuevoDisparoHielo != null) {
+                        agregarDisparoHielo(nuevoDisparoHielo);
+                    }
+                }
             }
         }
         
-        // GENERAR ZOMBIES
         generarZombie();
-        
-        // ACTUALIZAR Y DIBUJAR ZOMBIES
         actualizarZombies();
-        
-        // ACTUALIZAR Y DIBUJAR DISPAROS
         actualizarDisparos();
-        
-        // VERIFICAR COLISIONES
+        actualizarDisparosHielo(); // DESCOMENTADO
         verificarColisiones();
-        
+        verificarColisionesHielo(); // DESCOMENTADO
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
-        
         verificarFinJuego();
         dibujarUI();
     }
@@ -125,6 +126,15 @@ public class Juego extends InterfaceJuego
         for (int i = 0; i < disparos.length; i++) {
             if (disparos[i] == null) {
                 disparos[i] = disparo;
+                break;
+            }
+        }
+    }
+    
+    private void agregarDisparoHielo(BolaEscarcha disparo) {
+        for (int i = 0; i < disparosHielo.length; i++) {
+            if (disparosHielo[i] == null) {
+                disparosHielo[i] = disparo;
                 break;
             }
         }
@@ -165,10 +175,20 @@ public class Juego extends InterfaceJuego
             if (disparos[i] != null) {
                 disparos[i].mover();
                 disparos[i].dibujar();
-                
-                // Eliminar disparos inactivos
                 if (!disparos[i].activa) {
                     disparos[i] = null;
+                }
+            }
+        }
+    }
+    
+    private void actualizarDisparosHielo() {
+        for (int i = 0; i < disparosHielo.length; i++) {
+            if (disparosHielo[i] != null) {
+                disparosHielo[i].mover();
+                disparosHielo[i].dibujar();
+                if (!disparosHielo[i].activa) {
+                    disparosHielo[i] = null;
                 }
             }
         }
@@ -190,8 +210,23 @@ public class Juego extends InterfaceJuego
         }
     }
     
+    private void verificarColisionesHielo() {
+        for (int i = 0; i < disparosHielo.length; i++) {
+            if (disparosHielo[i] != null && disparosHielo[i].activa) {
+                for (int j = 0; j < zombies.length; j++) {
+                    if (zombies[j] != null && zombies[j].vivo && 
+                        disparosHielo[i].colisionaCon(zombies[j])) {
+                        zombies[j].ralentizar(disparosHielo[i].duracionRalentizacion);
+                        disparosHielo[i].activa = false;
+                        disparosHielo[i] = null;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
     private void manejarSeleccionYPlantado() {
-        // ... (mantener el mismo código de selección y plantado)
         if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
             for (int i = 0; i < plantas.length; i++) {
                 if (plantas[i] != null) {
