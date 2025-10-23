@@ -39,9 +39,8 @@ public class planta {
         }
     }
     
-    public planta(double x, double y, Entorno e) {
-        this(x, y, e, "planta1.jpg", "planta1.jpg", 0.10);
-    }
+    // ELIMINADO: El constructor que usaba "planta1.jpg" (girasol)
+    // Ya no necesitamos este constructor porque no usamos girasol
     
     public void dibujar() {
         if (seleccionada) {

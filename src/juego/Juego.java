@@ -13,12 +13,17 @@ public class Juego extends InterfaceJuego
     planta[] plantas;
     Zombie[] zombies;
     BolaFuego[] disparos;
-    BolaEscarcha[] disparosHielo;//Sistema de escarcha
+    BolaEscarcha[] disparosHielo;
     int contadorPlantas;
     int zombiesEliminados;
     int zombiesTotales;
     boolean juegoGanado;
     boolean juegoPerdido;
+    
+    // Plantas en el banner para controlar recarga
+    planta wallnutBanner; // CAMBIADO: Girasol por WallNut
+    planta hieloBanner; 
+    planta roseBanner;
     
     public Juego(){
         this.entorno = new Entorno(this, "Zombies Grinch", 1034, 585);
@@ -37,36 +42,54 @@ public class Juego extends InterfaceJuego
         
         this.zombies = new Zombie[15];
         this.disparos = new BolaFuego[50];
-        this.disparosHielo = new BolaEscarcha[50]; 
+        this.disparosHielo = new BolaEscarcha[50];
         this.zombiesEliminados = 0;
-        this.zombiesTotales = 10;
+        this.zombiesTotales = 50;
         this.juegoGanado = false;
         this.juegoPerdido = false;
         
-        crearGirasolEnBanner(50, 40);
-        crearPlantaDeHieloEnBanner(150, 40);
-        crearRoseBladeEnBanner(250, 40);
+        // Crear plantas del banner
+        crearPlantasBanner();
         
         this.entorno.iniciar();
     }
     
-    private void crearGirasolEnBanner(double x, double y) {
+    // NUEVO: Método para crear plantas del banner
+    private void crearPlantasBanner() {
+        this.wallnutBanner = new WallNut(50, 40, entorno);
+        this.hieloBanner = new PlantaDeHielo(150, 40, entorno);
+        this.roseBanner = new RoseBlade(250, 40, entorno);
+        
+        // Agregar plantas al array
+        plantas[contadorPlantas++] = wallnutBanner;
+        plantas[contadorPlantas++] = hieloBanner;
+        plantas[contadorPlantas++] = roseBanner;
+    }
+    
+    // CAMBIADO: crearWallNutEnBanner en lugar de crearGirasolEnBanner
+    private void crearWallNutEnBanner() {
         if (contadorPlantas < plantas.length) {
-            plantas[contadorPlantas] = new planta(x, y, entorno, "planta1.jpg", "planta1.jpg", 0.10);
+            WallNut nuevaWallnut = new WallNut(50, 40, entorno);
+            plantas[contadorPlantas] = nuevaWallnut;
+            wallnutBanner = nuevaWallnut;
             contadorPlantas++;
         }
     }
     
-    private void crearPlantaDeHieloEnBanner(double x, double y) {
+    private void crearPlantaDeHieloEnBanner() {
         if (contadorPlantas < plantas.length) {
-            plantas[contadorPlantas] = new PlantaDeHielo(x, y, entorno);
+            PlantaDeHielo nuevaHielo = new PlantaDeHielo(150, 40, entorno);
+            plantas[contadorPlantas] = nuevaHielo;
+            hieloBanner = nuevaHielo;
             contadorPlantas++;
         }
     }
     
-    private void crearRoseBladeEnBanner(double x, double y) {
+    private void crearRoseBladeEnBanner() {
         if (contadorPlantas < plantas.length) {
-            plantas[contadorPlantas] = new RoseBlade(x, y, entorno);
+            RoseBlade nuevaRose = new RoseBlade(250, 40, entorno);
+            plantas[contadorPlantas] = nuevaRose;
+            roseBanner = nuevaRose;
             contadorPlantas++;
         }
     }
@@ -85,7 +108,7 @@ public class Juego extends InterfaceJuego
             r.dibujar();
         }
         
-        // Actualizar y dibujar plantas
+        // ACTUALIZAR Y DIBUJAR PLANTAS
         for(planta p: this.plantas) {
             if(p != null) {
                 p.dibujar();
@@ -98,7 +121,7 @@ public class Juego extends InterfaceJuego
                         agregarDisparo(nuevoDisparo);
                     }
                 }
-                // Disparos de PlantaDeHielo (con BolaEscarcha)
+                // Disparos de PlantaDeHielo (con BolaEscarcha real)
                 else if (p instanceof PlantaDeHielo && p.plantada) {
                     PlantaDeHielo plantaHielo = (PlantaDeHielo) p;
                     plantaHielo.actualizar(entorno.numeroDeTick());
@@ -107,19 +130,131 @@ public class Juego extends InterfaceJuego
                         agregarDisparoHielo(nuevoDisparoHielo);
                     }
                 }
+                // WallNut no dispara, solo sirve de barrera
             }
         }
         
         generarZombie();
         actualizarZombies();
         actualizarDisparos();
-        actualizarDisparosHielo(); 
+        actualizarDisparosHielo();
         verificarColisiones();
-        verificarColisionesHielo(); 
+        verificarColisionesHielo();
+        verificarAtaquesZombies(); // NUEVO: Verificar ataques de zombies a plantas
         manejarSeleccionYPlantado();
         manejarMovimientoTeclado();
         verificarFinJuego();
         dibujarUI();
+        dibujarBarrasRecarga();
+    }
+    
+    // NUEVO: Método para manejar movimiento con teclado
+    private void manejarMovimientoTeclado() {
+        // Buscar la planta seleccionada
+        planta plantaSeleccionada = null;
+        for (planta p : plantas) {
+            if (p != null && p.seleccionada) {
+                plantaSeleccionada = p;
+                break;
+            }
+        }
+        
+        if (plantaSeleccionada == null || plantaSeleccionada.plantada) {
+            return; // No hay planta seleccionada o ya está plantada
+        }
+        
+        // Mover con teclas WASD
+        double velocidad = 3;
+        if (entorno.estaPresionada('w') || entorno.estaPresionada(entorno.TECLA_ARRIBA)) {
+            plantaSeleccionada.y -= velocidad;
+        }
+        if (entorno.estaPresionada('s') || entorno.estaPresionada(entorno.TECLA_ABAJO)) {
+            plantaSeleccionada.y += velocidad;
+        }
+        if (entorno.estaPresionada('a') || entorno.estaPresionada(entorno.TECLA_IZQUIERDA)) {
+            plantaSeleccionada.x -= velocidad;
+        }
+        if (entorno.estaPresionada('d') || entorno.estaPresionada(entorno.TECLA_DERECHA)) {
+            plantaSeleccionada.x += velocidad;
+        }
+        
+        // Limitar movimiento dentro de los bordes de la pantalla
+        plantaSeleccionada.x = Math.max(30, Math.min(plantaSeleccionada.x, 1000));
+        plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
+    }
+    
+    // NUEVO: Verificar cuando los zombies atacan plantas
+    private void verificarAtaquesZombies() {
+        for (int i = 0; i < zombies.length; i++) {
+            if (zombies[i] != null && zombies[i].vivo) {
+                for (int j = 0; j < plantas.length; j++) {
+                    if (plantas[j] != null && plantas[j].plantada && 
+                        zombies[i].colisionaConPlanta(plantas[j])) {
+                        
+                        // El zombie ataca la planta
+                        if (plantas[j] instanceof WallNut) {
+                            WallNut wallnut = (WallNut) plantas[j];
+                            wallnut.recibirAtaque();
+                            // Si la WallNut muere, eliminarla
+                            if (wallnut.resistencia <= 0) {
+                                // Liberar la casilla en la cuadrícula
+                                int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                                int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                                cuadricula.ocupado[indiceX][indiceY] = false;
+                                plantas[j] = null;
+                            }
+                        } else {
+                            // Otras plantas mueren instantáneamente
+                            int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                            int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                            cuadricula.ocupado[indiceX][indiceY] = false;
+                            plantas[j] = null;
+                        }
+                        break; // El zombie solo ataca una planta a la vez
+                    }
+                }
+            }
+        }
+    }
+    
+    // NUEVO: Dibujar barras de recarga para plantas del banner
+    private void dibujarBarrasRecarga() {
+        int tickActual = entorno.numeroDeTick();
+        
+        // Barra para PlantaDeHielo
+        if (hieloBanner instanceof PlantaDeHielo) {
+            PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+            double porcentaje = hielo.porcentajeRecarga(tickActual);
+            dibujarBarraRecarga(150, 70, porcentaje, Color.CYAN, "Hielo");
+        }
+        
+        // Barra para RoseBlade
+        if (roseBanner instanceof RoseBlade) {
+            RoseBlade rose = (RoseBlade) roseBanner;
+            double porcentaje = rose.porcentajeRecarga(tickActual);
+            dibujarBarraRecarga(250, 70, porcentaje, Color.ORANGE, "Fuego");
+        }
+        
+        // WallNut siempre disponible (sin recarga) - CORREGIDO: usar color marrón personalizado
+        Color marron = new Color(139, 69, 19); // Color marrón
+        dibujarBarraRecarga(50, 70, 1.0, marron, "WallNut");
+    }
+    
+    // NUEVO: Método para dibujar una barra de recarga
+    private void dibujarBarraRecarga(double x, double y, double porcentaje, Color color, String texto) {
+        double anchoBarra = 80;
+        double altoBarra = 8;
+        
+        // Fondo de la barra
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.GRAY);
+        
+        // Barra de progreso
+        double anchoProgreso = anchoBarra * porcentaje;
+        entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
+        
+        // Texto
+        entorno.cambiarFont("Arial", 12, Color.WHITE);
+        entorno.escribirTexto(texto, x - 25, y - 5);
     }
     
     private void agregarDisparo(BolaFuego disparo) {
@@ -141,7 +276,7 @@ public class Juego extends InterfaceJuego
     }
     
     private void generarZombie() {
-        if (Math.random() < 0.005 && zombiesEliminados < zombiesTotales) {
+        if (Math.random() < 0.01 && zombiesEliminados < zombiesTotales) {
             for (int i = 0; i < zombies.length; i++) {
                 if (zombies[i] == null) {
                     int fila = (int)(Math.random() * 5);
@@ -234,97 +369,139 @@ public class Juego extends InterfaceJuego
                 }
             }
             
-            for (int i = 0; i < plantas.length; i++) {
-                if (plantas[i] != null && plantas[i].encima(entorno.mouseX(), entorno.mouseY())) {
-                    plantas[i].seleccionada = true;
-                    if (plantas[i].plantada) {
-                        int indiceX = cuadricula.cercanoL(plantas[i].x, plantas[i].y).x;
-                        int indiceY = cuadricula.cercanoL(plantas[i].x, plantas[i].y).y;
-                        cuadricula.ocupado[indiceX][indiceY] = false;
-                    }
-                    break;
+            // Verificar si se hizo click en alguna planta del banner
+            if (wallnutBanner != null && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+                wallnutBanner.seleccionada = true;
+            } else if (hieloBanner != null && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
+                if (!hielo.estaEnRecarga(entorno.numeroDeTick())) {
+                    hieloBanner.seleccionada = true;
+                }
+            } else if (roseBanner != null && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
+                RoseBlade rose = (RoseBlade) roseBanner;
+                if (!rose.estaEnRecarga(entorno.numeroDeTick())) {
+                    roseBanner.seleccionada = true;
                 }
             }
         }
         
         if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
-            for (planta p : plantas) {
-                if (p != null && p.seleccionada) {
-                    p.arrastrar(entorno.mouseX(), entorno.mouseY());
-                }
+            // Mover la planta seleccionada del banner
+            if (wallnutBanner != null && wallnutBanner.seleccionada) {
+                wallnutBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+            } else if (hieloBanner != null && hieloBanner.seleccionada) {
+                hieloBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
+            } else if (roseBanner != null && roseBanner.seleccionada) {
+                roseBanner.arrastrar(entorno.mouseX(), entorno.mouseY());
             }
         }
         
         if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
-            for (int i = 0; i < plantas.length; i++) {
-                if (plantas[i] != null && plantas[i].seleccionada) {
-                    if (entorno.mouseY() < 70) {
-                        plantas[i].x = plantas[i].xInicial;
-                        plantas[i].y = plantas[i].yInicial;
-                        plantas[i].plantada = false;
-                    } else {
-                        int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
-                        int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+            // Procesar plantado para WallNut
+            if (wallnutBanner != null && wallnutBanner.seleccionada) {
+                if (entorno.mouseY() < 70) {
+                    // Si se suelta en el banner, regresar a su posición original
+                    wallnutBanner.x = wallnutBanner.xInicial;
+                    wallnutBanner.y = wallnutBanner.yInicial;
+                    wallnutBanner.plantada = false;
+                } else {
+                    // Intentar plantar en la cuadrícula
+                    int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+                    int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+                    
+                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                        cuadricula.centrarPlanta(wallnutBanner, indiceX, indiceY);
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        wallnutBanner.plantada = true;
                         
-                        if (!cuadricula.ocupado[indiceX][indiceY]) {
-                            cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
-                            cuadricula.ocupado[indiceX][indiceY] = true;
-                            plantas[i].plantada = true;
-                            
-                            if (plantas[i] instanceof PlantaDeHielo) {
-                                crearPlantaDeHieloEnBanner(150, 40);
-                            } else if (plantas[i] instanceof RoseBlade) {
-                                crearRoseBladeEnBanner(250, 40);
-                            } else {
-                                crearGirasolEnBanner(50, 40);
-                            }
-                        } else {
-                            plantas[i].x = plantas[i].xInicial;
-                            plantas[i].y = plantas[i].yInicial;
-                            plantas[i].plantada = false;
-                        }
+                        // Crear nueva WallNut en el banner
+                        crearWallNutEnBanner();
+                    } else {
+                        // Si la casilla está ocupada, regresar al banner
+                        wallnutBanner.x = wallnutBanner.xInicial;
+                        wallnutBanner.y = wallnutBanner.yInicial;
+                        wallnutBanner.plantada = false;
                     }
                 }
+                wallnutBanner.seleccionada = false;
+            }
+            
+            // Procesar plantado para PlantaDeHielo
+            else if (hieloBanner != null && hieloBanner.seleccionada) {
+                if (entorno.mouseY() < 70) {
+                    hieloBanner.x = hieloBanner.xInicial;
+                    hieloBanner.y = hieloBanner.yInicial;
+                    hieloBanner.plantada = false;
+                } else {
+                    int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+                    int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+                    
+                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                        cuadricula.centrarPlanta(hieloBanner, indiceX, indiceY);
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        hieloBanner.plantada = true;
+                        
+                        // Crear nueva PlantaDeHielo en el banner
+                        crearPlantaDeHieloEnBanner();
+                    } else {
+                        hieloBanner.x = hieloBanner.xInicial;
+                        hieloBanner.y = hieloBanner.yInicial;
+                        hieloBanner.plantada = false;
+                    }
+                }
+                hieloBanner.seleccionada = false;
+            }
+            
+            // Procesar plantado para RoseBlade
+            else if (roseBanner != null && roseBanner.seleccionada) {
+                if (entorno.mouseY() < 70) {
+                    roseBanner.x = roseBanner.xInicial;
+                    roseBanner.y = roseBanner.yInicial;
+                    roseBanner.plantada = false;
+                } else {
+                    int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+                    int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+                    
+                    if (!cuadricula.ocupado[indiceX][indiceY]) {
+                        cuadricula.centrarPlanta(roseBanner, indiceX, indiceY);
+                        cuadricula.ocupado[indiceX][indiceY] = true;
+                        roseBanner.plantada = true;
+                        
+                        // Crear nueva RoseBlade en el banner
+                        crearRoseBladeEnBanner();
+                    } else {
+                        roseBanner.x = roseBanner.xInicial;
+                        roseBanner.y = roseBanner.yInicial;
+                        roseBanner.plantada = false;
+                    }
+                }
+                roseBanner.seleccionada = false;
             }
         }
-    }
-    
-    private void manejarMovimientoTeclado() {
-        for (int i = 0; i < plantas.length; i++) {
-            if (plantas[i] != null && plantas[i].seleccionada && plantas[i].plantada) {
-                moverPlantaConTeclado(plantas[i]);
-            }
-        }
-    }
-    
-    private void moverPlantaConTeclado(planta planta) {
-        int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
-        int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
-        
-        if (entorno.sePresiono(entorno.TECLA_ARRIBA) && indiceY > 0 && !cuadricula.ocupado[indiceX][indiceY-1]) {
-            moverPlanta(planta, indiceX, indiceY, indiceX, indiceY-1);
-        }
-        else if (entorno.sePresiono(entorno.TECLA_ABAJO) && indiceY < 4 && !cuadricula.ocupado[indiceX][indiceY+1]) {
-            moverPlanta(planta, indiceX, indiceY, indiceX, indiceY+1);
-        }
-        else if (entorno.sePresiono(entorno.TECLA_DERECHA) && indiceX < 9 && !cuadricula.ocupado[indiceX+1][indiceY]) {
-            moverPlanta(planta, indiceX, indiceY, indiceX+1, indiceY);
-        }
-        else if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) && indiceX > 0 && !cuadricula.ocupado[indiceX-1][indiceY]) {
-            moverPlanta(planta, indiceX, indiceY, indiceX-1, indiceY);
-        }
-    }
-    
-    private void moverPlanta(planta planta, int xActual, int yActual, int xNuevo, int yNuevo) {
-        cuadricula.ocupado[xActual][yActual] = false;
-        planta.x = cuadricula.coorX[xNuevo];
-        planta.y = cuadricula.coorY[yNuevo];
-        cuadricula.ocupado[xNuevo][yNuevo] = true;
     }
     
     private void dibujarUI() {
         entorno.cambiarFont("Arial", 20, Color.WHITE);
         entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 800, 30);
+        entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 800, 60);
+        
+        // Mostrar plantas activas
+        int plantasActivas = 0;
+        for (planta p : plantas) {
+            if (p != null && p.plantada) {
+                plantasActivas++;
+            }
+        }
+        entorno.escribirTexto("Plantas: " + plantasActivas, 800, 90);
+        
+        // Mostrar zombies en pantalla
+        int zombiesEnPantalla = 0;
+        for (Zombie z : zombies) {
+            if (z != null && z.vivo) {
+                zombiesEnPantalla++;
+            }
+        }
+        entorno.escribirTexto("En pantalla: " + zombiesEnPantalla, 800, 120);
     }
     
     private void verificarFinJuego() {
@@ -338,9 +515,14 @@ public class Juego extends InterfaceJuego
         if (juegoGanado) {
             entorno.cambiarFont("Arial", 40, Color.GREEN);
             entorno.escribirTexto("¡VICTORIA!", 400, 300);
+            entorno.cambiarFont("Arial", 24, Color.WHITE);
+            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+            entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
         } else if (juegoPerdido) {
             entorno.cambiarFont("Arial", 40, Color.RED);
             entorno.escribirTexto("¡DERROTA!", 400, 300);
+            entorno.cambiarFont("Arial", 24, Color.WHITE);
+            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
         }
     }
 

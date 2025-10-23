@@ -17,7 +17,8 @@ public class Zombie {
     public boolean vivo;
     public boolean ralentizado;
     public int ticksRalentizacion;
-    public int golpesEscarcha; //Contador de golpes de escarcha
+    public int golpesEscarcha;
+    public int tiempoUltimoAtaque; // NUEVO: controlar frecuencia de ataques
     
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
@@ -31,7 +32,8 @@ public class Zombie {
         this.vivo = true;
         this.ralentizado = false;
         this.ticksRalentizacion = 0;
-        this.golpesEscarcha = 0; //Inicializar contador
+        this.golpesEscarcha = 0;
+        this.tiempoUltimoAtaque = 0; // NUEVO
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -48,7 +50,6 @@ public class Zombie {
             }
             
             if (ralentizado) {
-                // Dibujar aura azul cuando está ralentizado
                 e.dibujarCirculo(x, y, 35, new Color(0, 150, 255, 100));
             }
         }
@@ -68,6 +69,14 @@ public class Zombie {
         }
     }
     
+    // NUEVO: Método para verificar colisión con plantas
+    public boolean colisionaConPlanta(planta p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 40; // Radio de colisión con plantas
+    }
+    
     public void recibirDanio() {
         resistencia--;
         if (resistencia <= 0) {
@@ -78,9 +87,8 @@ public class Zombie {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.4; // 60% más lento
+        this.velocidad = velocidadNormal * 0.4;
         
-        // Contar golpes de escarcha y matar después de 4
         golpesEscarcha++;
         if (golpesEscarcha >= 4) {
             morir();

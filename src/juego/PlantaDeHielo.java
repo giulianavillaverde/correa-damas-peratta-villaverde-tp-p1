@@ -19,7 +19,6 @@ public class PlantaDeHielo extends planta {
         }
     }
     
-    
     public BolaEscarcha disparar(int tickActual) {
         if (puedeDisparar && plantada) {
             puedeDisparar = false;
@@ -27,5 +26,15 @@ public class PlantaDeHielo extends planta {
             return new BolaEscarcha(x + 40, y, e);
         }
         return null;
+    }
+    
+    public double porcentajeRecarga(int tickActual) {
+        if (puedeDisparar) return 1.0;
+        int tiempoTranscurrido = tickActual - tiempoUltimoDisparo;
+        return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecarga);
+    }
+
+    public boolean estaEnRecarga(int tickActual) {
+        return !puedeDisparar;
     }
 }

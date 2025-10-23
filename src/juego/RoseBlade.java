@@ -27,4 +27,14 @@ public class RoseBlade extends planta {
         }
         return null;
     }
+    
+    public double porcentajeRecarga(int tickActual) {
+        if (puedeDisparar) return 1.0;
+        int tiempoTranscurrido = tickActual - tiempoUltimoDisparo;
+        return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecarga);
+    }
+
+    public boolean estaEnRecarga(int tickActual) {
+        return !puedeDisparar;
+    }
 }
