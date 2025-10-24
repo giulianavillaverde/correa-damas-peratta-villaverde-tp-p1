@@ -26,7 +26,7 @@ public class ZombieColosal {
         this.y = 335; // Centro vertical (entre las 5 filas)
         this.velocidadNormal = 0.15; // Más lento que los zombies normales
         this.velocidad = velocidadNormal;
-        this.resistenciaMaxima = 30; // Muy resistente
+        this.resistenciaMaxima = 90; 
         this.resistencia = resistenciaMaxima;
         this.vivo = true;
         this.ralentizado = false;
@@ -57,39 +57,12 @@ public class ZombieColosal {
                 e.dibujarRectangulo(x, y, 80, 380, 0, Color.DARK_GRAY);
             }
             
-            // Dibujar barra de vida
-            dibujarBarraVida();
+            // ELIMINADO: Barra de vida
             
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 80, new Color(0, 150, 255, 100));
             }
         }
-    }
-    
-    private void dibujarBarraVida() {
-        double anchoBarra = 80;
-        double altoBarra = 6;
-        double porcentajeVida = (double) resistencia / resistenciaMaxima;
-        
-        // Fondo de la barra
-        e.dibujarRectangulo(x, y - 60, anchoBarra, altoBarra, 0, Color.DARK_GRAY);
-        
-        // Barra de vida
-        double anchoVida = anchoBarra * porcentajeVida;
-        if (anchoVida > 0) {
-            Color colorVida;
-            if (porcentajeVida > 0.6) {
-                colorVida = Color.GREEN;
-            } else if (porcentajeVida > 0.3) {
-                colorVida = Color.YELLOW;
-            } else {
-                colorVida = Color.RED;
-            }
-            e.dibujarRectangulo(x - (anchoBarra - anchoVida) / 2, y - 60, anchoVida, altoBarra, 0, colorVida);
-        }
-        
-        // Borde de la barra
-        e.dibujarRectangulo(x, y - 60, anchoBarra, altoBarra, 0, Color.BLACK);
     }
     
     public void mover() {
@@ -112,7 +85,8 @@ public class ZombieColosal {
         double distanciaX = Math.abs(x - p.x);
         double distanciaY = Math.abs(y - p.y);
         
-        return distanciaX < 60 && distanciaY < 250;
+        // Colisión más amplia porque ocupa todas las filas
+        return distanciaX < 60 && distanciaY < 250; // Muy amplio verticalmente
     }
     
     public boolean puedeAtacar(int tickActual) {
@@ -132,7 +106,7 @@ public class ZombieColosal {
     }
     
     public void recibirDanioFuerte() {
-        resistencia -= 2;
+        resistencia -= 2; // Recibe doble daño de algunos ataques
         System.out.println("Zombie Colosal recibió daño fuerte! Resistencia: " + resistencia + "/" + resistenciaMaxima);
         if (resistencia <= 0) {
             morir();
@@ -142,10 +116,10 @@ public class ZombieColosal {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.3;
+        this.velocidad = velocidadNormal * 0.3; // Más lento cuando está ralentizado
         
         golpesEscarcha++;
-        if (golpesEscarcha >= 7) {
+        if (golpesEscarcha >= 7) { // Necesita más golpes de hielo
             recibirDanioFuerte();
         }
     }
@@ -156,7 +130,7 @@ public class ZombieColosal {
     }
     
     public boolean llegoARegalos() {
-        return x <= 120;
+        return x <= 120; // Más ancho, llega antes a los regalos
     }
     
     public double getX() {
