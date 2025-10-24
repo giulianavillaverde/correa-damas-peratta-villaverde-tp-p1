@@ -74,7 +74,6 @@ public class Juego extends InterfaceJuego
 
     public void tick(){
         if (juegoGanado || juegoPerdido) {
-            
             dibujarPantallaFin();
             return;
         }
@@ -380,58 +379,71 @@ public class Juego extends InterfaceJuego
         }
     }
     
-    // Dibujar barras de recarga para plantas del banner (SOLO TIEMPO DE PLANTADO)
+    // CORREGIDO: Barras de recarga con colores COMPLETOS
     private void dibujarBarrasRecarga() {
         int tickActual = entorno.numeroDeTick();
         
-        // Barra para WallNut (TIEMPO DE PLANTADO)
+        // Barra para WallNut - TODO MARRÓN
         if (wallnutBanner instanceof WallNut) {
             WallNut wallnut = (WallNut) wallnutBanner;
             double porcentaje = wallnut.porcentajeRecarga(tickActual);
-            Color marron = new Color(139, 69, 19);
-            dibujarBarraRecargaConTiempo(50, 70, porcentaje, marron, "WallNut", wallnut, tickActual);
+            Color marronFondo = new Color(139, 69, 19); // Marrón para fondo
+            Color marronBorde = new Color(160, 82, 45); // Marrón más claro para borde
+            dibujarBarraRecargaCompleta(50, 70, porcentaje, marronFondo, marronBorde, "WallNut", wallnut, tickActual);
         }
         
-        // Barra para PlantaDeHielo (TIEMPO DE PLANTADO)
+        // Barra para PlantaDeHielo - TODO AZUL CELESTE con nombre "Escarchi"
         if (hieloBanner instanceof PlantaDeHielo) {
             PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
             double porcentaje = hielo.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaConTiempo(150, 70, porcentaje, Color.CYAN, "Hielo", hielo, tickActual);
+            Color celesteFondo = new Color(135, 206, 250); // Azul celeste para fondo
+            Color celesteBorde = new Color(173, 216, 230); // Azul celeste más claro para borde
+            dibujarBarraRecargaCompleta(150, 70, porcentaje, celesteFondo, celesteBorde, "Escarchi", hielo, tickActual);
         }
         
-        // Barra para RoseBlade (TIEMPO DE PLANTADO)
+        // Barra para RoseBlade - TODO ROJO con nombre "RoseBlade"
         if (roseBanner instanceof RoseBlade) {
             RoseBlade rose = (RoseBlade) roseBanner;
             double porcentaje = rose.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaConTiempo(250, 70, porcentaje, Color.ORANGE, "Fuego", rose, tickActual);
+            Color rojoFondo = new Color(255, 0, 0); // Rojo para fondo
+            Color rojoBorde = new Color(255, 69, 0); // Rojo anaranjado para borde
+            dibujarBarraRecargaCompleta(250, 70, porcentaje, rojoFondo, rojoBorde, "RoseBlade", rose, tickActual);
         }
     }
     
-    // Método para dibujar una barra de recarga con tiempo (SOLO PLANTADO)
-    private void dibujarBarraRecargaConTiempo(double x, double y, double porcentaje, Color color, String texto, planta planta, int tickActual) {
+    // NUEVO MÉTODO: Dibujar barra completa con colores específicos para fondo y borde
+    private void dibujarBarraRecargaCompleta(double x, double y, double porcentaje, Color colorFondo, Color colorBorde, String texto, planta planta, int tickActual) {
         double anchoBarra = 80;
-        double altoBarra = 8;
+        double altoBarra = 12;
         
-        // Fondo de la barra
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.DARK_GRAY);
+        // Fondo completo de la barra - COLOR ESPECÍFICO
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorFondo);
         
-        // Barra de progreso que se llena gradualmente
-        double anchoProgreso = anchoBarra * porcentaje;
-        if (anchoProgreso > 0) {
-            entorno.dibujarRectangulo(x - (anchoBarra - anchoProgreso) / 2, y, anchoProgreso, altoBarra, 0, color);
+        // Parte vacía de la barra (oscurecida)
+        double anchoVacio = anchoBarra * (1 - porcentaje);
+        if (anchoVacio > 0) {
+            Color colorVacio = oscurecerColor(colorFondo, 0.5f); // Oscurecer el color base
+            entorno.dibujarRectangulo(x + (anchoBarra - anchoVacio) / 2, y, anchoVacio, altoBarra, 0, colorVacio);
         }
         
-        // Borde de la barra
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, Color.BLACK);
+        // Borde de la barra - COLOR ESPECÍFICO MÁS CLARO
+        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
         
-        // Texto del nombre
+        // Texto del nombre - BLANCO para mejor contraste
         entorno.cambiarFont("Arial", 12, Color.WHITE);
         entorno.escribirTexto(texto, x - 25, y - 5);
         
         // Mostrar tiempo restante si está en recarga
         if (porcentaje < 1.0) {
             int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
-            entorno.cambiarFont("Arial", 10, Color.WHITE);
+            
+            // Texto del tiempo en negro para mejor legibilidad sobre colores claros
+            Color colorTiempo = Color.BLACK;
+            if (esColorOscuro(colorFondo)) {
+                colorTiempo = Color.WHITE; // Usar blanco si el fondo es oscuro
+            }
+            
+            entorno.cambiarFont("Arial", 10, colorTiempo);
             
             // Cambiar color del texto según el tiempo restante
             if (segundosRestantes <= 5) {
@@ -440,17 +452,33 @@ public class Juego extends InterfaceJuego
                 entorno.cambiarFont("Arial", 10, Color.ORANGE);
             }
             
-            entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 15);
+            entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 20);
             
             // Efecto visual adicional: parpadeo cuando está por terminar
             if (segundosRestantes <= 3 && tickActual % 10 < 5) {
                 entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, new Color(255, 255, 255, 100));
             }
         } else {
-            // Planta disponible
-            entorno.cambiarFont("Arial", 10, Color.GREEN);
-            entorno.escribirTexto("Listo", x - 12, y + 15);
+            // Planta disponible - VERDE sobre fondo oscuro, BLANCO sobre fondo claro
+            Color colorListo = esColorOscuro(colorFondo) ? Color.GREEN : new Color(0, 100, 0);
+            entorno.cambiarFont("Arial", 10, colorListo);
+            entorno.escribirTexto("Listo", x - 12, y + 20);
         }
+    }
+    
+    // Método auxiliar para oscurecer un color
+    private Color oscurecerColor(Color color, float factor) {
+        int rojo = Math.max(0, (int)(color.getRed() * factor));
+        int verde = Math.max(0, (int)(color.getGreen() * factor));
+        int azul = Math.max(0, (int)(color.getBlue() * factor));
+        return new Color(rojo, verde, azul);
+    }
+    
+    // Método auxiliar para determinar si un color es oscuro
+    private boolean esColorOscuro(Color color) {
+        // Fórmula de luminosidad
+        double luminosidad = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+        return luminosidad < 0.5;
     }
     
     // Método para calcular segundos restantes (SOLO PLANTADO)
