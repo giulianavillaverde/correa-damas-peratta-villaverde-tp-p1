@@ -4,7 +4,6 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.InterfaceJuego;
 
-
 public class Juego extends InterfaceJuego
 {
     Entorno entorno;
@@ -22,9 +21,6 @@ public class Juego extends InterfaceJuego
     boolean juegoGanado;
     boolean juegoPerdido;
     int ticksParaColosal;
-    
-    
-
     
     // Plantas en el banner para controlar recarga
     planta wallnutBanner;
@@ -76,7 +72,6 @@ public class Juego extends InterfaceJuego
 
     public void tick(){
         if (juegoGanado || juegoPerdido) {
-            
             dibujarPantallaFin();
             return;
         }
@@ -297,44 +292,77 @@ public class Juego extends InterfaceJuego
         plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
     }
     
-    // Verificar cuando los zombies atacan plantas (CON COOLDOWN MEJORADO)
+    // MODIFICADO: Verificar cuando los zombies atacan plantas (CON BLOQUEO DE WALLNUT)
     private void verificarAtaquesZombies() {
         int tickActual = entorno.numeroDeTick();
         
         for (int i = 0; i < zombies.length; i++) {
             if (zombies[i] != null && zombies[i].vivo) {
-                for (int j = 0; j < plantas.length; j++) {
-                    if (plantas[j] != null && plantas[j].plantada && 
-                        zombies[i].colisionaConPlanta(plantas[j])) {
+                
+                // NUEVO: Primero verificar si el zombie está bloqueado y si su WallNut sigue existiendo
+                zombies[i].verificarPlantaBloqueadora();
+                
+                // Si el zombie ya está bloqueado, solo puede atacar a su WallNut bloqueadora
+                if (zombies[i].estaBloqueado()) {
+                    planta plantaBloqueadora = zombies[i].plantaBloqueadora;
+                    if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
+                        zombies[i].puedeAtacar(tickActual)) {
                         
-                        // Verificar si el zombie puede atacar (cooldown)
-                        if (zombies[i].puedeAtacar(tickActual)) {
-                            // El zombie ataca la planta
+                        if (plantaBloqueadora instanceof WallNut) {
+                            WallNut wallnut = (WallNut) plantaBloqueadora;
+                            wallnut.recibirAtaque();
+                            System.out.println("WallNut bajo ataque! Resistencia: " + wallnut.resistencia + "/180");
+                            
+                            if (wallnut.resistencia <= 0) {
+                                System.out.println("WallNut destruida después de 3 minutos de ataque!");
+                                // Liberar la casilla en la cuadrícula
+                                int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
+                                int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
+                                cuadricula.ocupado[indiceX][indiceY] = false;
+                                plantaBloqueadora.plantada = false;
+                                // El zombie será liberado automáticamente en el próximo tick por verificarPlantaBloqueadora()
+                            }
+                        }
+                        zombies[i].registrarAtaque(tickActual);
+                    }
+                } 
+                // Si no está bloqueado, buscar plantas para atacar/bloquear
+                else {
+                    boolean encontroPlanta = false;
+                    for (int j = 0; j < plantas.length; j++) {
+                        if (plantas[j] != null && plantas[j].plantada && 
+                            zombies[i].colisionaConPlanta(plantas[j])) {
+                            
+                            encontroPlanta = true;
+                            
+                            // NUEVO: Comportamiento especial para WallNuts - BLOQUEAR
                             if (plantas[j] instanceof WallNut) {
-                                WallNut wallnut = (WallNut) plantas[j];
-                                wallnut.recibirAtaque();
-                                System.out.println("WallNut recibió ataque, resistencia: " + wallnut.resistencia + "/180");
-                                // Si la WallNut muere, eliminarla
-                                if (wallnut.resistencia <= 0) {
-                                    System.out.println("WallNut destruida después de 3 minutos de ataque!");
-                                    // Liberar la casilla en la cuadrícula
-                                    int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
-                                    int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                                    cuadricula.ocupado[indiceX][indiceY] = false;
-                                    plantas[j] = null;
-                                }
-                            } else {
-                                // Otras plantas mueren instantáneamente
+                                zombies[i].bloquear(plantas[j]);
+                            } 
+                            // Para otras plantas, atacar normalmente
+                            else if (zombies[i].puedeAtacar(tickActual)) {
                                 System.out.println("Planta destruida por zombie!");
                                 int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                                 int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                                 cuadricula.ocupado[indiceX][indiceY] = false;
                                 plantas[j] = null;
+                                zombies[i].registrarAtaque(tickActual);
                             }
-                            // Registrar el ataque del zombie
-                            zombies[i].registrarAtaque(tickActual);
+                            break; // El zombie solo interactúa con una planta a la vez
                         }
-                        break; // El zombie solo ataca una planta a la vez
+                    }
+                    
+                    // NUEVO: Si no encontró ninguna planta pero detecta una WallNut específicamente, bloquearse
+                    if (!encontroPlanta) {
+                        for (int j = 0; j < plantas.length; j++) {
+                            if (plantas[j] != null && plantas[j].plantada && 
+                                plantas[j] instanceof WallNut && 
+                                zombies[i].colisionaConWallNut(plantas[j])) {
+                                
+                                zombies[i].bloquear(plantas[j]);
+                                break;
+                            }
+                        }
                     }
                 }
             }

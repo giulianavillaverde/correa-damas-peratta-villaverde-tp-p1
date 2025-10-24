@@ -20,6 +20,8 @@ public class Zombie {
     public int golpesEscarcha;
     public int tiempoUltimoAtaque;
     public int cooldownAtaque;
+    public boolean bloqueadoPorWallNut;
+    public planta plantaBloqueadora;
     
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
@@ -35,7 +37,9 @@ public class Zombie {
         this.ticksRalentizacion = 0;
         this.golpesEscarcha = 0;
         this.tiempoUltimoAtaque = 0;
-        this.cooldownAtaque = 180; // 3 segundos entre ataques (180 ticks)
+        this.cooldownAtaque = 180;
+        this.bloqueadoPorWallNut = false;
+        this.plantaBloqueadora = null;
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -54,12 +58,16 @@ public class Zombie {
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 35, new Color(0, 150, 255, 100));
             }
+            
+            // ELIMINADO: Indicador visual cuando está bloqueado
         }
     }
     
     public void mover() {
         if (vivo) {
-            x -= velocidad;
+            if (!bloqueadoPorWallNut) {
+                x -= velocidad;
+            }
             
             if (ralentizado) {
                 ticksRalentizacion--;
@@ -71,20 +79,46 @@ public class Zombie {
         }
     }
     
-    // NUEVO: Método para verificar colisión con plantas
+    public void verificarPlantaBloqueadora() {
+        if (bloqueadoPorWallNut && plantaBloqueadora != null) {
+            if (!plantaBloqueadora.plantada) {
+                liberar();
+            }
+        }
+    }
+    
+    public void bloquear(planta wallnut) {
+        this.bloqueadoPorWallNut = true;
+        this.plantaBloqueadora = wallnut;
+        this.velocidad = 0;
+        System.out.println("Zombie bloqueado por WallNut en fila " + fila);
+    }
+    
+    public void liberar() {
+        this.bloqueadoPorWallNut = false;
+        this.plantaBloqueadora = null;
+        this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
+        System.out.println("Zombie liberado en fila " + fila);
+    }
+    
     public boolean colisionaConPlanta(planta p) {
         if (!vivo || p == null || !p.plantada) return false;
         
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
-        return distancia < 40; // Radio de colisión con plantas
+        return distancia < 40;
     }
     
-    // NUEVO: Método para atacar plantas con cooldown
+    public boolean colisionaConWallNut(planta p) {
+        if (!vivo || p == null || !p.plantada || !(p instanceof WallNut)) return false;
+        
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 45;
+    }
+    
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
     }
     
-    // NUEVO: Método para registrar ataque
     public void registrarAtaque(int tickActual) {
         this.tiempoUltimoAtaque = tickActual;
     }
@@ -99,7 +133,7 @@ public class Zombie {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.2; // Más lento cuando está ralentizado
+        this.velocidad = velocidadNormal * 0.2;
         
         golpesEscarcha++;
         if (golpesEscarcha >= 6) {
@@ -109,9 +143,16 @@ public class Zombie {
     
     public void morir() {
         vivo = false;
+        if (bloqueadoPorWallNut) {
+            liberar();
+        }
     }
     
     public boolean llegoARegalos() {
         return x <= 70;
+    }
+    
+    public boolean estaBloqueado() {
+        return bloqueadoPorWallNut;
     }
 }
