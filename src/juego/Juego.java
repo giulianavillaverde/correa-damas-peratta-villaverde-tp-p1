@@ -389,7 +389,7 @@ public class Juego extends InterfaceJuego
             double porcentaje = wallnut.porcentajeRecarga(tickActual);
             Color marronFondo = new Color(139, 69, 19); // Marrón para fondo
             Color marronBorde = new Color(160, 82, 45); // Marrón más claro para borde
-            dibujarBarraRecargaCompleta(50, 70, porcentaje, marronFondo, marronBorde, "WallNut", wallnut, tickActual);
+            dibujarBarraRecargaCompleta(50, 75, porcentaje, marronFondo, marronBorde, "WallNut", wallnut, tickActual);
         }
         
         // Barra para PlantaDeHielo - TODO AZUL CELESTE con nombre "Escarchi"
@@ -398,7 +398,7 @@ public class Juego extends InterfaceJuego
             double porcentaje = hielo.porcentajeRecarga(tickActual);
             Color celesteFondo = new Color(135, 206, 250); // Azul celeste para fondo
             Color celesteBorde = new Color(173, 216, 230); // Azul celeste más claro para borde
-            dibujarBarraRecargaCompleta(150, 70, porcentaje, celesteFondo, celesteBorde, "Escarchi", hielo, tickActual);
+            dibujarBarraRecargaCompleta(150, 75, porcentaje, celesteFondo, celesteBorde, "Escarchi", hielo, tickActual);
         }
         
         // Barra para RoseBlade - TODO ROJO con nombre "RoseBlade"
@@ -407,7 +407,7 @@ public class Juego extends InterfaceJuego
             double porcentaje = rose.porcentajeRecarga(tickActual);
             Color rojoFondo = new Color(255, 0, 0); // Rojo para fondo
             Color rojoBorde = new Color(255, 69, 0); // Rojo anaranjado para borde
-            dibujarBarraRecargaCompleta(250, 70, porcentaje, rojoFondo, rojoBorde, "RoseBlade", rose, tickActual);
+            dibujarBarraRecargaCompleta(250, 75, porcentaje, rojoFondo, rojoBorde, "RoseBlade", rose, tickActual);
         }
     }
     
