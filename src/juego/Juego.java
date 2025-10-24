@@ -20,7 +20,8 @@ public class Juego extends InterfaceJuego
     int zombiesTotales;
     boolean juegoGanado;
     boolean juegoPerdido;
-    int ticksParaColosal;
+    int ticksParaProximoColosal;
+    int colosalesAparecidos;
     
     // Plantas en el banner para controlar recarga
     planta wallnutBanner;
@@ -50,7 +51,8 @@ public class Juego extends InterfaceJuego
         this.zombiesTotales = 50;
         this.juegoGanado = false;
         this.juegoPerdido = false;
-        this.ticksParaColosal = 1800; // Aparece después de 5 minutos (1800 ticks)
+        this.ticksParaProximoColosal = 1080;
+        this.colosalesAparecidos = 0;
         
         // Crear plantas del banner
         crearPlantasBanner();
@@ -72,6 +74,7 @@ public class Juego extends InterfaceJuego
 
     public void tick(){
         if (juegoGanado || juegoPerdido) {
+            
             dibujarPantallaFin();
             return;
         }
@@ -133,14 +136,22 @@ public class Juego extends InterfaceJuego
         dibujarBarrasRecarga();
     }
     
-    // MÉTODO: Generar zombie colosal
+    // MÉTODO: Generar zombie colosal cada 3 minutos
     private void generarZombieColosal() {
-        if (zombieColosal == null && ticksParaColosal > 0) {
-            ticksParaColosal--;
-            if (ticksParaColosal <= 0) {
+        // Si no hay colosal en pantalla y es tiempo de generar uno nuevo
+        if (zombieColosal == null && ticksParaProximoColosal > 0) {
+            ticksParaProximoColosal--;
+            
+            if (ticksParaProximoColosal <= 0) {
                 zombieColosal = new ZombieColosal(entorno);
-                System.out.println("¡CUIDADO! ¡Zombie Colosal aparece!");
+                colosalesAparecidos++;
+                System.out.println("¡CUIDADO! ¡Zombie Colosal #" + colosalesAparecidos + " aparece!");
             }
+        }
+        
+        // Si el colosal fue eliminado, reiniciar el contador para el próximo
+        if (zombieColosal == null && ticksParaProximoColosal <= 0) {
+            ticksParaProximoColosal = 1080; // Reiniciar a 3 minutos
         }
     }
     
@@ -156,9 +167,9 @@ public class Juego extends InterfaceJuego
             }
             
             if (!zombieColosal.vivo) {
+                System.out.println("¡Zombie Colosal #" + colosalesAparecidos + " eliminado!");
                 zombieColosal = null;
                 zombiesEliminados += 5; // Vale por 5 zombies normales
-                System.out.println("¡Zombie Colosal eliminado! +5 puntos");
             }
         }
     }
@@ -311,10 +322,10 @@ public class Juego extends InterfaceJuego
                         if (plantaBloqueadora instanceof WallNut) {
                             WallNut wallnut = (WallNut) plantaBloqueadora;
                             wallnut.recibirAtaque();
-                            System.out.println("WallNut bajo ataque! Resistencia: " + wallnut.resistencia + "/180");
+                            System.out.println("WallNut bajo ataque! Resistencia: " + wallnut.resistencia + "/90");
                             
                             if (wallnut.resistencia <= 0) {
-                                System.out.println("WallNut destruida después de 3 minutos de ataque!");
+                                System.out.println("WallNut destruida!");
                                 // Liberar la casilla en la cuadrícula
                                 int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
                                 int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
@@ -785,14 +796,17 @@ public class Juego extends InterfaceJuego
         }
         entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
         
-        // NUEVO: Mostrar advertencia del colosal
+        // NUEVO: Mostrar información del colosal
         if (zombieColosal != null && zombieColosal.vivo) {
             entorno.cambiarFont("Arial", 50, Color.RED);
             entorno.escribirTexto("¡ZOMBIE COLOSAL!", 212, 300);
-        } else if (ticksParaColosal > 0) {
-            int segundosRestantes = ticksParaColosal / 6;
+        } else if (ticksParaProximoColosal > 0) {
+            int segundosRestantes = ticksParaProximoColosal / 6;
             entorno.cambiarFont("Arial", 20, Color.red);
-            entorno.escribirTexto("Zombie colosal aparece en: " + segundosRestantes + "s", 600, 84);
+            entorno.escribirTexto("Próximo colosal en: " + segundosRestantes + "s", 600, 84);
+        } else {
+            entorno.cambiarFont("Arial", 20, Color.orange);
+            entorno.escribirTexto("Colosales: " + colosalesAparecidos, 600, 84);
         }
     }
     
@@ -810,11 +824,13 @@ public class Juego extends InterfaceJuego
             entorno.cambiarFont("Arial", 24, Color.WHITE);
             entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
             entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
+            entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 410);
         } else if (juegoPerdido) {
             entorno.cambiarFont("Arial", 40, Color.RED);
             entorno.escribirTexto("¡DERROTA!", 400, 300);
             entorno.cambiarFont("Arial", 24, Color.WHITE);
             entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+            entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 380);
         }
     }
 

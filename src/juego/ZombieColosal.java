@@ -106,17 +106,13 @@ public class ZombieColosal {
         }
     }
     
-    // El zombie colosal ocupa las 5 filas, así que colisiona con cualquier planta
     public boolean colisionaConPlanta(planta p) {
         if (!vivo || p == null || !p.plantada) return false;
         
-        // El colosal es tan grande que colisiona con plantas en cualquier fila
-        // Solo verifica distancia horizontal
         double distanciaX = Math.abs(x - p.x);
         double distanciaY = Math.abs(y - p.y);
         
-        // Colisión más amplia porque ocupa todas las filas
-        return distanciaX < 60 && distanciaY < 250; // Muy amplio verticalmente
+        return distanciaX < 60 && distanciaY < 250;
     }
     
     public boolean puedeAtacar(int tickActual) {
@@ -136,7 +132,7 @@ public class ZombieColosal {
     }
     
     public void recibirDanioFuerte() {
-        resistencia -= 2; // Recibe doble daño de algunos ataques
+        resistencia -= 2;
         System.out.println("Zombie Colosal recibió daño fuerte! Resistencia: " + resistencia + "/" + resistenciaMaxima);
         if (resistencia <= 0) {
             morir();
@@ -146,10 +142,10 @@ public class ZombieColosal {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.3; // Más lento cuando está ralentizado
+        this.velocidad = velocidadNormal * 0.3;
         
         golpesEscarcha++;
-        if (golpesEscarcha >= 7) { // Necesita más golpes de hielo
+        if (golpesEscarcha >= 7) {
             recibirDanioFuerte();
         }
     }
@@ -160,7 +156,7 @@ public class ZombieColosal {
     }
     
     public boolean llegoARegalos() {
-        return x <= 120; // Más ancho, llega antes a los regalos
+        return x <= 120;
     }
     
     public double getX() {
