@@ -314,9 +314,9 @@ public class Juego extends InterfaceJuego
            }
        }
    }
-  
+   
    // Método para manejar movimiento con teclado
-   private void manejarMovimientoTeclado() {
+  private void manejarMovimientoTeclado() {
        planta plantaSeleccionada = null;
        for (planta p : plantas) {
            if (p != null && p.seleccionada) {
@@ -329,24 +329,24 @@ public class Juego extends InterfaceJuego
            return;
        }
       
-       double velocidad = 3;
-       if (entorno.estaPresionada('w') || entorno.estaPresionada(entorno.TECLA_ARRIBA)) {
+       double velocidad = 105;
+     if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
            plantaSeleccionada.y -= velocidad;
        }
-       if (entorno.estaPresionada('s') || entorno.estaPresionada(entorno.TECLA_ABAJO)) {
+       if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
            plantaSeleccionada.y += velocidad;
        }
-       if (entorno.estaPresionada('a') || entorno.estaPresionada(entorno.TECLA_IZQUIERDA)) {
+      if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
            plantaSeleccionada.x -= velocidad;
        }
-       if (entorno.estaPresionada('d') || entorno.estaPresionada(entorno.TECLA_DERECHA)) {
+      if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
            plantaSeleccionada.x += velocidad;
        }
       
-       plantaSeleccionada.x = Math.max(30, Math.min(plantaSeleccionada.x, 1000));
-       plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
-   }
-  
+      plantaSeleccionada.x = Math.max(30, Math.min(plantaSeleccionada.x, 1000));
+      plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
+  }
+ 
    // MODIFICADO: Verificar cuando los zombies atacan plantas
    private void verificarAtaquesZombies() {
        int tickActual = entorno.numeroDeTick();
@@ -721,7 +721,7 @@ public class Juego extends InterfaceJuego
                    wallnutBanner.x = wallnutBanner.xInicial;
                    wallnutBanner.y = wallnutBanner.yInicial;
                }
-               wallnutBanner.seleccionada = false;
+              wallnutBanner.seleccionada = false;
            }
           
            // PlantaDeHielo
@@ -783,7 +783,7 @@ public class Juego extends InterfaceJuego
                    roseBanner.x = roseBanner.xInicial;
                    roseBanner.y = roseBanner.yInicial;
                }
-               roseBanner.seleccionada = false;
+              roseBanner.seleccionada = false;
            }
           
            // Cereza Explosiva
@@ -838,7 +838,7 @@ public class Juego extends InterfaceJuego
                        cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = true;
                    }
                   
-                   plantas[i].seleccionada = false;
+                  // plantas[i].seleccionada = false;
                }
            }
        }
