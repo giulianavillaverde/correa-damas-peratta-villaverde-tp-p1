@@ -314,39 +314,57 @@ public class Juego extends InterfaceJuego
            }
        }
    }
-   
-   // Método para manejar movimiento con teclado
-  private void manejarMovimientoTeclado() {
-       planta plantaSeleccionada = null;
-       for (planta p : plantas) {
-           if (p != null && p.seleccionada) {
-               plantaSeleccionada = p;
-               break;
-           }
-       }
-      
-       if (plantaSeleccionada == null) {
-           return;
-       }
-      
-       double velocidad = 105;
-     if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
-           plantaSeleccionada.y -= velocidad;
-       }
-       if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
-           plantaSeleccionada.y += velocidad;
-       }
-      if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
-           plantaSeleccionada.x -= velocidad;
-       }
-      if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
-           plantaSeleccionada.x += velocidad;
-       }
-      
-      plantaSeleccionada.x = Math.max(30, Math.min(plantaSeleccionada.x, 1000));
-      plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
-  }
- 
+   // Método para manejar movimiento con teclado 
+   private void manejarMovimientoTeclado() {
+	       planta plantaSeleccionada = null;
+	       for (planta p : plantas) {
+	           if (p != null && p.seleccionada) {
+	               plantaSeleccionada = p;
+	               break;
+	           }
+	       }
+	       
+	       if (plantaSeleccionada == null) {
+	           return;
+	       }
+	       
+	       double velocidad = 105;
+	       double nuevaX = plantaSeleccionada.x;
+	       double nuevaY = plantaSeleccionada.y;
+	       
+	       if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
+	           nuevaY -= velocidad;
+	       }
+	       if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
+	           nuevaY += velocidad;
+	       }
+	       if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
+	           nuevaX -= velocidad;
+	       }
+	       if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
+	           nuevaX += velocidad;
+	       }
+	       
+	       // VERIFICAR RESTRICCIONES ANTES DE ACTUALIZAR LA POSICIÓN
+	       
+	       // 1. No puede entrar en el área del banner (y < 100 aproximadamente)
+	       boolean enBanner = nuevaY < 100;
+	       
+	       // 2. No puede colocarse en la primera columna donde están los regalos (x < 100 aproximadamente)
+	       boolean enPrimeraColumna = nuevaX < 100;
+	       
+	       // 3. Mantener dentro de los límites generales de la pantalla
+	       boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
+	       
+	       // Solo actualizar posición si NO está en las zonas prohibidas y está dentro de los límites
+	       if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
+	           plantaSeleccionada.x = nuevaX;
+	           plantaSeleccionada.y = nuevaY;
+	       }
+	       // Si intenta moverse a zona prohibida, mantener posición actual
+	       else {
+	       }
+	   }
    
 //MÉTODO ACTUALIZADO: Verificar cuando los zombies atacan plantas (BLOQUEO CON TODAS LAS PLANTAS)
 private void verificarAtaquesZombies() {

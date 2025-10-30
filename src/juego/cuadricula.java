@@ -114,11 +114,13 @@ public class cuadricula {
         }
         return new Point(jm, im);
     }
-    
     public void centrarPlanta(planta p, int indiceX, int indiceY) {
-        p.x = this.coorX[indiceX];
-        p.y = this.coorY[indiceY];
-        p.xInicial = p.x;
-        p.yInicial = p.y;
+        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
+            p.x = this.coorX[indiceX];
+            p.y = this.coorY[indiceY];
+            p.xInicial = p.x;
+            p.yInicial = p.y;
+            System.out.println("Planta centrada en: (" + p.x + ", " + p.y + ")");
+        }
     }
 }
