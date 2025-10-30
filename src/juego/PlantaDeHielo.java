@@ -3,11 +3,11 @@ import entorno.Entorno;
 
 public class PlantaDeHielo extends planta {
     // TIEMPOS DE RECARGA SEPARADOS
-    public int tiempoRecargaPlantado;  // Para plantar desde el banner
-    public int tiempoRecargaDisparo;   // Para disparar cuando está plantada
+    public int tiempoRecargaPlantado;
+    public int tiempoRecargaDisparo;
     
-    public int tiempoUltimoPlantado;   // Cuándo se plantó desde el banner
-    public int tiempoUltimoDisparo;    // Cuándo disparó por última vez
+    public int tiempoUltimoPlantado;
+    public int tiempoUltimoDisparo;
     
     private boolean puedeDisparar;
     private boolean disponibleParaPlantar;
@@ -15,9 +15,13 @@ public class PlantaDeHielo extends planta {
     public PlantaDeHielo(double x, double y, Entorno e) {
         super(x, y, e, "plantaHielo.png", "plantaHielo.png", 0.12);
         
+        // NUEVO: Resistencia específica para PlantaDeHielo
+        this.resistencia = 5;
+        this.resistenciaMaxima = 5;
+        
         // TIEMPOS SEPARADOS
-        this.tiempoRecargaPlantado = 1080;  // 3 minutos para volver a plantar
-        this.tiempoRecargaDisparo = 45;     // Tiempo entre disparos
+        this.tiempoRecargaPlantado = 1080;
+        this.tiempoRecargaDisparo = 45;
         
         this.tiempoUltimoPlantado = -100;
         this.tiempoUltimoDisparo = -100;
@@ -27,12 +31,10 @@ public class PlantaDeHielo extends planta {
     }
     
     public void actualizar(int tickActual) {
-        // Actualizar recarga de disparo
         if (!puedeDisparar && tickActual - tiempoUltimoDisparo > tiempoRecargaDisparo) {
             puedeDisparar = true;
         }
         
-        // Actualizar disponibilidad para plantar (solo si está en el banner)
         if (!disponibleParaPlantar && !plantada && tickActual - tiempoUltimoPlantado > tiempoRecargaPlantado) {
             disponibleParaPlantar = true;
         }
@@ -47,13 +49,11 @@ public class PlantaDeHielo extends planta {
         return null;
     }
     
-    // Método para cuando se planta desde el banner
     public void usar(int tickActual) {
         disponibleParaPlantar = false;
         tiempoUltimoPlantado = tickActual;
     }
     
-    // PARA EL BANNER: Verificar si está disponible para plantar
     public boolean estaEnRecarga(int tickActual) {
         if (disponibleParaPlantar) return false;
         
@@ -64,14 +64,12 @@ public class PlantaDeHielo extends planta {
         return true;
     }
     
-    // PARA EL BANNER: Porcentaje de recarga de plantado
     public double porcentajeRecarga(int tickActual) {
         if (disponibleParaPlantar) return 1.0;
         int tiempoTranscurrido = tickActual - tiempoUltimoPlantado;
         return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecargaPlantado);
     }
     
-    // PARA DISPAROS: Porcentaje de recarga de disparo (esto NO se muestra en el banner)
     public double porcentajeRecargaDisparo(int tickActual) {
         if (puedeDisparar) return 1.0;
         int tiempoTranscurrido = tickActual - tiempoUltimoDisparo;

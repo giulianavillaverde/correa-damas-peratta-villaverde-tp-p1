@@ -7,61 +7,29 @@ public class WallNut extends planta {
     public int tiempoRecargaPlantado;
     public int tiempoUltimoUso;
     private boolean disponibleParaPlantar;
-    public int resistencia;
-    public boolean bajoAtaque; // SOLO para el punto rojo
     
     public WallNut(double x, double y, Entorno e) {
         super(x, y, e, "wallnut.png", "wallnut.png", 0.11);
+        
+        // NUEVO: Resistencia específica para WallNut (más alta)
+        this.resistencia = 10;
+        this.resistenciaMaxima = 10;
+        
         this.tiempoRecargaPlantado = 360;
         this.tiempoUltimoUso = -100;
         this.disponibleParaPlantar = true;
-        this.resistencia = 10; 
-        this.bajoAtaque = false;
     }
     
     @Override
     public void dibujar() {
-        if (seleccionada) {
-            if (imagenSeleccionada != null) {
-                e.dibujarImagen(imagenSeleccionada, x, y, 0, escala);
-            } else if (imagen != null) {
-                e.dibujarImagen(imagen, x, y, 0, escala);
-            }
-        } else {
-            if (imagen != null) {
-                e.dibujarImagen(imagen, x, y, 0, escala);
-            }
-        }
+        super.dibujar(); // Usa el dibujar de la clase base
         
-        // SOLO punto rojo cuando está bajo ataque (sin texto)
+        // Punto rojo más grande para WallNut
         if (bajoAtaque && plantada) {
-            e.dibujarCirculo(x, y, 45, new Color(255, 0, 0, 100)); // Rojo semitransparente
+            e.dibujarCirculo(x, y, 45, new Color(255, 0, 0, 100));
         }
-        
-        // ELIMINADO: Barra de resistencia
     }
     
-    public void recibirAtaque() {
-        this.resistencia--;
-        this.bajoAtaque = true;
-        System.out.println("WallNut recibió ataque, resistencia restante: " + resistencia);
-        
-        // Programar para quitar el efecto visual después de un tiempo
-        new java.util.Timer().schedule( 
-            new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    bajoAtaque = false;
-                }
-            }, 
-            500 // 500 milisegundos = 0.5 segundos
-        );
-        
-        if (resistencia <= 0) {
-            System.out.println("WallNut destruida!");
-            plantada = false;
-        }
-    }
     
     public boolean estaEnRecarga(int tickActual) {
         if (disponibleParaPlantar) return false;

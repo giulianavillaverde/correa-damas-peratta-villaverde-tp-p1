@@ -347,72 +347,66 @@ public class Juego extends InterfaceJuego
       plantaSeleccionada.y = Math.max(30, Math.min(plantaSeleccionada.y, 550));
   }
  
-   // MODIFICADO: Verificar cuando los zombies atacan plantas
-   private void verificarAtaquesZombies() {
-       int tickActual = entorno.numeroDeTick();
-      
-       for (int i = 0; i < zombies.length; i++) {
-           if (zombies[i] != null && zombies[i].vivo) {
-              
-               zombies[i].verificarPlantaBloqueadora();
-              
-               if (zombies[i].estaBloqueado()) {
-                   planta plantaBloqueadora = zombies[i].plantaBloqueadora;
-                   if (plantaBloqueadora != null && plantaBloqueadora.plantada &&
-                       zombies[i].puedeAtacar(tickActual)) {
-                      
-                       if (plantaBloqueadora instanceof WallNut) {
-                           WallNut wallnut = (WallNut) plantaBloqueadora;
-                           wallnut.recibirAtaque();
-                          
-                           if (wallnut.resistencia <= 0) {
-                               int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
-                               int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
-                               cuadricula.ocupado[indiceX][indiceY] = false;
-                               plantaBloqueadora.plantada = false;
-                           }
-                       }
-                       zombies[i].registrarAtaque(tickActual);
-                   }
-               }
-               else {
-                   boolean encontroPlanta = false;
-                   for (int j = 0; j < plantas.length; j++) {
-                       if (plantas[j] != null && plantas[j].plantada &&
-                           zombies[i].colisionaConPlanta(plantas[j])) {
-                          
-                           encontroPlanta = true;
-                          
-                           if (plantas[j] instanceof WallNut) {
-                               zombies[i].bloquear(plantas[j]);
-                           }
-                           else if (zombies[i].puedeAtacar(tickActual)) {
-                               int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
-                               int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                               cuadricula.ocupado[indiceX][indiceY] = false;
-                               plantas[j] = null;
-                               zombies[i].registrarAtaque(tickActual);
-                           }
-                           break;
-                       }
-                   }
-                  
-                   if (!encontroPlanta) {
+   
+//MÉTODO ACTUALIZADO: Verificar cuando los zombies atacan plantas (BLOQUEO CON TODAS LAS PLANTAS)
+private void verificarAtaquesZombies() {
+   int tickActual = entorno.numeroDeTick();
+   
+   for (int i = 0; i < zombies.length; i++) {
+       if (zombies[i] != null && zombies[i].vivo) {
+           
+           zombies[i].verificarPlantaBloqueadora();
+           
+           if (zombies[i].estaBloqueado()) {
+               planta plantaBloqueadora = zombies[i].plantaBloqueadora;
+               if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
+                   zombies[i].puedeAtacar(tickActual)) {
+                   
+                   // TODAS las plantas reciben daño
+                   plantaBloqueadora.recibirAtaque();
+                   
+                   // Si la planta es destruida, liberar al zombie
+                   if (!plantaBloqueadora.plantada) {
+                       int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
+                       int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
+                       cuadricula.ocupado[indiceX][indiceY] = false;
+                       
+                       // Buscar y eliminar la planta del array
                        for (int j = 0; j < plantas.length; j++) {
-                           if (plantas[j] != null && plantas[j].plantada &&
-                               plantas[j] instanceof WallNut &&
-                               zombies[i].colisionaConWallNut(plantas[j])) {
-                              
-                               zombies[i].bloquear(plantas[j]);
+                           if (plantas[j] == plantaBloqueadora) {
+                               plantas[j] = null;
                                break;
                            }
                        }
+                       zombies[i].liberar();
+                   }
+                   zombies[i].registrarAtaque(tickActual);
+               }
+           } 
+           else {
+               for (int j = 0; j < plantas.length; j++) {
+                   if (plantas[j] != null && plantas[j].plantada && 
+                       zombies[i].colisionaConPlanta(plantas[j])) {
+                       
+                       // BLOQUEAR CON CUALQUIER PLANTA
+                       zombies[i].bloquear(plantas[j]);
+                       
+                       // Si la planta es CerezaExplosiva, hacerla explotar inmediatamente
+                       if (plantas[j] instanceof CerezaExplosiva) {
+                           CerezaExplosiva cereza = (CerezaExplosiva) plantas[j];
+                           if (!cereza.debeExplotar()) {
+                               if (cereza.hayZombieCerca(zombies)) {
+                                   verificarExplosionCereza(cereza);
+                               }
+                           }
+                       }
+                       break;
                    }
                }
            }
        }
    }
-  
+}
    // BARRAS DE RECARGA
    private void dibujarBarrasRecarga() {
        int tickActual = entorno.numeroDeTick();
