@@ -1,9 +1,8 @@
-package juego;
+  package juego;
 
 import java.awt.Color;
 import entorno.Entorno;
 import entorno.InterfaceJuego;
-
 
 public class Juego extends InterfaceJuego
 {
@@ -13,6 +12,7 @@ public class Juego extends InterfaceJuego
    regalos[] regalo;
    planta[] plantas;
    Zombie[] zombies;
+   ZombieRapido zombieRapido;
    ZombieColosal zombieColosal;
    BolaFuego[] disparos;
    BolaEscarcha[] disparosHielo;
@@ -21,7 +21,9 @@ public class Juego extends InterfaceJuego
    int zombiesTotales;
    boolean juegoGanado;
    boolean juegoPerdido;
+   int ticksParaProximoRapido;
    int ticksParaProximoColosal;
+   int rapidosAparecidos;
    int colosalesAparecidos;
   
    // Plantas en el banner para controlar recarga
@@ -46,6 +48,7 @@ public class Juego extends InterfaceJuego
        this.contadorPlantas = 0;
       
        this.zombies = new Zombie[15];
+       this.zombieRapido = null;
        this.zombieColosal = null;
        this.disparos = new BolaFuego[50];
        this.disparosHielo = new BolaEscarcha[50];
@@ -53,7 +56,9 @@ public class Juego extends InterfaceJuego
        this.zombiesTotales = 50;
        this.juegoGanado = false;
        this.juegoPerdido = false;
-       this.ticksParaProximoColosal = 1080;
+       this.ticksParaProximoRapido = 270;  // 45 segundos
+       this.ticksParaProximoColosal = 1080; // 3 minutos
+       this.rapidosAparecidos = 0;
        this.colosalesAparecidos = 0;
       
        // Crear plantas del banner
@@ -75,6 +80,7 @@ public class Juego extends InterfaceJuego
        plantas[contadorPlantas++] = roseBanner;
        plantas[contadorPlantas++] = cerezaBanner;
    }
+  
    public void tick(){
        if (juegoGanado || juegoPerdido) {
            dibujarPantallaFin();
@@ -122,15 +128,19 @@ public class Juego extends InterfaceJuego
        dibujarPlantasBanner();
       
        generarZombie();
+       generarZombieRapido();
        generarZombieColosal();
        actualizarZombies();
+       actualizarZombieRapido();
        actualizarZombieColosal();
        actualizarDisparos();
        actualizarDisparosHielo();
        verificarColisiones();
        verificarColisionesHielo();
+       verificarColisionesConRapido();
        verificarColisionesConColosal();
        verificarAtaquesZombies();
+       verificarAtaquesZombieRapido();
        verificarAtaquesZombieColosal();
        manejarSeleccionYPlantado();
        manejarMovimientoTeclado();
@@ -138,8 +148,119 @@ public class Juego extends InterfaceJuego
        dibujarUI();
        dibujarBarrasRecarga();
    }
-  
-// MÉTODO: Verificar explosión de cereza
+
+   // MÉTODO: Generar zombie rápido cada 45 segundos
+   private void generarZombieRapido() {
+       if (zombieRapido == null && ticksParaProximoRapido > 0) {
+           ticksParaProximoRapido--;
+           
+           if (ticksParaProximoRapido <= 0) {
+               int fila = (int)(Math.random() * 5); // Aparece en fila aleatoria
+               zombieRapido = new ZombieRapido(fila, entorno);
+               rapidosAparecidos++;
+               System.out.println("¡Zombie Rápido aparece en fila " + fila + "!");
+           }
+       }
+       
+       // Reiniciar contador si no hay zombie rápido y el contador llegó a 0
+       if (zombieRapido == null && ticksParaProximoRapido <= 0) {
+           ticksParaProximoRapido = 270; // 45 segundos nuevamente
+       }
+   }
+
+   // MÉTODO: Actualizar zombie rápido
+   private void actualizarZombieRapido() {
+       if (zombieRapido != null) {
+           zombieRapido.mover();
+           zombieRapido.dibujar();
+           
+           if (zombieRapido.llegoARegalos()) {
+               juegoPerdido = true;
+           }
+           
+           if (!zombieRapido.vivo) {
+               zombieRapido = null;
+               zombiesEliminados += 2; // Vale más puntos que un zombie normal
+           }
+       }
+   }
+
+   // MÉTODO: Verificar colisiones con el zombie rápido
+   private void verificarColisionesConRapido() {
+       if (zombieRapido == null || !zombieRapido.vivo) return;
+       
+       // Colisión con disparos de fuego
+       for (int i = 0; i < disparos.length; i++) {
+           if (disparos[i] != null && disparos[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparos[i].x - zombieRapido.getX(), 2) +
+                                         Math.pow(disparos[i].y - zombieRapido.getY(), 2));
+               if (distancia < 40) {
+                   zombieRapido.recibirDanio();
+                   disparos[i].activa = false;
+                   disparos[i] = null;
+                   break;
+               }
+           }
+       }
+       
+       // Colisión con disparos de hielo
+       for (int i = 0; i < disparosHielo.length; i++) {
+           if (disparosHielo[i] != null && disparosHielo[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombieRapido.getX(), 2) +
+                                         Math.pow(disparosHielo[i].y - zombieRapido.getY(), 2));
+               if (distancia < 40) {
+                   zombieRapido.ralentizar(disparosHielo[i].duracionRalentizacion);
+                   disparosHielo[i].activa = false;
+                   disparosHielo[i] = null;
+                   break;
+               }
+           }
+       }
+   }
+
+   // MÉTODO: Verificar ataques del zombie rápido
+   private void verificarAtaquesZombieRapido() {
+       if (zombieRapido == null || !zombieRapido.vivo) return;
+       
+       int tickActual = entorno.numeroDeTick();
+       
+       for (int j = 0; j < plantas.length; j++) {
+           if (plantas[j] != null && plantas[j].plantada &&
+               zombieRapido.colisionaConPlanta(plantas[j])) {
+               
+               if (!zombieRapido.estaBloqueado()) {
+                   zombieRapido.bloquear(plantas[j]);
+               }
+               
+               if (zombieRapido.puedeAtacar(tickActual)) {
+                   plantas[j].recibirAtaque();
+                   
+                   // Si la planta es destruida, liberar al zombie rápido
+                   if (!plantas[j].plantada) {
+                       int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                       int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                       cuadricula.ocupado[indiceX][indiceY] = false;
+                       
+                       // Buscar y eliminar la planta del array
+                       for (int k = 0; k < plantas.length; k++) {
+                           if (plantas[k] == plantas[j]) {
+                               plantas[k] = null;
+                               break;
+                           }
+                       }
+                       zombieRapido.liberar();
+                   }
+                   zombieRapido.registrarAtaque(tickActual);
+               }
+               break;
+           }
+       }
+       
+       // Verificar si necesita liberarse
+       zombieRapido.verificarPlantaBloqueadora();
+   }
+
+   // MÉTODO: Verificar explosión de cereza
    private void verificarExplosionCereza(CerezaExplosiva cereza) {
        // Primero verificar si hay zombies cerca
        if (cereza.hayZombieCerca(zombies)) {
@@ -157,6 +278,18 @@ public class Juego extends InterfaceJuego
                        zombiesEliminadosPorCereza++;
                        System.out.println("Zombie eliminado por explosión de cereza");
                    }
+               }
+           }
+          
+           // Verificar también zombie rápido
+           if (zombieRapido != null && zombieRapido.vivo) {
+               double distancia = Math.sqrt(Math.pow(zombieRapido.getX() - cereza.x, 2) +
+                                          Math.pow(zombieRapido.getY() - cereza.y, 2));
+               if (distancia < cereza.getRadioExplosion()) {
+                   zombieRapido.morir();
+                   zombiesEliminados += 2;
+                   zombiesEliminadosPorCereza++;
+                   System.out.println("Zombie Rápido eliminado por explosión de cereza");
                }
            }
           
@@ -180,6 +313,7 @@ public class Juego extends InterfaceJuego
            dibujarExplosion(cereza.x, cereza.y, cereza.getRadioExplosion());
        }
    }
+   
    // Método opcional para dibujar efecto visual de explosión
    private void dibujarExplosion(double x, double y, double radio) {
        // Dibujar círculo de explosión (rojo semitransparente)
@@ -314,6 +448,7 @@ public class Juego extends InterfaceJuego
            }
        }
    }
+   
    // Método para manejar movimiento con teclado 
    private void manejarMovimientoTeclado() {
 	       planta plantaSeleccionada = null;
@@ -366,65 +501,66 @@ public class Juego extends InterfaceJuego
 	       }
 	   }
    
-//MÉTODO ACTUALIZADO: Verificar cuando los zombies atacan plantas (BLOQUEO CON TODAS LAS PLANTAS)
-private void verificarAtaquesZombies() {
-   int tickActual = entorno.numeroDeTick();
-   
-   for (int i = 0; i < zombies.length; i++) {
-       if (zombies[i] != null && zombies[i].vivo) {
-           
-           zombies[i].verificarPlantaBloqueadora();
-           
-           if (zombies[i].estaBloqueado()) {
-               planta plantaBloqueadora = zombies[i].plantaBloqueadora;
-               if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
-                   zombies[i].puedeAtacar(tickActual)) {
-                   
-                   // TODAS las plantas reciben daño
-                   plantaBloqueadora.recibirAtaque();
-                   
-                   // Si la planta es destruida, liberar al zombie
-                   if (!plantaBloqueadora.plantada) {
-                       int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
-                       int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
-                       cuadricula.ocupado[indiceX][indiceY] = false;
+   //MÉTODO ACTUALIZADO: Verificar cuando los zombies atacan plantas (BLOQUEO CON TODAS LAS PLANTAS)
+   private void verificarAtaquesZombies() {
+       int tickActual = entorno.numeroDeTick();
+       
+       for (int i = 0; i < zombies.length; i++) {
+           if (zombies[i] != null && zombies[i].vivo) {
+               
+               zombies[i].verificarPlantaBloqueadora();
+               
+               if (zombies[i].estaBloqueado()) {
+                   planta plantaBloqueadora = zombies[i].plantaBloqueadora;
+                   if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
+                       zombies[i].puedeAtacar(tickActual)) {
                        
-                       // Buscar y eliminar la planta del array
-                       for (int j = 0; j < plantas.length; j++) {
-                           if (plantas[j] == plantaBloqueadora) {
-                               plantas[j] = null;
-                               break;
-                           }
-                       }
-                       zombies[i].liberar();
-                   }
-                   zombies[i].registrarAtaque(tickActual);
-               }
-           } 
-           else {
-               for (int j = 0; j < plantas.length; j++) {
-                   if (plantas[j] != null && plantas[j].plantada && 
-                       zombies[i].colisionaConPlanta(plantas[j])) {
+                       // TODAS las plantas reciben daño
+                       plantaBloqueadora.recibirAtaque();
                        
-                       // BLOQUEAR CON CUALQUIER PLANTA
-                       zombies[i].bloquear(plantas[j]);
-                       
-                       // Si la planta es CerezaExplosiva, hacerla explotar inmediatamente
-                       if (plantas[j] instanceof CerezaExplosiva) {
-                           CerezaExplosiva cereza = (CerezaExplosiva) plantas[j];
-                           if (!cereza.debeExplotar()) {
-                               if (cereza.hayZombieCerca(zombies)) {
-                                   verificarExplosionCereza(cereza);
+                       // Si la planta es destruida, liberar al zombie
+                       if (!plantaBloqueadora.plantada) {
+                           int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
+                           int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
+                           cuadricula.ocupado[indiceX][indiceY] = false;
+                           
+                           // Buscar y eliminar la planta del array
+                           for (int j = 0; j < plantas.length; j++) {
+                               if (plantas[j] == plantaBloqueadora) {
+                                   plantas[j] = null;
+                                   break;
                                }
                            }
+                           zombies[i].liberar();
                        }
-                       break;
+                       zombies[i].registrarAtaque(tickActual);
+                   }
+               } 
+               else {
+                   for (int j = 0; j < plantas.length; j++) {
+                       if (plantas[j] != null && plantas[j].plantada && 
+                           zombies[i].colisionaConPlanta(plantas[j])) {
+                           
+                           // BLOQUEAR CON CUALQUIER PLANTA
+                           zombies[i].bloquear(plantas[j]);
+                           
+                           // Si la planta es CerezaExplosiva, hacerla explotar inmediatamente
+                           if (plantas[j] instanceof CerezaExplosiva) {
+                               CerezaExplosiva cereza = (CerezaExplosiva) plantas[j];
+                               if (!cereza.debeExplotar()) {
+                                   if (cereza.hayZombieCerca(zombies)) {
+                                       verificarExplosionCereza(cereza);
+                                   }
+                               }
+                           }
+                           break;
+                       }
                    }
                }
            }
        }
    }
-}
+   
    // BARRAS DE RECARGA
    private void dibujarBarrasRecarga() {
        int tickActual = entorno.numeroDeTick();
@@ -877,17 +1013,29 @@ private void verificarAtaquesZombies() {
        }
        entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
       
+       // Información de zombies especiales
+       if (zombieRapido != null && zombieRapido.vivo) {
+           entorno.cambiarFont("Arial", 30, Color.YELLOW);
+           entorno.escribirTexto("¡ZOMBIE RÁPIDO!", 212, 250);
+       } else if (ticksParaProximoRapido > 0) {
+           int segundosRestantesRapido = ticksParaProximoRapido / 6;
+           entorno.cambiarFont("Arial", 16, Color.YELLOW);
+           entorno.escribirTexto("Rápido en: " + segundosRestantesRapido + "s", 600, 40);
+       }
+       
        if (zombieColosal != null && zombieColosal.vivo) {
            entorno.cambiarFont("Arial", 50, Color.RED);
            entorno.escribirTexto("¡ZOMBIE COLOSAL!", 212, 300);
        } else if (ticksParaProximoColosal > 0) {
-           int segundosRestantes = ticksParaProximoColosal / 6;
-           entorno.cambiarFont("Arial", 20, Color.red);
-           entorno.escribirTexto("Próximo colosal en: " + segundosRestantes + "s", 600, 84);
-       } else {
-           entorno.cambiarFont("Arial", 20, Color.orange);
-           entorno.escribirTexto("Colosales: " + colosalesAparecidos, 600, 84);
+           int segundosRestantesColosal = ticksParaProximoColosal / 6;
+           entorno.cambiarFont("Arial", 16, Color.RED);
+           entorno.escribirTexto("Colosal en: " + segundosRestantesColosal + "s", 600, 60);
        }
+       
+       // Contadores
+       entorno.cambiarFont("Arial", 16, Color.WHITE);
+       entorno.escribirTexto("Rápidos: " + rapidosAparecidos, 750, 40);
+       entorno.escribirTexto("Colosales: " + colosalesAparecidos, 750, 60);
    }
   
    private void verificarFinJuego() {
@@ -904,15 +1052,18 @@ private void verificarAtaquesZombies() {
            entorno.cambiarFont("Arial", 24, Color.WHITE);
            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
            entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
-           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 410);
+           entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 410);
+           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 440);
        } else if (juegoPerdido) {
            entorno.cambiarFont("Arial", 40, Color.RED);
            entorno.escribirTexto("¡DERROTA!", 400, 300);
            entorno.cambiarFont("Arial", 24, Color.WHITE);
            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
-           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 380);
+           entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 380);
+           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 410);
        }
    }
+   
    public static void main(String[] args) {
        new Juego();
    }

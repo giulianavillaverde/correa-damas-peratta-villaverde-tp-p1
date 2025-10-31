@@ -26,7 +26,7 @@ public class ZombieColosal {
         this.y = 335; // Centro vertical (entre las 5 filas)
         this.velocidadNormal = 0.15; // Más lento que los zombies normales
         this.velocidad = velocidadNormal;
-        this.resistenciaMaxima = 90; 
+        this.resistenciaMaxima = 100; 
         this.resistencia = resistenciaMaxima;
         this.vivo = true;
         this.ralentizado = false;

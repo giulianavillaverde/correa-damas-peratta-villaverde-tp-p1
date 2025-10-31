@@ -5,7 +5,7 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.Herramientas;
 
-public class Zombie {
+public class ZombieRapido {
     public double x, y;
     public double velocidad;
     public double velocidadNormal;
@@ -23,29 +23,33 @@ public class Zombie {
     public boolean bloqueadoPorPlanta; 
     public planta plantaBloqueadora;
     
-    public Zombie(int fila, Entorno e) {
+    public ZombieRapido(int fila, Entorno e) {
         this.fila = fila;
         this.e = e;
         this.x = 1100;
         this.y = 140 + (fila * 100);
-        this.velocidadNormal = 0.3;
+        this.velocidadNormal = 0.8; // Mucho más rápido que el zombie normal (0.3)
         this.velocidad = velocidadNormal;
-        this.resistenciaMaxima = 15;
+        this.resistenciaMaxima = 65; // Menos resistencia que el zombie normal (2)
         this.resistencia = resistenciaMaxima;
         this.vivo = true;
         this.ralentizado = false;
         this.ticksRalentizacion = 0;
         this.golpesEscarcha = 0;
         this.tiempoUltimoAtaque = 0;
-        this.cooldownAtaque = 180;
+        this.cooldownAtaque = 120; // Ataca más rápido (2 segundos vs 3 segundos)
         this.bloqueadoPorPlanta = false; 
         this.plantaBloqueadora = null;
         
         try {
-            this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
+            this.imagen = Herramientas.cargarImagen("zombieRapido.png");
         } catch (Exception ex) {
-            System.err.println("ERROR: No se pudo cargar zombieGrinch.png");
-            this.imagen = null;
+            System.err.println("ERROR: No se pudo cargar zombieRapido.png - usando zombie normal");
+            try {
+                this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
+            } catch (Exception ex2) {
+                this.imagen = null;
+            }
         }
     }
     
@@ -53,6 +57,12 @@ public class Zombie {
         if (vivo) {
             if (imagen != null) {
                 e.dibujarImagen(imagen, x, y, 0, 0.1);
+            } else {
+                // Fallback visual - dibujar un zombie verde más delgado y rápido
+                e.dibujarRectangulo(x, y, 40, 80, 0, new Color(0, 200, 0)); // Verde más brillante
+                e.dibujarRectangulo(x, y, 30, 70, 0, new Color(100, 255, 100)); // Verde neón
+                // Indicador visual de velocidad
+                e.dibujarRectangulo(x + 25, y, 10, 5, 0, Color.YELLOW); // Efecto de movimiento
             }
             
             if (ralentizado) {
@@ -78,36 +88,33 @@ public class Zombie {
     }
     
     public void verificarPlantaBloqueadora() {
-        if (bloqueadoPorPlanta && plantaBloqueadora != null) { // CAMBIADO
+        if (bloqueadoPorPlanta && plantaBloqueadora != null) {
             if (!plantaBloqueadora.plantada) {
                 liberar();
             }
         }
     }
     
-    //Ahora bloquea con cualquier planta
     public void bloquear(planta planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
         this.velocidad = 0;
-        System.out.println("Zombie bloqueado por " + planta.getClass().getSimpleName() + " en fila " + fila);
+        System.out.println("Zombie Rápido bloqueado por " + planta.getClass().getSimpleName() + " en fila " + fila);
     }
     
     public void liberar() {
-        this.bloqueadoPorPlanta = false; // CAMBIADO
+        this.bloqueadoPorPlanta = false;
         this.plantaBloqueadora = null;
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
-        System.out.println("Zombie liberado en fila " + fila);
+        System.out.println("Zombie Rápido liberado en fila " + fila);
     }
-    
     
     public boolean colisionaConPlanta(planta p) {
         if (!vivo || p == null || !p.plantada) return false;
         
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
-        return distancia < 50; // AUMENTADO de 40 a 50
+        return distancia < 50;
     }
-    
     
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
@@ -127,10 +134,10 @@ public class Zombie {
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
-        this.velocidad = velocidadNormal * 0.2;
+        this.velocidad = velocidadNormal * 0.3; // Más afectado por la ralentización
         
         golpesEscarcha++;
-        if (golpesEscarcha >= 6) {
+        if (golpesEscarcha >= 3) { // Menos resistente al hielo que los normales
             morir();
         }
     }
@@ -148,5 +155,14 @@ public class Zombie {
     
     public boolean estaBloqueado() {
         return bloqueadoPorPlanta; 
+    }
+    
+    // Métodos getter para compatibilidad
+    public double getX() {
+        return x;
+    }
+    
+    public double getY() {
+        return y;
     }
 }
