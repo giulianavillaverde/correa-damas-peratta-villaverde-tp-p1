@@ -47,13 +47,13 @@ public class Juego extends InterfaceJuego
        this.plantas = new planta[30];
        this.contadorPlantas = 0;
       
-       this.zombies = new Zombie[15];
+       this.zombies = new Zombie[15]; //zombies en pantalla 
        this.zombieRapido = null;
        this.zombieColosal = null;
        this.disparos = new BolaFuego[50];
        this.disparosHielo = new BolaEscarcha[50];
        this.zombiesEliminados = 0;
-       this.zombiesTotales = 50;
+       this.zombiesTotales = 80; //zombies totales en el juego
        this.juegoGanado = false;
        this.juegoPerdido = false;
        this.ticksParaProximoRapido = 270;  // 45 segundos
