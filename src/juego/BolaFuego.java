@@ -21,7 +21,7 @@ public class BolaFuego {
     
     public void dibujar() {
         if (activa) {
-            e.dibujarImagen(imagen, x, y, 0, 0.08);
+            e.dibujarImagen(imagen, x, y, 0, 0.05);
         }
     }
     

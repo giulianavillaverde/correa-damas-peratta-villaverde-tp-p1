@@ -32,7 +32,7 @@ public class BolaEscarcha {
     public void dibujar() {
         if (activa) {
             if (imagen != null) {
-                e.dibujarImagen(imagen, x, y, 0, 0.07);
+                e.dibujarImagen(imagen, x, y, 0, 0.05);
             } else {
                 // Fallback visual
                 e.dibujarCirculo(x, y, 12, Color.CYAN);

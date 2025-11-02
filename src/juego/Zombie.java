@@ -23,6 +23,11 @@ public class Zombie {
     public boolean bloqueadoPorPlanta; 
     public planta plantaBloqueadora;
     
+    // NUEVOS ATRIBUTOS PARA DISPAROS
+    public int tiempoUltimoDisparo;
+    public int cooldownDisparo;
+    public boolean puedeDisparar;
+    
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
         this.e = e;
@@ -40,6 +45,11 @@ public class Zombie {
         this.cooldownAtaque = 180;
         this.bloqueadoPorPlanta = false; 
         this.plantaBloqueadora = null;
+        
+        // INICIALIZAR NUEVOS ATRIBUTOS DE DISPARO
+        this.tiempoUltimoDisparo = 0;
+        this.cooldownDisparo = 120; // Dispara cada 2 segundos (120 ticks)
+        this.puedeDisparar = true;
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -77,15 +87,34 @@ public class Zombie {
         }
     }
     
+    // NUEVO MÉTODO: Verificar si puede disparar
+    public boolean puedeDisparar(int tickActual) {
+        return (tickActual - tiempoUltimoDisparo) >= cooldownDisparo;
+    }
+    
+    // NUEVO MÉTODO: Crear bola de nieve
+    public BolaNieve disparar(int tickActual) {
+        if (vivo && puedeDisparar(tickActual) && !bloqueadoPorPlanta) {
+            this.tiempoUltimoDisparo = tickActual;
+            // Crear la bola de nieve ligeramente delante del zombie
+            return new BolaNieve(x - 40, y, e);
+        }
+        return null;
+    }
+    
+    // NUEVO MÉTODO: Registrar disparo
+    public void registrarDisparo(int tickActual) {
+        this.tiempoUltimoDisparo = tickActual;
+    }
+    
     public void verificarPlantaBloqueadora() {
-        if (bloqueadoPorPlanta && plantaBloqueadora != null) { // CAMBIADO
+        if (bloqueadoPorPlanta && plantaBloqueadora != null) {
             if (!plantaBloqueadora.plantada) {
                 liberar();
             }
         }
     }
     
-    //Ahora bloquea con cualquier planta
     public void bloquear(planta planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
@@ -94,20 +123,18 @@ public class Zombie {
     }
     
     public void liberar() {
-        this.bloqueadoPorPlanta = false; // CAMBIADO
+        this.bloqueadoPorPlanta = false;
         this.plantaBloqueadora = null;
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
         System.out.println("Zombie liberado en fila " + fila);
     }
     
-    
     public boolean colisionaConPlanta(planta p) {
         if (!vivo || p == null || !p.plantada) return false;
         
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
-        return distancia < 50; // AUMENTADO de 40 a 50
+        return distancia < 50;
     }
-    
     
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;

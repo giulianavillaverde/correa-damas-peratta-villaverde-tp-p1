@@ -1,4 +1,4 @@
-  package juego;
+package juego;
 
 import java.awt.Color;
 import entorno.Entorno;
@@ -16,6 +16,7 @@ public class Juego extends InterfaceJuego
    ZombieColosal zombieColosal;
    BolaFuego[] disparos;
    BolaEscarcha[] disparosHielo;
+   BolaNieve[] bolasNieve; // NUEVO: Array para bolas de nieve de zombies
    int contadorPlantas;
    int zombiesEliminados;
    int zombiesTotales;
@@ -52,6 +53,7 @@ public class Juego extends InterfaceJuego
        this.zombieColosal = null;
        this.disparos = new BolaFuego[50];
        this.disparosHielo = new BolaEscarcha[50];
+       this.bolasNieve = new BolaNieve[30]; // NUEVO: Bolas de nieve de zombies
        this.zombiesEliminados = 0;
        this.zombiesTotales = 80; //zombies totales en el juego
        this.juegoGanado = false;
@@ -135,18 +137,95 @@ public class Juego extends InterfaceJuego
        actualizarZombieColosal();
        actualizarDisparos();
        actualizarDisparosHielo();
+       actualizarBolasNieve(); // NUEVO: Actualizar bolas de nieve
        verificarColisiones();
        verificarColisionesHielo();
        verificarColisionesConRapido();
        verificarColisionesConColosal();
+       verificarColisionesBolasNieve(); // NUEVO: Verificar colisiones de bolas de nieve
        verificarAtaquesZombies();
        verificarAtaquesZombieRapido();
        verificarAtaquesZombieColosal();
+       generarDisparosZombies(); // NUEVO: Generar disparos de zombies normales
        manejarSeleccionYPlantado();
        manejarMovimientoTeclado();
        verificarFinJuego();
        dibujarUI();
        dibujarBarrasRecarga();
+   }
+
+   // NUEVO MÉTODO: Generar disparos de zombies normales
+   private void generarDisparosZombies() {
+       int tickActual = entorno.numeroDeTick();
+       
+       // Solo zombies normales (clase Zombie) disparan
+       for (int i = 0; i < zombies.length; i++) {
+           if (zombies[i] != null && zombies[i].vivo && !zombies[i].estaBloqueado()) {
+               BolaNieve nuevaBola = zombies[i].disparar(tickActual);
+               if (nuevaBola != null) {
+                   agregarBolaNieve(nuevaBola);
+               }
+           }
+       }
+   }
+
+   // NUEVO MÉTODO: Agregar bola de nieve al array
+   private void agregarBolaNieve(BolaNieve bola) {
+       for (int i = 0; i < bolasNieve.length; i++) {
+           if (bolasNieve[i] == null) {
+               bolasNieve[i] = bola;
+               break;
+           }
+       }
+   }
+
+   // NUEVO MÉTODO: Actualizar bolas de nieve
+   private void actualizarBolasNieve() {
+       for (int i = 0; i < bolasNieve.length; i++) {
+           if (bolasNieve[i] != null) {
+               bolasNieve[i].mover();
+               bolasNieve[i].dibujar();
+               if (!bolasNieve[i].activa) {
+                   bolasNieve[i] = null;
+               }
+           }
+       }
+   }
+
+   // NUEVO MÉTODO: Verificar colisiones de bolas de nieve con plantas
+   private void verificarColisionesBolasNieve() {
+       for (int i = 0; i < bolasNieve.length; i++) {
+           if (bolasNieve[i] != null && bolasNieve[i].activa) {
+               for (int j = 0; j < plantas.length; j++) {
+                   if (plantas[j] != null && plantas[j].plantada &&
+                       bolasNieve[i].colisionaCon(plantas[j])) {
+                       
+                       // La planta recibe daño
+                       plantas[j].recibirAtaque();
+                       System.out.println("Planta golpeada por bola de nieve!");
+                       
+                       // Si la planta es destruida
+                       if (!plantas[j].plantada) {
+                           int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                           int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
+                           cuadricula.ocupado[indiceX][indiceY] = false;
+                           
+                           // Eliminar del array de plantas
+                           for (int k = 0; k < plantas.length; k++) {
+                               if (plantas[k] == plantas[j]) {
+                                   plantas[k] = null;
+                                   break;
+                               }
+                           }
+                       }
+                       
+                       bolasNieve[i].activa = false;
+                       bolasNieve[i] = null;
+                       break;
+                   }
+               }
+           }
+       }
    }
 
    // MÉTODO: Generar zombie rápido cada 45 segundos
@@ -603,49 +682,75 @@ public class Juego extends InterfaceJuego
    }
   
    private void dibujarBarraRecargaCompleta(double x, double y, double porcentaje, Color colorFondo, Color colorBorde, String texto, planta planta, int tickActual) {
-       double anchoBarra = 80;
-       double altoBarra = 12;
-      
-       entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorFondo);
-      
-       double anchoVacio = anchoBarra * (1 - porcentaje);
-       if (anchoVacio > 0) {
-           Color colorVacio = oscurecerColor(colorFondo, 0.5f);
-           entorno.dibujarRectangulo(x + (anchoBarra - anchoVacio) / 2, y, anchoVacio, altoBarra, 0, colorVacio);
-       }
-      
-       entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
-      
-       entorno.cambiarFont("Arial", 12, Color.WHITE);
-       entorno.escribirTexto(texto, x - 25, y - 5);
-      
-       if (porcentaje < 1.0) {
-           int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
-          
-           Color colorTiempo = Color.BLACK;
-           if (esColorOscuro(colorFondo)) {
-               colorTiempo = Color.WHITE;
-           }
-          
-           entorno.cambiarFont("Arial", 10, colorTiempo);
-          
-           if (segundosRestantes <= 5) {
-               entorno.cambiarFont("Arial", 10, Color.YELLOW);
-           } else if (segundosRestantes <= 10) {
-               entorno.cambiarFont("Arial", 10, Color.ORANGE);
-           }
-          
-           entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 20);
-          
-           if (segundosRestantes <= 3 && tickActual % 10 < 5) {
-               entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, new Color(255, 255, 255, 100));
-           }
-       } else {
-           Color colorListo = esColorOscuro(colorFondo) ? Color.GREEN : new Color(0, 100, 0);
-           entorno.cambiarFont("Arial", 10, colorListo);
-           entorno.escribirTexto("Listo", x - 12, y + 20);
-       }
-   }
+	    double anchoBarra = 80;
+	    double altoBarra = 12;
+	    
+	    // Fondo de la barra (parte vacía)
+	    Color fondoOscuro = oscurecerColor(colorFondo, 0.5f);
+	    entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, fondoOscuro);
+	    
+	    // Barra de progreso con efecto de movimiento
+	    if (porcentaje > 0) {
+	        double anchoLleno = anchoBarra * porcentaje;
+	        
+	        // Efecto de movimiento en la parte cargada
+	        if (porcentaje < 1.0) {
+	            // Crear un efecto de "ondulación" en la barra de progreso
+	            for (int i = 0; i < anchoLleno; i += 4) {
+	                double onda = Math.sin((tickActual * 0.3) + (i * 0.2)) * 2;
+	                double alturaOnda = altoBarra + onda;
+	                double posY = y - onda/2;
+	                
+	                if (i + 2 <= anchoLleno) {
+	                    entorno.dibujarRectangulo(
+	                        x - anchoBarra/2 + i + 2, 
+	                        posY, 
+	                        2, 
+	                        alturaOnda, 
+	                        0, 
+	                        aclararColor(colorFondo, 0.1f)
+	                    );
+	                }
+	            }
+	        }
+	        
+	        // Barra principal de progreso
+	        entorno.dibujarRectangulo(x - anchoBarra/2 + anchoLleno/2, y, anchoLleno, altoBarra, 0, colorFondo);
+	    }
+	    
+	    // Borde
+	    entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
+	    
+	    // Texto del nombre
+	    entorno.cambiarFont("Arial", 12, Color.WHITE);
+	    entorno.escribirTexto(texto, x - 25, y - 5);
+	    
+	    // Texto del tiempo/estado
+	    if (porcentaje < 1.0) {
+	        int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
+	        
+	        Color colorTiempo = esColorOscuro(colorFondo) ? Color.WHITE : Color.BLACK;
+	        entorno.cambiarFont("Arial", 10, colorTiempo);
+	        
+	        if (segundosRestantes <= 5) {
+	            entorno.cambiarFont("Arial", 10, Color.YELLOW);
+	        } else if (segundosRestantes <= 10) {
+	            entorno.cambiarFont("Arial", 10, Color.ORANGE);
+	        }
+	        
+	        entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 20);
+	    } else {
+	        Color colorListo = esColorOscuro(colorFondo) ? Color.GREEN : new Color(0, 100, 0);
+	        entorno.cambiarFont("Arial", 10, colorListo);
+	        entorno.escribirTexto("Listo", x - 12, y + 20);
+	    }
+	}
+   private Color aclararColor(Color color, float factor) {
+	    int rojo = Math.min(255, (int)(color.getRed() + (255 - color.getRed()) * factor));
+	    int verde = Math.min(255, (int)(color.getGreen() + (255 - color.getGreen()) * factor));
+	    int azul = Math.min(255, (int)(color.getBlue() + (255 - color.getBlue()) * factor));
+	    return new Color(rojo, verde, azul);
+	}
   
    private Color oscurecerColor(Color color, float factor) {
        int rojo = Math.max(0, (int)(color.getRed() * factor));
