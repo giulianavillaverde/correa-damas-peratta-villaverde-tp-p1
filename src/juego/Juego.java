@@ -61,7 +61,7 @@ public class Juego extends InterfaceJuego {
        this.contadorPlantas = 0;
        this.cantidadPlantasActivas = 0;
       
-       this.zombies = new Zombie[15];
+       this.zombies = new Zombie[7];
        this.zombieRapido = null;
        this.zombieColosal = null;
        this.disparos = new BolaFuego[50];
@@ -134,18 +134,18 @@ public class Juego extends InterfaceJuego {
        }
    }
    
-   public void compactarArrayPlantas() {
-       int writeIndex = 0;
-       for (int readIndex = 0; readIndex < plantas.length; readIndex++) {
-           if (plantas[readIndex] != null) {
-               if (writeIndex != readIndex) {
-                   plantas[writeIndex] = plantas[readIndex];
-                   plantas[readIndex] = null;
+   public void ArrayPlantas() {
+       int OrganizarPlantas = 0;
+       for (int Plantass = 0; Plantass < plantas.length; Plantass ++) {
+           if (plantas[Plantass] != null) {
+               if (OrganizarPlantas != Plantass) {
+                   plantas[OrganizarPlantas] = plantas[Plantass];
+                   plantas[Plantass] = null;
                }
-               writeIndex++;
+               OrganizarPlantas++;
            }
        }
-       cantidadPlantasActivas = writeIndex;
+       cantidadPlantasActivas = OrganizarPlantas;
    }
   
    public void tick(){
@@ -1149,4 +1149,3 @@ public class Juego extends InterfaceJuego {
 	       new Juego();
 	   }
 }
-
