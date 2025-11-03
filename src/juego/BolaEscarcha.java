@@ -6,7 +6,6 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaEscarcha {
-    // Variables públicas
     public double x, y;
     public double velocidad;
     public Image imagen;
@@ -35,7 +34,6 @@ public class BolaEscarcha {
             if (imagen != null) {
                 e.dibujarImagen(imagen, x, y, 0, 0.05);
             } else {
-                // Fallback visual
                 e.dibujarCirculo(x, y, 12, Color.CYAN);
                 e.dibujarCirculo(x, y, 6, Color.BLUE);
             }
@@ -51,7 +49,20 @@ public class BolaEscarcha {
         }
     }
     
-    public boolean colisionaCon(Zombie zombie) {
+    // Métodos de colisión específicos para cada tipo de zombie
+    public boolean colisionaConGrinch(ZombieGrinch zombie) {
+        if (!activa || !zombie.vivo) return false;
+        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        return distancia < 25;
+    }
+    
+    public boolean colisionaConRapido(ZombieRapido zombie) {
+        if (!activa || !zombie.vivo) return false;
+        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        return distancia < 25;
+    }
+    
+    public boolean colisionaConColosal(ZombieColosal zombie) {
         if (!activa || !zombie.vivo) return false;
         double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
         return distancia < 25;

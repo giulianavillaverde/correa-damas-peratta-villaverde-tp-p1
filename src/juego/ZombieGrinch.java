@@ -5,8 +5,7 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.Herramientas;
 
-public class Zombie {
-   
+public class ZombieGrinch {
     public double x, y;
     public double velocidad;
     public double velocidadNormal;
@@ -24,9 +23,9 @@ public class Zombie {
     public int cooldownAtaque;
     public int cooldownDisparo;
     public boolean bloqueadoPorPlanta;
-    public planta plantaBloqueadora;
+    public Object plantaBloqueadora; // Cambiado a Object
     
-    public Zombie(int fila, Entorno e) {
+    public ZombieGrinch(int fila, Entorno e) {
         this.fila = fila;
         this.e = e;
         this.x = 1100;
@@ -86,13 +85,25 @@ public class Zombie {
     
     public void verificarPlantaBloqueadora() {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
-            if (!plantaBloqueadora.plantada) {
+            // Verificar si la planta sigue plantada
+            boolean plantaViva = false;
+            if (plantaBloqueadora instanceof WallNut) {
+                plantaViva = ((WallNut)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof PlantaDeHielo) {
+                plantaViva = ((PlantaDeHielo)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof RoseBlade) {
+                plantaViva = ((RoseBlade)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof CerezaExplosiva) {
+                plantaViva = ((CerezaExplosiva)plantaBloqueadora).plantada;
+            }
+            
+            if (!plantaViva) {
                 liberar();
             }
         }
     }
     
-    public void bloquear(planta planta) {
+    public void bloquear(Object planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
         this.velocidad = 0;
@@ -104,9 +115,27 @@ public class Zombie {
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
     }
     
-    public boolean colisionaConPlanta(planta p) {
+    // Métodos de colisión específicos para cada tipo de planta
+    public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
-        
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConPlantaHielo(PlantaDeHielo p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConRoseBlade(RoseBlade p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConCereza(CerezaExplosiva p) {
+        if (!vivo || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 50;
     }
@@ -162,5 +191,11 @@ public class Zombie {
     
     public boolean estaVivo() {
         return vivo;
+    }
+    
+    public boolean colisionaConBolaFuego(BolaFuego bola) {
+        if (!vivo || bola == null || !bola.activa) return false;
+        double distancia = Math.sqrt(Math.pow(x - bola.x, 2) + Math.pow(y - bola.y, 2));
+        return distancia < 25;
     }
 }

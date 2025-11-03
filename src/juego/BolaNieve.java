@@ -5,7 +5,6 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaNieve {
-    // Variables públicas
     public double x, y;
     public double velocidad;
     public boolean activa;
@@ -21,7 +20,6 @@ public class BolaNieve {
         this.danio = 1;
         this.e = e;
         
-        // CARGAR IMAGEN DE BOLA DE NIEVE
         try {
             this.imagen = Herramientas.cargarImagen("Snowball.png");
         } catch (Exception ex) {
@@ -44,9 +42,30 @@ public class BolaNieve {
         }
     }
     
-    public boolean colisionaCon(planta p) {
+    // Método para colisión con WallNut
+    public boolean colisionaConWallnut(WallNut p) {
         if (!activa || p == null || !p.plantada) return false;
-        
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 30;
+    }
+    
+    // Método para colisión con PlantaDeHielo
+    public boolean colisionaConPlantaHielo(PlantaDeHielo p) {
+        if (!activa || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 30;
+    }
+    
+    // Método para colisión con RoseBlade
+    public boolean colisionaConRoseBlade(RoseBlade p) {
+        if (!activa || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 30;
+    }
+    
+    // Método para colisión con CerezaExplosiva
+    public boolean colisionaConCereza(CerezaExplosiva p) {
+        if (!activa || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 30;
     }

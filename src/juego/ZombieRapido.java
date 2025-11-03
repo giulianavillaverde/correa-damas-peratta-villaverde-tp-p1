@@ -6,7 +6,6 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class ZombieRapido {
-    // Variables públicas
     public double x, y;
     public double velocidad;
     public double velocidadNormal;
@@ -21,8 +20,8 @@ public class ZombieRapido {
     public int golpesEscarcha;
     public int tiempoUltimoAtaque;
     public int cooldownAtaque;
-    public boolean bloqueadoPorPlanta; 
-    public planta plantaBloqueadora;
+    public boolean bloqueadoPorPlanta;
+    public Object plantaBloqueadora; // Cambiado a Object
     
     public ZombieRapido(int fila, Entorno e) {
         this.fila = fila;
@@ -39,7 +38,7 @@ public class ZombieRapido {
         this.golpesEscarcha = 0;
         this.tiempoUltimoAtaque = 0;
         this.cooldownAtaque = 120;
-        this.bloqueadoPorPlanta = false; 
+        this.bloqueadoPorPlanta = false;
         this.plantaBloqueadora = null;
         
         try {
@@ -71,7 +70,7 @@ public class ZombieRapido {
     
     public void mover() {
         if (vivo) {
-            if (!bloqueadoPorPlanta) { 
+            if (!bloqueadoPorPlanta) {
                 x -= velocidad;
             }
             
@@ -87,13 +86,25 @@ public class ZombieRapido {
     
     public void verificarPlantaBloqueadora() {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
-            if (!plantaBloqueadora.plantada) {
+            // Verificar si la planta sigue plantada
+            boolean plantaViva = false;
+            if (plantaBloqueadora instanceof WallNut) {
+                plantaViva = ((WallNut)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof PlantaDeHielo) {
+                plantaViva = ((PlantaDeHielo)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof RoseBlade) {
+                plantaViva = ((RoseBlade)plantaBloqueadora).plantada;
+            } else if (plantaBloqueadora instanceof CerezaExplosiva) {
+                plantaViva = ((CerezaExplosiva)plantaBloqueadora).plantada;
+            }
+            
+            if (!plantaViva) {
                 liberar();
             }
         }
     }
     
-    public void bloquear(planta planta) {
+    public void bloquear(Object planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
         this.velocidad = 0;
@@ -105,9 +116,27 @@ public class ZombieRapido {
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
     }
     
-    public boolean colisionaConPlanta(planta p) {
+    // Métodos de colisión específicos
+    public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
-        
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConPlantaHielo(PlantaDeHielo p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConRoseBlade(RoseBlade p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        return distancia < 50;
+    }
+    
+    public boolean colisionaConCereza(CerezaExplosiva p) {
+        if (!vivo || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 50;
     }
@@ -140,7 +169,7 @@ public class ZombieRapido {
     
     public void morir() {
         vivo = false;
-        if (bloqueadoPorPlanta) { 
+        if (bloqueadoPorPlanta) {
             liberar();
         }
     }
@@ -151,5 +180,5 @@ public class ZombieRapido {
     
     public boolean estaVivo() {
         return vivo;
-    }  
+    }
 }

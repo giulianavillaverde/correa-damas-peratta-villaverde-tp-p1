@@ -5,7 +5,6 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaFuego {
-   
     public double x, y;
     public double velocidad;
     public Image imagen;
@@ -36,19 +35,29 @@ public class BolaFuego {
     
     public void mover() {
         if (activa) {
-            x += velocidad; // Se mueve hacia la derecha
-            
-            // Si sale de la pantalla, se desactiva
+            x += velocidad;
             if (x > 1100) {
                 activa = false;
             }
         }
     }
     
-    public boolean colisionaCon(Zombie zombie) {
+    // Métodos de colisión específicos para cada tipo de zombie
+    public boolean colisionaConGrinch(ZombieGrinch zombie) {
         if (!activa || !zombie.vivo) return false;
-        
         double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
-        return distancia < 25; // Radio de colisión
+        return distancia < 25;
+    }
+    
+    public boolean colisionaConRapido(ZombieRapido zombie) {
+        if (!activa || !zombie.vivo) return false;
+        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        return distancia < 25;
+    }
+    
+    public boolean colisionaConColosal(ZombieColosal zombie) {
+        if (!activa || !zombie.vivo) return false;
+        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        return distancia < 25;
     }
 }

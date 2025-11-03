@@ -7,14 +7,13 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class cuadricula {
-   
     public double x, y;
     public double escala;
     public double ancho, alto;
     public Image imagen1, imagen2;
     public Entorno e;
-    public double[] coorX;
-    public double[] coorY;
+    double[] coorX;
+    double[] coorY;
     public boolean[][] ocupado;
     
     public cuadricula(double x, double y, Entorno e) {
@@ -48,7 +47,6 @@ public class cuadricula {
         for(int j = 0; j < 10; j++) {
             for (int i = 0; i < 5; i++) {
                 this.ocupado[j][i] = false;
-                // Bloquear la primera columna (j=0) donde están los regalos
                 if (j == 0) {
                     this.ocupado[j][i] = true;
                 }
@@ -68,7 +66,6 @@ public class cuadricula {
                     }
                     e.dibujarImagen(img, this.coorX[i], this.coorY[j], 0, escala);
                 } else {
-                    // Fallback si no hay imágenes
                     Color color = ((i + j) % 2 == 0) ? new Color(100, 200, 100) : new Color(120, 220, 120);
                     e.dibujarRectangulo(coorX[i], coorY[j], 90, 90, 0, color);
                 }
@@ -82,10 +79,10 @@ public class cuadricula {
     
     public Point cercanoL(double xM, double yM) {
         int im = 0;
-        int jm = 1; // Empezar desde la columna 1 (no la 0 que está bloqueada)
+        int jm = 1;
         double distanciaM = 10000;
         
-        for (int j = 1; j < 10; j++) { // Solo buscar desde columna 1 en adelante
+        for (int j = 1; j < 10; j++) {
             for (int i = 0; i < 5; i++) {
                 double dist = distancia(xM, yM, coorX[j], coorY[i]);
                 if (dist < distanciaM) {
@@ -100,10 +97,10 @@ public class cuadricula {
     
     public Point cercano(double xM, double yM) {
         int im = 0;
-        int jm = 1; // Empezar desde la columna 1
+        int jm = 1;
         double distanciaM = 10000;
         
-        for(int j = 1; j < 10; j++) { // Solo buscar desde columna 1 en adelante
+        for(int j = 1; j < 10; j++) {
             for(int i = 0; i < 5; i++) {
                 double dist = distancia(xM, yM, coorX[j], coorY[i]);
                 if(dist < distanciaM) {
@@ -116,13 +113,40 @@ public class cuadricula {
         return new Point(jm, im);
     }
     
-    public void centrarPlanta(planta p, int indiceX, int indiceY) {
+    // Métodos específicos para cada tipo de planta
+    public void centrarWallnut(WallNut p, int indiceX, int indiceY) {
         if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
             p.x = this.coorX[indiceX];
             p.y = this.coorY[indiceY];
             p.xInicial = p.x;
             p.yInicial = p.y;
-            System.out.println("Planta centrada en: (" + p.x + ", " + p.y + ")");
+        }
+    }
+    
+    public void centrarPlantaHielo(PlantaDeHielo p, int indiceX, int indiceY) {
+        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
+            p.x = this.coorX[indiceX];
+            p.y = this.coorY[indiceY];
+            p.xInicial = p.x;
+            p.yInicial = p.y;
+        }
+    }
+    
+    public void centrarRoseBlade(RoseBlade p, int indiceX, int indiceY) {
+        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
+            p.x = this.coorX[indiceX];
+            p.y = this.coorY[indiceY];
+            p.xInicial = p.x;
+            p.yInicial = p.y;
+        }
+    }
+    
+    public void centrarCereza(CerezaExplosiva p, int indiceX, int indiceY) {
+        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
+            p.x = this.coorX[indiceX];
+            p.y = this.coorY[indiceY];
+            p.xInicial = p.x;
+            p.yInicial = p.y;
         }
     }
     
@@ -136,6 +160,6 @@ public class cuadricula {
         if (x >= 0 && x < ocupado.length && y >= 0 && y < ocupado[0].length) {
             return ocupado[x][y];
         }
-        return true; // Si está fuera de los límites, considerar ocupado
+        return true;
     }
 }

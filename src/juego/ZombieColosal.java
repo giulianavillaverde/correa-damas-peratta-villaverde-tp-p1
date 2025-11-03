@@ -6,7 +6,6 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class ZombieColosal {
-    // Variables públicas
     public double x, y;
     public double velocidad;
     public double velocidadNormal;
@@ -27,7 +26,7 @@ public class ZombieColosal {
         this.y = 335;
         this.velocidadNormal = 0.15;
         this.velocidad = velocidadNormal;
-        this.resistenciaMaxima = 100; 
+        this.resistenciaMaxima = 100;
         this.resistencia = resistenciaMaxima;
         this.vivo = true;
         this.ralentizado = false;
@@ -76,12 +75,32 @@ public class ZombieColosal {
         }
     }
     
-    public boolean colisionaConPlanta(planta p) {
+    // Métodos de colisión específicos
+    public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
-        
         double distanciaX = Math.abs(x - p.x);
         double distanciaY = Math.abs(y - p.y);
-        
+        return distanciaX < 60 && distanciaY < 250;
+    }
+    
+    public boolean colisionaConPlantaHielo(PlantaDeHielo p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distanciaX = Math.abs(x - p.x);
+        double distanciaY = Math.abs(y - p.y);
+        return distanciaX < 60 && distanciaY < 250;
+    }
+    
+    public boolean colisionaConRoseBlade(RoseBlade p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distanciaX = Math.abs(x - p.x);
+        double distanciaY = Math.abs(y - p.y);
+        return distanciaX < 60 && distanciaY < 250;
+    }
+    
+    public boolean colisionaConCereza(CerezaExplosiva p) {
+        if (!vivo || p == null || !p.plantada) return false;
+        double distanciaX = Math.abs(x - p.x);
+        double distanciaY = Math.abs(y - p.y);
         return distanciaX < 60 && distanciaY < 250;
     }
     
