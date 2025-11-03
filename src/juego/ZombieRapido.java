@@ -6,22 +6,22 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class ZombieRapido {
-    public double x, y;
-    public double velocidad;
-    public double velocidadNormal;
-    public int fila;
-    public int resistencia;
-    public int resistenciaMaxima;
-    public Image imagen;
-    public Entorno e;
-    public boolean vivo;
-    public boolean ralentizado;
-    public int ticksRalentizacion;
-    public int golpesEscarcha;
-    public int tiempoUltimoAtaque;
-    public int cooldownAtaque;
-    public boolean bloqueadoPorPlanta; 
-    public planta plantaBloqueadora;
+    private double x, y;
+    private double velocidad;
+    private double velocidadNormal;
+    private int fila;
+    private int resistencia;
+    private int resistenciaMaxima;
+    private Image imagen;
+    private Entorno e;
+    private boolean vivo;
+    private boolean ralentizado;
+    private int ticksRalentizacion;
+    private int golpesEscarcha;
+    private int tiempoUltimoAtaque;
+    private int cooldownAtaque;
+    private boolean bloqueadoPorPlanta; 
+    private planta plantaBloqueadora;
     
     public ZombieRapido(int fila, Entorno e) {
         this.fila = fila;
@@ -51,11 +51,6 @@ public class ZombieRapido {
                 this.imagen = null;
             }
         }
-    }
-    
-    // NUEVO MÉTODO: getImagen()
-    public Image getImagen() {
-        return this.imagen;
     }
     
     public void dibujar() {
@@ -94,7 +89,7 @@ public class ZombieRapido {
     
     public void verificarPlantaBloqueadora() {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
-            if (!plantaBloqueadora.plantada) {
+            if (!plantaBloqueadora.isPlantada()) {
                 liberar();
             }
         }
@@ -115,9 +110,9 @@ public class ZombieRapido {
     }
     
     public boolean colisionaConPlanta(planta p) {
-        if (!vivo || p == null || !p.plantada) return false;
+        if (!vivo || p == null || !p.isPlantada()) return false;
         
-        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        double distancia = Math.sqrt(Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2));
         return distancia < 50;
     }
     
@@ -162,12 +157,25 @@ public class ZombieRapido {
         return bloqueadoPorPlanta; 
     }
     
-    // Métodos getter para compatibilidad
-    public double getX() {
-        return x;
+    public boolean estaVivo() {
+        return vivo;
     }
     
-    public double getY() {
-        return y;
-    }
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getVelocidad() { return velocidad; }
+    public int getFila() { return fila; }
+    public int getResistencia() { return resistencia; }
+    public int getResistenciaMaxima() { return resistenciaMaxima; }
+    public boolean isRalentizado() { return ralentizado; }
+    public Image getImagen() { return imagen; }
+    public planta getPlantaBloqueadora() { return plantaBloqueadora; }
+    
+    // Setters
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
+    public void setVelocidad(double velocidad) { this.velocidad = velocidad; }
+    public void setVivo(boolean vivo) { this.vivo = vivo; }
+    public void setRalentizado(boolean ralentizado) { this.ralentizado = ralentizado; }
 }

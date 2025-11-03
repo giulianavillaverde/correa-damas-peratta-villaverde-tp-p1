@@ -6,27 +6,27 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class Zombie {
-    public double x, y;
-    public double velocidad;
-    public double velocidadNormal;
-    public int fila;
-    public int resistencia;
-    public int resistenciaMaxima;
-    public Image imagen;
-    public Entorno e;
-    public boolean vivo;
-    public boolean ralentizado;
-    public int ticksRalentizacion;
-    public int golpesEscarcha;
-    public int tiempoUltimoAtaque;
-    public int cooldownAtaque;
-    public boolean bloqueadoPorPlanta; 
-    public planta plantaBloqueadora;
+    private double x, y;
+    private double velocidad;
+    private double velocidadNormal;
+    private int fila;
+    private int resistencia;
+    private int resistenciaMaxima;
+    private Image imagen;
+    private Entorno e;
+    private boolean vivo;
+    private boolean ralentizado;
+    private int ticksRalentizacion;
+    private int golpesEscarcha;
+    private int tiempoUltimoAtaque;
+    private int cooldownAtaque;
+    private boolean bloqueadoPorPlanta; 
+    private planta plantaBloqueadora;
     
-    // NUEVOS ATRIBUTOS PARA DISPAROS
-    public int tiempoUltimoDisparo;
-    public int cooldownDisparo;
-    public boolean puedeDisparar;
+    // ATRIBUTOS PARA DISPAROS
+    private int tiempoUltimoDisparo;
+    private int cooldownDisparo;
+    private boolean puedeDisparar;
     
     public Zombie(int fila, Entorno e) {
         this.fila = fila;
@@ -46,10 +46,9 @@ public class Zombie {
         this.bloqueadoPorPlanta = false; 
         this.plantaBloqueadora = null;
         
-        // INICIALIZAR NUEVOS ATRIBUTOS DE DISPARO
+        // INICIALIZAR ATRIBUTOS DE DISPARO
         this.tiempoUltimoDisparo = 0;
         this.cooldownDisparo = 120; // Dispara cada 2 segundos (120 ticks)
-        this.puedeDisparar = true;
         this.puedeDisparar = (Math.random() < 0.2); // 20% de probabilidad
         
         try {
@@ -58,11 +57,6 @@ public class Zombie {
             System.err.println("ERROR: No se pudo cargar zombieGrinch.png");
             this.imagen = null;
         }
-    }
-    
-    // NUEVO MÉTODO: getImagen()
-    public Image getImagen() {
-        return this.imagen;
     }
     
     public void dibujar() {
@@ -112,14 +106,9 @@ public class Zombie {
         return null;
     }
     
-    // NUEVO MÉTODO: Registrar disparo
-    public void registrarDisparo(int tickActual) {
-        this.tiempoUltimoDisparo = tickActual;
-    }
-    
     public void verificarPlantaBloqueadora() {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
-            if (!plantaBloqueadora.plantada) {
+            if (!plantaBloqueadora.isPlantada()) {
                 liberar();
             }
         }
@@ -140,9 +129,9 @@ public class Zombie {
     }
     
     public boolean colisionaConPlanta(planta p) {
-        if (!vivo || p == null || !p.plantada) return false;
+        if (!vivo || p == null || !p.isPlantada()) return false;
         
-        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
+        double distancia = Math.sqrt(Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2));
         return distancia < 50;
     }
     
@@ -186,4 +175,26 @@ public class Zombie {
     public boolean estaBloqueado() {
         return bloqueadoPorPlanta; 
     }
+    
+    public boolean estaVivo() {
+        return vivo;
+    }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getVelocidad() { return velocidad; }
+    public int getFila() { return fila; }
+    public int getResistencia() { return resistencia; }
+    public int getResistenciaMaxima() { return resistenciaMaxima; }
+    public boolean isRalentizado() { return ralentizado; }
+    public Image getImagen() { return imagen; }
+    public planta getPlantaBloqueadora() { return plantaBloqueadora; }
+    
+    // Setters
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
+    public void setVelocidad(double velocidad) { this.velocidad = velocidad; }
+    public void setVivo(boolean vivo) { this.vivo = vivo; }
+    public void setRalentizado(boolean ralentizado) { this.ralentizado = ralentizado; }
 }

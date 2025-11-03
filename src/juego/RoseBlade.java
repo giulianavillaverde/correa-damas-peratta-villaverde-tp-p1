@@ -1,13 +1,14 @@
 package juego;
+
 import entorno.Entorno;
 
 public class RoseBlade extends planta {
     // TIEMPOS DE RECARGA SEPARADOS
-    public int tiempoRecargaPlantado;
-    public int tiempoRecargaDisparo;
+    private int tiempoRecargaPlantado;
+    private int tiempoRecargaDisparo;
     
-    public int tiempoUltimoPlantado;
-    public int tiempoUltimoDisparo;
+    private int tiempoUltimoPlantado;
+    private int tiempoUltimoDisparo;
     
     private boolean puedeDisparar;
     private boolean disponibleParaPlantar;
@@ -15,9 +16,9 @@ public class RoseBlade extends planta {
     public RoseBlade(double x, double y, Entorno e) {
         super(x, y, e, "roseblade.png", "roseblade.png", 0.10);
         
-        // NUEVO: Resistencia específica para RoseBlade
-        this.resistencia = 5;
-        this.resistenciaMaxima = 5;
+        // Resistencia específica para RoseBlade
+        this.setResistencia(5);
+        this.setResistenciaMaxima(5);
         
         // TIEMPOS SEPARADOS
         this.tiempoRecargaPlantado = 360;
@@ -35,16 +36,21 @@ public class RoseBlade extends planta {
             puedeDisparar = true;
         }
         
-        if (!disponibleParaPlantar && !plantada && tickActual - tiempoUltimoPlantado > tiempoRecargaPlantado) {
+        if (!disponibleParaPlantar && !isPlantada() && tickActual - tiempoUltimoPlantado > tiempoRecargaPlantado) {
             disponibleParaPlantar = true;
+        }
+        
+        // Manejar efecto de ataque basado en ticks
+        if (isBajoAtaque() && tickActual >= getTiempoFinAtaque()) {
+            setBajoAtaque(false);
         }
     }
     
     public BolaFuego disparar(int tickActual) {
-        if (puedeDisparar && plantada) {
+        if (puedeDisparar && isPlantada()) {
             puedeDisparar = false;
             tiempoUltimoDisparo = tickActual;
-            return new BolaFuego(x + 40, y, e);
+            return new BolaFuego(getX() + 40, getY(), getEntorno());
         }
         return null;
     }
@@ -75,4 +81,11 @@ public class RoseBlade extends planta {
         int tiempoTranscurrido = tickActual - tiempoUltimoDisparo;
         return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecargaDisparo);
     }
+    
+    // Getters adicionales
+    public boolean isPuedeDisparar() { return puedeDisparar; }
+    public boolean isDisponibleParaPlantar() { return disponibleParaPlantar; }
+    public int getTiempoRecargaPlantado() { return tiempoRecargaPlantado; }
+    public int getTiempoRecargaDisparo() { return tiempoRecargaDisparo; }
+    public int getTiempoUltimoPlantado() { return tiempoUltimoPlantado; } // AGREGADO
 }

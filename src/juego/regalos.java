@@ -6,10 +6,10 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class regalos {
-    double x,y,escala,alto,ancho;
-    double angulo;
-    Entorno e;
-    Image imagen;
+    private double x, y, escala, alto, ancho;
+    private double angulo;
+    private Entorno e;
+    private Image imagen;
     
     public regalos(double x, double y, Entorno e) {
         this.x = x;
@@ -37,5 +37,28 @@ public class regalos {
             e.dibujarRectangulo(x, y, 25, 25, 0, Color.RED);
             e.dibujarRectangulo(x, y, 15, 25, 0, Color.GREEN);
         }
+    }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getEscala() { return escala; }
+    public double getAncho() { return ancho; }
+    public double getAlto() { return alto; }
+    public double getAngulo() { return angulo; }
+    public Image getImagen() { return imagen; }
+    
+    // Setters
+    public void setPosicion(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+    
+    public void setEscala(double escala) {
+        this.escala = escala;
+    }
+    
+    public void setAngulo(double angulo) {
+        this.angulo = angulo;
     }
 }

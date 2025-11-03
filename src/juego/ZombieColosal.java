@@ -6,19 +6,19 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class ZombieColosal {
-    public double x, y;
-    public double velocidad;
-    public double velocidadNormal;
-    public Image imagen;
-    public Entorno e;
-    public boolean vivo;
-    public boolean ralentizado;
-    public int ticksRalentizacion;
-    public int golpesEscarcha;
-    public int tiempoUltimoAtaque;
-    public int cooldownAtaque;
-    public int resistencia;
-    public int resistenciaMaxima;
+    private double x, y;
+    private double velocidad;
+    private double velocidadNormal;
+    private Image imagen;
+    private Entorno e;
+    private boolean vivo;
+    private boolean ralentizado;
+    private int ticksRalentizacion;
+    private int golpesEscarcha;
+    private int tiempoUltimoAtaque;
+    private int cooldownAtaque;
+    private int resistencia;
+    private int resistenciaMaxima;
     
     public ZombieColosal(Entorno e) {
         this.e = e;
@@ -47,11 +47,6 @@ public class ZombieColosal {
         }
     }
     
-    // NUEVO MÉTODO: getImagen()
-    public Image getImagen() {
-        return this.imagen;
-    }
-    
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {
@@ -61,8 +56,6 @@ public class ZombieColosal {
                 e.dibujarRectangulo(x, y, 100, 400, 0, Color.RED);
                 e.dibujarRectangulo(x, y, 80, 380, 0, Color.DARK_GRAY);
             }
-            
-            // ELIMINADO: Barra de vida
             
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 80, new Color(0, 150, 255, 100));
@@ -85,10 +78,10 @@ public class ZombieColosal {
     }
     
     public boolean colisionaConPlanta(planta p) {
-        if (!vivo || p == null || !p.plantada) return false;
+        if (!vivo || p == null || !p.isPlantada()) return false;
         
-        double distanciaX = Math.abs(x - p.x);
-        double distanciaY = Math.abs(y - p.y);
+        double distanciaX = Math.abs(x - p.getX());
+        double distanciaY = Math.abs(y - p.getY());
         
         // Colisión más amplia porque ocupa todas las filas
         return distanciaX < 60 && distanciaY < 250; // Muy amplio verticalmente
@@ -138,11 +131,22 @@ public class ZombieColosal {
         return x <= 120; // Más ancho, llega antes a los regalos
     }
     
-    public double getX() {
-        return x;
+    public boolean estaVivo() {
+        return vivo;
     }
     
-    public double getY() {
-        return y;
-    }
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getVelocidad() { return velocidad; }
+    public int getResistencia() { return resistencia; }
+    public int getResistenciaMaxima() { return resistenciaMaxima; }
+    public boolean isRalentizado() { return ralentizado; }
+    public Image getImagen() { return imagen; }
+    
+    // Setters
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
+    public void setVelocidad(double velocidad) { this.velocidad = velocidad; }
+    public void setVivo(boolean vivo) { this.vivo = vivo; }
 }

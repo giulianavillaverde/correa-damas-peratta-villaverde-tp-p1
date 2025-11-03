@@ -1,64 +1,65 @@
 package juego;
+
 import entorno.Entorno;
 
 public class CerezaExplosiva extends planta {
-    public int tiempoRecargaPlantado;
-    public int tiempoUltimoPlantado;
+    private int tiempoRecargaPlantado;
+    private int tiempoUltimoPlantado;
     private boolean disponibleParaPlantar;
     private double radioExplosion;
     private boolean explotando;
+    private int tickExplosion;
     
     public CerezaExplosiva(double x, double y, Entorno e) {
         super(x, y, e, "CerezaExplosiva.png", "CerezaExplosiva.png", 0.11);
         
-        // NUEVO: Resistencia específica para CerezaExplosiva
-        this.resistencia = 1; // Muy frágil, explota rápido
-        this.resistenciaMaxima = 1;
+        // Resistencia específica para CerezaExplosiva
+        this.setResistencia(1); // Muy frágil, explota rápido
+        this.setResistenciaMaxima(1);
         
         this.tiempoRecargaPlantado = 720;
         this.tiempoUltimoPlantado = -100;
         this.disponibleParaPlantar = true;
         this.radioExplosion = 200;
         this.explotando = false;
+        this.tickExplosion = -1;
     }
     
     public void actualizar(int tickActual) {
-        if (!disponibleParaPlantar && !plantada && tickActual - tiempoUltimoPlantado > tiempoRecargaPlantado) {
+        if (!disponibleParaPlantar && !isPlantada() && tickActual - tiempoUltimoPlantado > tiempoRecargaPlantado) {
             disponibleParaPlantar = true;
+        }
+        
+        // Manejar efecto de ataque basado en ticks
+        if (isBajoAtaque() && tickActual >= getTiempoFinAtaque()) {
+            setBajoAtaque(false);
         }
     }
     
-    // NUEVO: Sobrescribir recibirAtaque para que explote inmediatamente
+    // Sobrescribir recibirAtaque para que explote inmediatamente
     @Override
-    public void recibirAtaque() {
-        this.resistencia--;
-        this.bajoAtaque = true;
+    public void recibirAtaque(int tickActual) {
+        this.setResistencia(this.getResistencia() - 1);
+        this.setBajoAtaque(true);
+        this.setTiempoFinAtaque(tickActual + 30); // 30 ticks ≈ 500ms
         System.out.println("CerezaExplosiva recibió ataque!");
         
-        new java.util.Timer().schedule( 
-            new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    bajoAtaque = false;
-                }
-            }, 
-            500
-        );
-        
-        if (resistencia <= 0 && !explotando) {
+        if (this.getResistencia() <= 0 && !explotando) {
             explotando = true;
+            tickExplosion = tickActual;
         }
     }
     
     public boolean hayZombieCerca(Zombie[] zombies) {
-        if (!plantada || explotando) return false;
+        if (!isPlantada() || explotando) return false;
         
         for (Zombie zombie : zombies) {
-            if (zombie != null && zombie.vivo) {
-                double distancia = Math.sqrt(Math.pow(zombie.x - x, 2) + 
-                                           Math.pow(zombie.y - y, 2));
+            if (zombie != null && zombie.estaVivo()) {
+                double distancia = Math.sqrt(Math.pow(zombie.getX() - getX(), 2) + 
+                                           Math.pow(zombie.getY() - getY(), 2));
                 if (distancia < 50) {
                     explotando = true;
+                    tickExplosion = getEntorno().numeroDeTick(); // CORREGIDO: usar getEntorno()
                     return true;
                 }
             }
@@ -66,8 +67,8 @@ public class CerezaExplosiva extends planta {
         return false;
     }
     
-    public boolean debeExplotar() {
-        return explotando;
+    public boolean debeExplotar(int tickActual) {
+        return explotando && tickExplosion != -1 && tickActual >= tickExplosion;
     }
     
     public double getRadioExplosion() {
@@ -94,4 +95,12 @@ public class CerezaExplosiva extends planta {
         int tiempoTranscurrido = tickActual - tiempoUltimoPlantado;
         return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecargaPlantado);
     }
+    
+    // Getters adicionales
+    public boolean isExplotando() { return explotando; }
+    public int getTiempoRecargaPlantado() { return tiempoRecargaPlantado; }
+    public int getTiempoUltimoPlantado() { return tiempoUltimoPlantado; }
+    
+    // Setters adicionales
+    public void setExplotando(boolean explotando) { this.explotando = explotando; }
 }

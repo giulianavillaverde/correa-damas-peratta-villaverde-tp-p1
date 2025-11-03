@@ -6,12 +6,12 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaEscarcha {
-    public double x, y;
-    public double velocidad;
-    public Image imagen;
-    public Entorno e;
-    public boolean activa;
-    public int duracionRalentizacion;
+    private double x, y;
+    private double velocidad;
+    private Image imagen;
+    private Entorno e;
+    private boolean activa;
+    private int duracionRalentizacion;
     
     public BolaEscarcha(double x, double y, Entorno e) {
         this.x = x;
@@ -51,8 +51,19 @@ public class BolaEscarcha {
     }
     
     public boolean colisionaCon(Zombie zombie) {
-        if (!activa || !zombie.vivo) return false;
-        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        if (!activa || !zombie.estaVivo()) return false;
+        double distancia = Math.sqrt(Math.pow(x - zombie.getX(), 2) + Math.pow(y - zombie.getY(), 2));
         return distancia < 25;
     }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public boolean isActiva() { return activa; }
+    public int getDuracionRalentizacion() { return duracionRalentizacion; }
+    
+    // Setters
+    public void setActiva(boolean activa) { this.activa = activa; }
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
 }

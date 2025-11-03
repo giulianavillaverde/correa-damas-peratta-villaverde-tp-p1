@@ -1,26 +1,34 @@
 package juego;
+
 import java.awt.Image;
 import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaFuego {
-    public double x, y;
-    public double velocidad;
-    public Image imagen;
-    public Entorno e;
-    public boolean activa;
+    private double x, y;
+    private double velocidad;
+    private Image imagen;
+    private Entorno e;
+    private boolean activa;
     
     public BolaFuego(double x, double y, Entorno e) {
         this.x = x;
         this.y = y;
         this.e = e;
         this.velocidad = 4;
-        this.imagen = Herramientas.cargarImagen("bolaFuego.png");
+        
+        try {
+            this.imagen = Herramientas.cargarImagen("bolaFuego.png");
+        } catch (Exception ex) {
+            System.err.println("ERROR: No se pudo cargar bolaFuego.png");
+            this.imagen = null;
+        }
+        
         this.activa = true;
     }
     
     public void dibujar() {
-        if (activa) {
+        if (activa && imagen != null) {
             e.dibujarImagen(imagen, x, y, 0, 0.05);
         }
     }
@@ -37,9 +45,20 @@ public class BolaFuego {
     }
     
     public boolean colisionaCon(Zombie zombie) {
-        if (!activa || !zombie.vivo) return false;
+        if (!activa || !zombie.estaVivo()) return false;
         
-        double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));
+        double distancia = Math.sqrt(Math.pow(x - zombie.getX(), 2) + Math.pow(y - zombie.getY(), 2));
         return distancia < 25; // Radio de colisión
     }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public boolean isActiva() { return activa; }
+    public Image getImagen() { return imagen; }
+    
+    // Setters
+    public void setActiva(boolean activa) { this.activa = activa; }
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
 }

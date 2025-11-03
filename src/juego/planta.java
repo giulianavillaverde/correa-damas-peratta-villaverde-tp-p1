@@ -6,16 +6,17 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class planta {
-    public double x, y;
-    public double xInicial, yInicial;
-    public double escala;
-    public Image imagen, imagenSeleccionada;
-    public Entorno e;
-    public boolean seleccionada;
-    public boolean plantada;
-    public int resistencia; // NUEVO: Resistencia para todas las plantas
-    public int resistenciaMaxima; // NUEVO: Resistencia máxima
-    public boolean bajoAtaque; // NUEVO: Indicador visual de ataque
+    private double x, y;
+    private double xInicial, yInicial;
+    private double escala;
+    private Image imagen, imagenSeleccionada;
+    private Entorno e;
+    private boolean seleccionada;
+    private boolean plantada;
+    private int resistencia;
+    private int resistenciaMaxima;
+    private boolean bajoAtaque;
+    private int tiempoFinAtaque;
     
     public planta(double x, double y, Entorno e, String imgNormal, String imgSeleccionada, double escala) {
         this.x = x;
@@ -29,6 +30,7 @@ public class planta {
         this.resistencia = 1; // Valor por defecto
         this.resistenciaMaxima = 1; // Valor por defecto
         this.bajoAtaque = false;
+        this.tiempoFinAtaque = 0;
         
         try {
             this.imagen = Herramientas.cargarImagen(imgNormal);
@@ -46,6 +48,11 @@ public class planta {
     }
     
     public void dibujar() {
+        // Manejar efecto de ataque basado en ticks
+        if (bajoAtaque && e.numeroDeTick() >= tiempoFinAtaque) {
+            bajoAtaque = false;
+        }
+        
         if (seleccionada) {
             if (imagenSeleccionada != null) {
                 e.dibujarImagen(imagenSeleccionada, x, y, 0, escala);
@@ -58,28 +65,18 @@ public class planta {
             }
         }
         
-        // NUEVO: Efecto visual cuando está bajo ataque
+        // Efecto visual cuando está bajo ataque
         if (bajoAtaque && plantada) {
             e.dibujarCirculo(x, y, 35, new Color(255, 0, 0, 100));
         }
     }
     
-    // NUEVO: Método para recibir daño
-    public void recibirAtaque() {
+    // Método para recibir daño
+    public void recibirAtaque(int tickActual) {
         this.resistencia--;
         this.bajoAtaque = true;
+        this.tiempoFinAtaque = tickActual + 30; // 30 ticks ≈ 500ms
         System.out.println(this.getClass().getSimpleName() + " recibió ataque, resistencia: " + resistencia + "/" + resistenciaMaxima);
-        
-        // Quitar el efecto visual después de un tiempo
-        new java.util.Timer().schedule( 
-            new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    bajoAtaque = false;
-                }
-            }, 
-            500
-        );
         
         if (resistencia <= 0) {
             System.out.println(this.getClass().getSimpleName() + " destruida!");
@@ -95,5 +92,36 @@ public class planta {
     public void arrastrar(double xM, double yM) {
         this.x = xM;
         this.y = yM;
+    }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getXInicial() { return xInicial; }
+    public double getYInicial() { return yInicial; }
+    public boolean isSeleccionada() { return seleccionada; }
+    public boolean isPlantada() { return plantada; }
+    public int getResistencia() { return resistencia; }
+    public int getResistenciaMaxima() { return resistenciaMaxima; }
+    public boolean isBajoAtaque() { return bajoAtaque; }
+    public int getTiempoFinAtaque() { return tiempoFinAtaque; }
+    public Image getImagen() { return imagen; }
+    public Image getImagenSeleccionada() { return imagenSeleccionada; }
+    public Entorno getEntorno() { return e; }
+    
+    // Setters
+    public void setSeleccionada(boolean seleccionada) { this.seleccionada = seleccionada; }
+    public void setPlantada(boolean plantada) { this.plantada = plantada; }
+    public void setResistencia(int resistencia) { this.resistencia = resistencia; }
+    public void setResistenciaMaxima(int resistenciaMaxima) { this.resistenciaMaxima = resistenciaMaxima; }
+    public void setBajoAtaque(boolean bajoAtaque) { this.bajoAtaque = bajoAtaque; }
+    public void setTiempoFinAtaque(int tiempoFinAtaque) { this.tiempoFinAtaque = tiempoFinAtaque; }
+    public void setPosicion(double x, double y) { 
+        this.x = x; 
+        this.y = y; 
+    }
+    public void setPosicionInicial(double x, double y) { 
+        this.xInicial = x; 
+        this.yInicial = y; 
     }
 }

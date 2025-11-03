@@ -6,11 +6,11 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class Banner {
-    double x,y,escala;
-    Image imagen;
-    Entorno e;
+    private double x, y, escala;
+    private Image imagen;
+    private Entorno e;
     
-    public Banner (Entorno e) {
+    public Banner(Entorno e) {
         this.x = -5;
         this.y = 28;
         this.e = e;
@@ -24,7 +24,7 @@ public class Banner {
         }
     }
     
-    public void dibujar () {
+    public void dibujar() {
         if (imagen != null) {
             e.dibujarImagen(imagen, x, y, 0.0, escala);
         } else {
@@ -32,4 +32,10 @@ public class Banner {
             e.dibujarRectangulo(500, 30, 1000, 60, 0, Color.DARK_GRAY);
         }
     }
+    
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getEscala() { return escala; }
+    public Image getImagen() { return imagen; }
 }
