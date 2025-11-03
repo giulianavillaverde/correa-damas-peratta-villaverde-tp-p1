@@ -50,6 +50,7 @@ public class Zombie {
         this.tiempoUltimoDisparo = 0;
         this.cooldownDisparo = 120; // Dispara cada 2 segundos (120 ticks)
         this.puedeDisparar = true;
+        this.puedeDisparar = (Math.random() < 0.2); // 20% de probabilidad
         
         try {
             this.imagen = Herramientas.cargarImagen("zombieGrinch.png");
@@ -59,10 +60,19 @@ public class Zombie {
         }
     }
     
+    // NUEVO MÉTODO: getImagen()
+    public Image getImagen() {
+        return this.imagen;
+    }
+    
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {
                 e.dibujarImagen(imagen, x, y, 0, 0.1);
+            }
+            
+            if (puedeDisparar && !ralentizado) {
+                e.dibujarCirculo(x, y - 25, 8, new Color(0, 200, 255, 150));
             }
             
             if (ralentizado) {
@@ -87,14 +97,14 @@ public class Zombie {
         }
     }
     
-    // NUEVO MÉTODO: Verificar si puede disparar
+    // MÉTODO: Verificar si puede disparar
     public boolean puedeDisparar(int tickActual) {
-        return (tickActual - tiempoUltimoDisparo) >= cooldownDisparo;
+        return puedeDisparar && vivo && (tickActual - tiempoUltimoDisparo) >= cooldownDisparo && !bloqueadoPorPlanta;
     }
     
-    // NUEVO MÉTODO: Crear bola de nieve
+    // MÉTODO: Crear bola de nieve
     public BolaNieve disparar(int tickActual) {
-        if (vivo && puedeDisparar(tickActual) && !bloqueadoPorPlanta) {
+        if (puedeDisparar(tickActual)) {
             this.tiempoUltimoDisparo = tickActual;
             // Crear la bola de nieve ligeramente delante del zombie
             return new BolaNieve(x - 40, y, e);

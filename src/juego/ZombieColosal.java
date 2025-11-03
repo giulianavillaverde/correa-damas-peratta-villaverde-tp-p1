@@ -47,6 +47,11 @@ public class ZombieColosal {
         }
     }
     
+    // NUEVO MÉTODO: getImagen()
+    public Image getImagen() {
+        return this.imagen;
+    }
+    
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {

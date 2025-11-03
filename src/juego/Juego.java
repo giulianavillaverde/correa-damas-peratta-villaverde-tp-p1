@@ -4,8 +4,8 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.InterfaceJuego;
 
-public class Juego extends InterfaceJuego
-{
+public class Juego extends InterfaceJuego {
+
    Entorno entorno;
    Banner banner;
    cuadricula cuadricula;
@@ -16,7 +16,7 @@ public class Juego extends InterfaceJuego
    ZombieColosal zombieColosal;
    BolaFuego[] disparos;
    BolaEscarcha[] disparosHielo;
-   BolaNieve[] bolasNieve; // NUEVO: Array para bolas de nieve de zombies
+   BolaNieve[] bolasNieve;
    int contadorPlantas;
    int zombiesEliminados;
    int zombiesTotales;
@@ -27,11 +27,16 @@ public class Juego extends InterfaceJuego
    int rapidosAparecidos;
    int colosalesAparecidos;
   
-   // Plantas en el banner para controlar recarga
+   // Plantas en el banner
    planta wallnutBanner;
    planta hieloBanner;
    planta roseBanner;
    planta cerezaBanner;
+   
+   // Zombies en el banner
+   Zombie zombieNormalBanner;
+   ZombieRapido zombieRapidoBanner;
+   ZombieColosal zombieColosalBanner;
   
    public Juego(){
        this.entorno = new Entorno(this, "Zombies Grinch", 1034, 585);
@@ -48,39 +53,54 @@ public class Juego extends InterfaceJuego
        this.plantas = new planta[30];
        this.contadorPlantas = 0;
       
-       this.zombies = new Zombie[15]; //zombies en pantalla 
+       this.zombies = new Zombie[15];
        this.zombieRapido = null;
        this.zombieColosal = null;
        this.disparos = new BolaFuego[50];
        this.disparosHielo = new BolaEscarcha[50];
-       this.bolasNieve = new BolaNieve[30]; // NUEVO: Bolas de nieve de zombies
+       this.bolasNieve = new BolaNieve[30];
        this.zombiesEliminados = 0;
-       this.zombiesTotales = 80; //zombies totales en el juego
+       this.zombiesTotales = 80;
        this.juegoGanado = false;
        this.juegoPerdido = false;
-       this.ticksParaProximoRapido = 270;  // 45 segundos
-       this.ticksParaProximoColosal = 1080; // 3 minutos
+       this.ticksParaProximoRapido = 270;
+       this.ticksParaProximoColosal = 1080;
        this.rapidosAparecidos = 0;
        this.colosalesAparecidos = 0;
       
-       // Crear plantas del banner
        crearPlantasBanner();
-      
+       crearZombiesBanner();
        this.entorno.iniciar();
    }
   
-   // Método para crear plantas del banner
    private void crearPlantasBanner() {
        this.wallnutBanner = new WallNut(50, 40, entorno);
        this.hieloBanner = new PlantaDeHielo(150, 40, entorno);
        this.roseBanner = new RoseBlade(250, 40, entorno);
        this.cerezaBanner = new CerezaExplosiva(350, 40, entorno);
       
-       // Agregar plantas al array
        plantas[contadorPlantas++] = wallnutBanner;
        plantas[contadorPlantas++] = hieloBanner;
        plantas[contadorPlantas++] = roseBanner;
        plantas[contadorPlantas++] = cerezaBanner;
+   }
+   
+   private void crearZombiesBanner() {
+       this.zombieNormalBanner = new Zombie(0, entorno);
+       this.zombieRapidoBanner = new ZombieRapido(0, entorno);
+       this.zombieColosalBanner = new ZombieColosal(entorno);
+       
+       this.zombieNormalBanner.x = 800;
+       this.zombieNormalBanner.y = 20;
+       this.zombieNormalBanner.vivo = true;
+       
+       this.zombieRapidoBanner.x = 900;
+       this.zombieRapidoBanner.y = 20;
+       this.zombieRapidoBanner.vivo = true;
+       
+       this.zombieColosalBanner.x = 1000;
+       this.zombieColosalBanner.y = 20;
+       this.zombieColosalBanner.vivo = true;
    }
   
    public void tick(){
@@ -97,7 +117,6 @@ public class Juego extends InterfaceJuego
            r.dibujar();
        }
       
-       // ACTUALIZAR Y DIBUJAR PLANTAS (solo las plantadas en la cuadrícula)
        for(planta p: this.plantas) {
            if(p != null && p.plantada) {
                p.dibujar();
@@ -126,8 +145,8 @@ public class Juego extends InterfaceJuego
            }
        }
       
-       // DIBUJAR PLANTAS DEL BANNER SOLO SI NO ESTÁN EN RECARGA
        dibujarPlantasBanner();
+       dibujarZombiesBanner();
       
        generarZombie();
        generarZombieRapido();
@@ -137,16 +156,16 @@ public class Juego extends InterfaceJuego
        actualizarZombieColosal();
        actualizarDisparos();
        actualizarDisparosHielo();
-       actualizarBolasNieve(); // NUEVO: Actualizar bolas de nieve
+       actualizarBolasNieve();
        verificarColisiones();
        verificarColisionesHielo();
        verificarColisionesConRapido();
        verificarColisionesConColosal();
-       verificarColisionesBolasNieve(); // NUEVO: Verificar colisiones de bolas de nieve
+       verificarColisionesBolasNieve();
        verificarAtaquesZombies();
        verificarAtaquesZombieRapido();
        verificarAtaquesZombieColosal();
-       generarDisparosZombies(); // NUEVO: Generar disparos de zombies normales
+       generarDisparosZombies();
        manejarSeleccionYPlantado();
        manejarMovimientoTeclado();
        verificarFinJuego();
@@ -154,22 +173,49 @@ public class Juego extends InterfaceJuego
        dibujarBarrasRecarga();
    }
 
-   // NUEVO MÉTODO: Generar disparos de zombies normales
+   private void dibujarZombiesBanner() {
+	    if (zombieNormalBanner != null && zombieNormalBanner.getImagen() != null) {
+	        zombieNormalBanner.x = 770;
+	        zombieNormalBanner.y = 40;
+	        entorno.dibujarImagen(zombieNormalBanner.getImagen(), 
+	                            zombieNormalBanner.x, zombieNormalBanner.y, 0, 0.1);
+	        entorno.cambiarFont("Arial", 12, Color.WHITE);
+	        entorno.escribirTexto("Grinch", zombieNormalBanner.x - 15, zombieNormalBanner.y + 45);
+	    }
+	    
+	    if (zombieRapidoBanner != null && zombieRapidoBanner.getImagen() != null) {
+	        zombieRapidoBanner.x = 870;
+	        zombieRapidoBanner.y = 40;
+	        entorno.dibujarImagen(zombieRapidoBanner.getImagen(), 
+	                            zombieRapidoBanner.x, zombieRapidoBanner.y, 0, 0.1);
+	        entorno.cambiarFont("Arial", 12, Color.WHITE);
+	        entorno.escribirTexto("Rápido", zombieRapidoBanner.x - 15, zombieRapidoBanner.y + 45);
+	    }
+	    
+	    if (zombieColosalBanner != null && zombieColosalBanner.getImagen() != null) {
+	        zombieColosalBanner.x = 970;
+	        zombieColosalBanner.y = 40;
+	        entorno.dibujarImagen(zombieColosalBanner.getImagen(), 
+	                            zombieColosalBanner.x, zombieColosalBanner.y, 0, 0.1);
+	        entorno.cambiarFont("Arial", 12, Color.WHITE);
+	        entorno.escribirTexto("Colosal", zombieColosalBanner.x - 15, zombieColosalBanner.y + 45);
+	    }
+	}
    private void generarDisparosZombies() {
-       int tickActual = entorno.numeroDeTick();
-       
-       // Solo zombies normales (clase Zombie) disparan
-       for (int i = 0; i < zombies.length; i++) {
-           if (zombies[i] != null && zombies[i].vivo && !zombies[i].estaBloqueado()) {
-               BolaNieve nuevaBola = zombies[i].disparar(tickActual);
-               if (nuevaBola != null) {
-                   agregarBolaNieve(nuevaBola);
-               }
-           }
-       }
-   }
+	    int tickActual = entorno.numeroDeTick();
+	    
+	    for (int i = 0; i < zombies.length; i++) {
+	        if (zombies[i] != null && zombies[i].vivo && 
+	            zombies[i].puedeDisparar && !zombies[i].estaBloqueado()) {
+	            
+	            BolaNieve nuevaBola = zombies[i].disparar(tickActual);
+	            if (nuevaBola != null) {
+	                agregarBolaNieve(nuevaBola);
+	            }
+	        }
+	    }
+	}
 
-   // NUEVO MÉTODO: Agregar bola de nieve al array
    private void agregarBolaNieve(BolaNieve bola) {
        for (int i = 0; i < bolasNieve.length; i++) {
            if (bolasNieve[i] == null) {
@@ -179,7 +225,6 @@ public class Juego extends InterfaceJuego
        }
    }
 
-   // NUEVO MÉTODO: Actualizar bolas de nieve
    private void actualizarBolasNieve() {
        for (int i = 0; i < bolasNieve.length; i++) {
            if (bolasNieve[i] != null) {
@@ -192,7 +237,6 @@ public class Juego extends InterfaceJuego
        }
    }
 
-   // NUEVO MÉTODO: Verificar colisiones de bolas de nieve con plantas
    private void verificarColisionesBolasNieve() {
        for (int i = 0; i < bolasNieve.length; i++) {
            if (bolasNieve[i] != null && bolasNieve[i].activa) {
@@ -200,17 +244,13 @@ public class Juego extends InterfaceJuego
                    if (plantas[j] != null && plantas[j].plantada &&
                        bolasNieve[i].colisionaCon(plantas[j])) {
                        
-                       // La planta recibe daño
                        plantas[j].recibirAtaque();
-                       System.out.println("Planta golpeada por bola de nieve!");
                        
-                       // Si la planta es destruida
                        if (!plantas[j].plantada) {
                            int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                            int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                            cuadricula.ocupado[indiceX][indiceY] = false;
                            
-                           // Eliminar del array de plantas
                            for (int k = 0; k < plantas.length; k++) {
                                if (plantas[k] == plantas[j]) {
                                    plantas[k] = null;
@@ -228,26 +268,22 @@ public class Juego extends InterfaceJuego
        }
    }
 
-   // MÉTODO: Generar zombie rápido cada 45 segundos
    private void generarZombieRapido() {
        if (zombieRapido == null && ticksParaProximoRapido > 0) {
            ticksParaProximoRapido--;
            
            if (ticksParaProximoRapido <= 0) {
-               int fila = (int)(Math.random() * 5); // Aparece en fila aleatoria
+               int fila = (int)(Math.random() * 5);
                zombieRapido = new ZombieRapido(fila, entorno);
                rapidosAparecidos++;
-               System.out.println("¡Zombie Rápido aparece en fila " + fila + "!");
            }
        }
        
-       // Reiniciar contador si no hay zombie rápido y el contador llegó a 0
        if (zombieRapido == null && ticksParaProximoRapido <= 0) {
-           ticksParaProximoRapido = 270; // 45 segundos nuevamente
+           ticksParaProximoRapido = 270;
        }
    }
 
-   // MÉTODO: Actualizar zombie rápido
    private void actualizarZombieRapido() {
        if (zombieRapido != null) {
            zombieRapido.mover();
@@ -259,16 +295,14 @@ public class Juego extends InterfaceJuego
            
            if (!zombieRapido.vivo) {
                zombieRapido = null;
-               zombiesEliminados += 2; // Vale más puntos que un zombie normal
+               zombiesEliminados += 1;
            }
        }
    }
 
-   // MÉTODO: Verificar colisiones con el zombie rápido
    private void verificarColisionesConRapido() {
        if (zombieRapido == null || !zombieRapido.vivo) return;
        
-       // Colisión con disparos de fuego
        for (int i = 0; i < disparos.length; i++) {
            if (disparos[i] != null && disparos[i].activa) {
                double distancia = Math.sqrt(Math.pow(disparos[i].x - zombieRapido.getX(), 2) +
@@ -282,7 +316,6 @@ public class Juego extends InterfaceJuego
            }
        }
        
-       // Colisión con disparos de hielo
        for (int i = 0; i < disparosHielo.length; i++) {
            if (disparosHielo[i] != null && disparosHielo[i].activa) {
                double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombieRapido.getX(), 2) +
@@ -297,7 +330,6 @@ public class Juego extends InterfaceJuego
        }
    }
 
-   // MÉTODO: Verificar ataques del zombie rápido
    private void verificarAtaquesZombieRapido() {
        if (zombieRapido == null || !zombieRapido.vivo) return;
        
@@ -314,13 +346,11 @@ public class Juego extends InterfaceJuego
                if (zombieRapido.puedeAtacar(tickActual)) {
                    plantas[j].recibirAtaque();
                    
-                   // Si la planta es destruida, liberar al zombie rápido
                    if (!plantas[j].plantada) {
                        int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                        int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                        cuadricula.ocupado[indiceX][indiceY] = false;
                        
-                       // Buscar y eliminar la planta del array
                        for (int k = 0; k < plantas.length; k++) {
                            if (plantas[k] == plantas[j]) {
                                plantas[k] = null;
@@ -335,18 +365,11 @@ public class Juego extends InterfaceJuego
            }
        }
        
-       // Verificar si necesita liberarse
        zombieRapido.verificarPlantaBloqueadora();
    }
 
-   // MÉTODO: Verificar explosión de cereza
    private void verificarExplosionCereza(CerezaExplosiva cereza) {
-       // Primero verificar si hay zombies cerca
        if (cereza.hayZombieCerca(zombies)) {
-           System.out.println("¡Cereza explotando! Eliminando zombies en radio...");
-          
-           // Eliminar zombies en el radio de explosión
-           int zombiesEliminadosPorCereza = 0;
            for (int i = 0; i < zombies.length; i++) {
                if (zombies[i] != null && zombies[i].vivo) {
                    double distancia = Math.sqrt(Math.pow(zombies[i].x - cereza.x, 2) +
@@ -354,56 +377,42 @@ public class Juego extends InterfaceJuego
                    if (distancia < cereza.getRadioExplosion()) {
                        zombies[i].vivo = false;
                        zombiesEliminados++;
-                       zombiesEliminadosPorCereza++;
-                       System.out.println("Zombie eliminado por explosión de cereza");
                    }
                }
            }
           
-           // Verificar también zombie rápido
            if (zombieRapido != null && zombieRapido.vivo) {
                double distancia = Math.sqrt(Math.pow(zombieRapido.getX() - cereza.x, 2) +
                                           Math.pow(zombieRapido.getY() - cereza.y, 2));
                if (distancia < cereza.getRadioExplosion()) {
                    zombieRapido.morir();
                    zombiesEliminados += 2;
-                   zombiesEliminadosPorCereza++;
-                   System.out.println("Zombie Rápido eliminado por explosión de cereza");
                }
            }
           
-           System.out.println("Cereza eliminó " + zombiesEliminadosPorCereza + " zombies");
+           if (zombieColosal != null && zombieColosal.vivo) {
+               double distancia = Math.sqrt(Math.pow(zombieColosal.getX() - cereza.x, 2) +
+                                          Math.pow(zombieColosal.getY() - cereza.y, 2));
+               if (distancia < cereza.getRadioExplosion()) {
+                   zombieColosal.morir();
+                   zombiesEliminados += 5;
+               }
+           }
           
-           // Eliminar la cereza
            cereza.plantada = false;
            int indiceX = cuadricula.cercanoL(cereza.x, cereza.y).x;
            int indiceY = cuadricula.cercanoL(cereza.x, cereza.y).y;
            cuadricula.ocupado[indiceX][indiceY] = false;
           
-           // Eliminar del array de plantas
            for (int i = 0; i < plantas.length; i++) {
                if (plantas[i] == cereza) {
                    plantas[i] = null;
                    break;
                }
            }
-          
-           // Dibujar efecto visual de explosión (opcional)
-           dibujarExplosion(cereza.x, cereza.y, cereza.getRadioExplosion());
        }
    }
-   
-   // Método opcional para dibujar efecto visual de explosión
-   private void dibujarExplosion(double x, double y, double radio) {
-       // Dibujar círculo de explosión (rojo semitransparente)
-       entorno.dibujarCirculo(x, y, radio, new java.awt.Color(255, 0, 0, 100));
-      
-       // También puedes agregar más efectos visuales aquí
-       entorno.dibujarCirculo(x, y, radio * 0.7, new java.awt.Color(255, 165, 0, 80));
-       entorno.dibujarCirculo(x, y, radio * 0.4, new java.awt.Color(255, 255, 0, 60));
-   }
   
-   // MÉTODO: Generar zombie colosal cada 3 minutos
    private void generarZombieColosal() {
        if (zombieColosal == null && ticksParaProximoColosal > 0) {
            ticksParaProximoColosal--;
@@ -419,7 +428,6 @@ public class Juego extends InterfaceJuego
        }
    }
   
-   // MÉTODO: Actualizar zombie colosal
    private void actualizarZombieColosal() {
        if (zombieColosal != null) {
            zombieColosal.mover();
@@ -431,12 +439,11 @@ public class Juego extends InterfaceJuego
           
            if (!zombieColosal.vivo) {
                zombieColosal = null;
-               zombiesEliminados += 5;
+               zombiesEliminados += 1;
            }
        }
    }
   
-   // MÉTODO: Verificar colisiones con el zombie colosal
    private void verificarColisionesConColosal() {
        if (zombieColosal == null || !zombieColosal.vivo) return;
       
@@ -467,7 +474,6 @@ public class Juego extends InterfaceJuego
        }
    }
   
-   // MÉTODO: Verificar ataques del zombie colosal
    private void verificarAtaquesZombieColosal() {
        if (zombieColosal == null || !zombieColosal.vivo) return;
       
@@ -495,7 +501,6 @@ public class Juego extends InterfaceJuego
        }
    }
   
-   // MÉTODO: Dibujar plantas del banner solo si no están en recarga
    private void dibujarPlantasBanner() {
        int tickActual = entorno.numeroDeTick();
       
@@ -528,7 +533,6 @@ public class Juego extends InterfaceJuego
        }
    }
    
-   // Método para manejar movimiento con teclado 
    private void manejarMovimientoTeclado() {
 	       planta plantaSeleccionada = null;
 	       for (planta p : plantas) {
@@ -559,28 +563,16 @@ public class Juego extends InterfaceJuego
 	           nuevaX += velocidad;
 	       }
 	       
-	       // VERIFICAR RESTRICCIONES ANTES DE ACTUALIZAR LA POSICIÓN
-	       
-	       // 1. No puede entrar en el área del banner (y < 100 aproximadamente)
 	       boolean enBanner = nuevaY < 100;
-	       
-	       // 2. No puede colocarse en la primera columna donde están los regalos (x < 100 aproximadamente)
 	       boolean enPrimeraColumna = nuevaX < 100;
-	       
-	       // 3. Mantener dentro de los límites generales de la pantalla
 	       boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
 	       
-	       // Solo actualizar posición si NO está en las zonas prohibidas y está dentro de los límites
 	       if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
 	           plantaSeleccionada.x = nuevaX;
 	           plantaSeleccionada.y = nuevaY;
 	       }
-	       // Si intenta moverse a zona prohibida, mantener posición actual
-	       else {
-	       }
 	   }
    
-   //MÉTODO ACTUALIZADO: Verificar cuando los zombies atacan plantas (BLOQUEO CON TODAS LAS PLANTAS)
    private void verificarAtaquesZombies() {
        int tickActual = entorno.numeroDeTick();
        
@@ -594,16 +586,13 @@ public class Juego extends InterfaceJuego
                    if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
                        zombies[i].puedeAtacar(tickActual)) {
                        
-                       // TODAS las plantas reciben daño
                        plantaBloqueadora.recibirAtaque();
                        
-                       // Si la planta es destruida, liberar al zombie
                        if (!plantaBloqueadora.plantada) {
                            int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
                            int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
                            cuadricula.ocupado[indiceX][indiceY] = false;
                            
-                           // Buscar y eliminar la planta del array
                            for (int j = 0; j < plantas.length; j++) {
                                if (plantas[j] == plantaBloqueadora) {
                                    plantas[j] = null;
@@ -620,10 +609,8 @@ public class Juego extends InterfaceJuego
                        if (plantas[j] != null && plantas[j].plantada && 
                            zombies[i].colisionaConPlanta(plantas[j])) {
                            
-                           // BLOQUEAR CON CUALQUIER PLANTA
                            zombies[i].bloquear(plantas[j]);
                            
-                           // Si la planta es CerezaExplosiva, hacerla explotar inmediatamente
                            if (plantas[j] instanceof CerezaExplosiva) {
                                CerezaExplosiva cereza = (CerezaExplosiva) plantas[j];
                                if (!cereza.debeExplotar()) {
@@ -640,11 +627,9 @@ public class Juego extends InterfaceJuego
        }
    }
    
-   // BARRAS DE RECARGA
    private void dibujarBarrasRecarga() {
        int tickActual = entorno.numeroDeTick();
       
-       // WallNut - MARRÓN
        if (wallnutBanner instanceof WallNut) {
            WallNut wallnut = (WallNut) wallnutBanner;
            double porcentaje = wallnut.porcentajeRecarga(tickActual);
@@ -653,7 +638,6 @@ public class Juego extends InterfaceJuego
            dibujarBarraRecargaCompleta(50, 75, porcentaje, marronFondo, marronBorde, "WallNut", wallnut, tickActual);
        }
       
-       // Escarchi - AZUL CELESTE
        if (hieloBanner instanceof PlantaDeHielo) {
            PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
            double porcentaje = hielo.porcentajeRecarga(tickActual);
@@ -662,7 +646,6 @@ public class Juego extends InterfaceJuego
            dibujarBarraRecargaCompleta(150, 75, porcentaje, celesteFondo, celesteBorde, "Escarchi", hielo, tickActual);
        }
       
-       // RoseBlade - ROJO
        if (roseBanner instanceof RoseBlade) {
            RoseBlade rose = (RoseBlade) roseBanner;
            double porcentaje = rose.porcentajeRecarga(tickActual);
@@ -671,7 +654,6 @@ public class Juego extends InterfaceJuego
            dibujarBarraRecargaCompleta(250, 75, porcentaje, rojoFondo, rojoBorde, "RoseBlade", rose, tickActual);
        }
       
-       // Cereza Explosiva - VIOLETA
        if (cerezaBanner instanceof CerezaExplosiva) {
            CerezaExplosiva cereza = (CerezaExplosiva) cerezaBanner;
            double porcentaje = cereza.porcentajeRecarga(tickActual);
@@ -685,17 +667,13 @@ public class Juego extends InterfaceJuego
 	    double anchoBarra = 80;
 	    double altoBarra = 12;
 	    
-	    // Fondo de la barra (parte vacía)
 	    Color fondoOscuro = oscurecerColor(colorFondo, 0.5f);
 	    entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, fondoOscuro);
 	    
-	    // Barra de progreso con efecto de movimiento
 	    if (porcentaje > 0) {
 	        double anchoLleno = anchoBarra * porcentaje;
 	        
-	        // Efecto de movimiento en la parte cargada
 	        if (porcentaje < 1.0) {
-	            // Crear un efecto de "ondulación" en la barra de progreso
 	            for (int i = 0; i < anchoLleno; i += 4) {
 	                double onda = Math.sin((tickActual * 0.3) + (i * 0.2)) * 2;
 	                double alturaOnda = altoBarra + onda;
@@ -714,18 +692,14 @@ public class Juego extends InterfaceJuego
 	            }
 	        }
 	        
-	        // Barra principal de progreso
 	        entorno.dibujarRectangulo(x - anchoBarra/2 + anchoLleno/2, y, anchoLleno, altoBarra, 0, colorFondo);
 	    }
 	    
-	    // Borde
 	    entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
 	    
-	    // Texto del nombre
 	    entorno.cambiarFont("Arial", 12, Color.WHITE);
 	    entorno.escribirTexto(texto, x - 25, y - 5);
 	    
-	    // Texto del tiempo/estado
 	    if (porcentaje < 1.0) {
 	        int segundosRestantes = calcularSegundosRestantes(planta, tickActual);
 	        
@@ -745,6 +719,7 @@ public class Juego extends InterfaceJuego
 	        entorno.escribirTexto("Listo", x - 12, y + 20);
 	    }
 	}
+   
    private Color aclararColor(Color color, float factor) {
 	    int rojo = Math.min(255, (int)(color.getRed() + (255 - color.getRed()) * factor));
 	    int verde = Math.min(255, (int)(color.getGreen() + (255 - color.getGreen()) * factor));
@@ -946,7 +921,6 @@ public class Juego extends InterfaceJuego
        }
       
        if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
-           // WallNut
            if (wallnutBanner != null && wallnutBanner.seleccionada) {
                WallNut wallnut = (WallNut) wallnutBanner;
               
@@ -977,7 +951,6 @@ public class Juego extends InterfaceJuego
               wallnutBanner.seleccionada = false;
            }
           
-           // PlantaDeHielo
            else if (hieloBanner != null && hieloBanner.seleccionada) {
                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
               
@@ -1008,7 +981,6 @@ public class Juego extends InterfaceJuego
                hieloBanner.seleccionada = false;
            }
           
-           // RoseBlade
            else if (roseBanner != null && roseBanner.seleccionada) {
                RoseBlade rose = (RoseBlade) roseBanner;
               
@@ -1039,7 +1011,6 @@ public class Juego extends InterfaceJuego
               roseBanner.seleccionada = false;
            }
           
-           // Cereza Explosiva
            else if (cerezaBanner != null && cerezaBanner.seleccionada) {
                CerezaExplosiva cereza = (CerezaExplosiva) cerezaBanner;
               
@@ -1070,7 +1041,6 @@ public class Juego extends InterfaceJuego
                cerezaBanner.seleccionada = false;
            }
           
-           // Plantas ya plantadas
            for (int i = 0; i < plantas.length; i++) {
                if (plantas[i] != null && plantas[i].plantada && plantas[i].seleccionada) {
                    int indiceX = cuadricula.cercanoL(plantas[i].x, plantas[i].y).x;
@@ -1090,86 +1060,61 @@ public class Juego extends InterfaceJuego
                        plantas[i].y = plantas[i].yInicial;
                        cuadricula.ocupado[indiceXAnterior][indiceYAnterior] = true;
                    }
-                  
-                  // plantas[i].seleccionada = false;
                }
            }
        }
    }
   
    private void dibujarUI() {
-       entorno.cambiarFont("Arial", 20, Color.WHITE);
-       entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 400, 40);
-       entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 400, 80);
-      
-       int plantasActivas = 0;
-       for (planta p : plantas) {
-           if (p != null && p.plantada) {
-               plantasActivas++;
-           }
-       }
-       entorno.escribirTexto("Plantas: " + plantasActivas, 400, 20);
-      
-       int zombiesEnPantalla = 0;
-       for (Zombie z : zombies) {
-           if (z != null && z.vivo) {
-               zombiesEnPantalla++;
-           }
-       }
-       entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
-      
-       // Información de zombies especiales
-       if (zombieRapido != null && zombieRapido.vivo) {
-           entorno.cambiarFont("Arial", 30, Color.YELLOW);
-           entorno.escribirTexto("¡ZOMBIE RÁPIDO!", 212, 250);
-       } else if (ticksParaProximoRapido > 0) {
-           int segundosRestantesRapido = ticksParaProximoRapido / 6;
-           entorno.cambiarFont("Arial", 16, Color.YELLOW);
-           entorno.escribirTexto("Rápido en: " + segundosRestantesRapido + "s", 600, 40);
-       }
-       
-       if (zombieColosal != null && zombieColosal.vivo) {
-           entorno.cambiarFont("Arial", 50, Color.RED);
-           entorno.escribirTexto("¡ZOMBIE COLOSAL!", 212, 300);
-       } else if (ticksParaProximoColosal > 0) {
-           int segundosRestantesColosal = ticksParaProximoColosal / 6;
-           entorno.cambiarFont("Arial", 16, Color.RED);
-           entorno.escribirTexto("Colosal en: " + segundosRestantesColosal + "s", 600, 60);
-       }
-       
-       // Contadores
-       entorno.cambiarFont("Arial", 16, Color.WHITE);
-       entorno.escribirTexto("Rápidos: " + rapidosAparecidos, 750, 40);
-       entorno.escribirTexto("Colosales: " + colosalesAparecidos, 750, 60);
-   }
-  
-   private void verificarFinJuego() {
-       if (zombiesEliminados >= zombiesTotales) {
-           juegoGanado = true;
-       }
-   }
-  
-   private void dibujarPantallaFin() {
-       entorno.colorFondo(Color.BLACK);
-       if (juegoGanado) {
-           entorno.cambiarFont("Arial", 40, Color.GREEN);
-           entorno.escribirTexto("¡VICTORIA!", 400, 300);
-           entorno.cambiarFont("Arial", 24, Color.WHITE);
-           entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
-           entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
-           entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 410);
-           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 440);
-       } else if (juegoPerdido) {
-           entorno.cambiarFont("Arial", 40, Color.RED);
-           entorno.escribirTexto("¡DERROTA!", 400, 300);
-           entorno.cambiarFont("Arial", 24, Color.WHITE);
-           entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
-           entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 380);
-           entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 410);
-       }
-   }
-   
-   public static void main(String[] args) {
-       new Juego();
-   }
-}
+	    entorno.cambiarFont("Arial", 20, Color.WHITE);
+	    entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 400, 40);
+	    entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 400, 80);
+	   
+	    int zombiesEnPantalla = 0;
+	    for (Zombie z : zombies) {
+	        if (z != null && z.vivo) {
+	            zombiesEnPantalla++;
+	        }
+	    }
+	    entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
+	   
+	  //Aviso de que los zombies van a aparecer en pantalla
+	    if (zombieRapido != null && zombieRapido.vivo) {
+	        entorno.cambiarFont("Impact", 50, Color.ORANGE);
+	        entorno.escribirTexto("¡ZOMBIE RÁPIDO!", 330, 350);
+	    } 
+	    
+	    if (zombieColosal != null && zombieColosal.vivo) {
+	        entorno.cambiarFont("Impact", 50, Color.RED);
+	        entorno.escribirTexto("¡ZOMBIE COLOSAL!", 330, 350);
+	    }
+	}
+
+	private void verificarFinJuego() {
+	    if (zombiesEliminados >= zombiesTotales) {
+	        juegoGanado = true;
+	    }
+	}
+
+	private void dibujarPantallaFin() {
+	    entorno.colorFondo(Color.BLACK);
+	    if (juegoGanado) {
+	        entorno.cambiarFont("Arial", 40, Color.GREEN);
+	        entorno.escribirTexto("¡VICTORIA!", 400, 300);
+	        entorno.cambiarFont("Arial", 24, Color.WHITE);
+	        entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+	        entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
+	        entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 410);
+	        entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 440);
+	    } else if (juegoPerdido) {
+	        entorno.cambiarFont("Arial", 40, Color.RED);
+	        entorno.escribirTexto("¡DERROTA!", 400, 300);
+	        entorno.cambiarFont("Arial", 24, Color.WHITE);
+	        entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+	      
+	    }
+	}
+	  public static void main(String[] args) {
+	       new Juego();
+	   }
+	}
