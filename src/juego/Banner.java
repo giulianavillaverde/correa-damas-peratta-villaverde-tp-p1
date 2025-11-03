@@ -5,9 +5,10 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class Banner {
-    private double x, y, escala;
-    private Image imagen;
-    private Entorno e;
+    // Variables públicas
+    public double x, y, escala;
+    public Image imagen;
+    public Entorno e;
     
     // Constructor: inicializa el banner con posición, escala y carga la imagen
     public Banner(Entorno e) {
@@ -25,10 +26,4 @@ public class Banner {
         // Pone la imagen en las coordenadas especificadas con la escala aplicada
         e.dibujarImagen(imagen, x, y, 0.0, escala);
     }
-    
-    // Getters para acceder a las propiedades del banner
-    public double getX() { return x; }           // Obtiene la posición X actual
-    public double getY() { return y; }           // Obtiene la posición Y actual
-    public double getEscala() { return escala; } // Obtiene el factor de escala aplicado
-    public Image getImagen() { return imagen; }  // Obtiene la referencia directa a la imagen
 }

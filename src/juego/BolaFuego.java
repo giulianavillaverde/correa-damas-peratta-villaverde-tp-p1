@@ -5,7 +5,7 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaFuego {
-    // Variables públicas
+   
     public double x, y;
     public double velocidad;
     public Image imagen;
