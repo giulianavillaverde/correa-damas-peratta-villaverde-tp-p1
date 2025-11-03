@@ -3,40 +3,47 @@ package juego;
 import entorno.Entorno;
 
 public class RoseBlade extends planta {
-    private int tiempoRecargaDisparo;
-    private int tiempoUltimoDisparo;
-    private boolean puedeDisparar;
+   
+    public int tiempoRecargaDisparo;
+    public int tiempoUltimoDisparo;
+    public boolean puedeDisparar;
     
     public RoseBlade(double x, double y, Entorno e) {
         super(x, y, e, "roseblade.png", "roseblade.png", 0.10);
         
-        this.setResistencia(5);
-        this.setResistenciaMaxima(5);
-        
+        this.resistencia = 5;
+        this.resistenciaMaxima = 5;
         this.tiempoRecargaPlantado = 360;
         this.tiempoRecargaDisparo = 80;
         this.tiempoUltimoDisparo = -100;
         this.puedeDisparar = true;
     }
     
-    @Override
     public void actualizar(int tickActual) {
         if (!puedeDisparar && tickActual - tiempoUltimoDisparo > tiempoRecargaDisparo) {
             puedeDisparar = true;
         }
         
-        if (isBajoAtaque() && tickActual >= getTiempoFinAtaque()) {
-            setBajoAtaque(false);
+        if (bajoAtaque && tickActual >= tiempoFinAtaque) {
+            bajoAtaque = false;
         }
     }
     
-    @Override
+    public void recibirAtaque(int tickActual) {
+        this.resistencia--;
+        this.bajoAtaque = true;
+        this.tiempoFinAtaque = tickActual + 30;
+        
+        if (this.resistencia <= 0) {
+            this.plantada = false;
+        }
+    }
+    
     public void usar(int tickActual) {
         this.disponibleParaPlantar = false;
         this.tiempoUltimoPlantado = tickActual;
     }
     
-    @Override
     public void ejecutarComportamientoEspecifico(int tickActual, Juego juego) {
         BolaFuego nuevoDisparo = disparar(tickActual);
         if (nuevoDisparo != null) {
@@ -45,15 +52,11 @@ public class RoseBlade extends planta {
     }
     
     public BolaFuego disparar(int tickActual) {
-        if (puedeDisparar && isPlantada()) {
+        if (puedeDisparar && plantada) {
             puedeDisparar = false;
             tiempoUltimoDisparo = tickActual;
-            return new BolaFuego(getX() + 40, getY(), getEntorno());
+            return new BolaFuego(x + 40, y, e);
         }
         return null;
     }
-    
-    // Getters específicos
-    public boolean isPuedeDisparar() { return puedeDisparar; }
-    public int getTiempoRecargaDisparo() { return tiempoRecargaDisparo; }
 }

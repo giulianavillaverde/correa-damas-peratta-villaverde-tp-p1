@@ -5,12 +5,13 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class BolaNieve {
-    private double x, y;
-    private double velocidad;
-    private boolean activa;
-    private int danio;
-    private Entorno e;
-    private Image imagen;
+    // Variables públicas
+    public double x, y;
+    public double velocidad;
+    public boolean activa;
+    public int danio;
+    public Entorno e;
+    public Image imagen;
     
     public BolaNieve(double x, double y, Entorno e) {
         this.x = x;
@@ -44,21 +45,9 @@ public class BolaNieve {
     }
     
     public boolean colisionaCon(planta p) {
-        if (!activa || p == null || !p.isPlantada()) return false;
+        if (!activa || p == null || !p.plantada) return false;
         
-        double distancia = Math.sqrt(Math.pow(x - p.getX(), 2) + Math.pow(y - p.getY(), 2));
+        double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 30;
     }
-    
-    // Getters
-    public double getX() { return x; }
-    public double getY() { return y; }
-    public boolean isActiva() { return activa; }
-    public int getDanio() { return danio; }
-    public Image getImagen() { return imagen; }
-    
-    // Setters
-    public void setActiva(boolean activa) { this.activa = activa; }
-    public void setX(double x) { this.x = x; }
-    public void setY(double y) { this.y = y; }
 }

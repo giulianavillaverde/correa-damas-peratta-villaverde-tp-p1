@@ -103,17 +103,17 @@ public class Juego extends InterfaceJuego {
        this.zombieRapidoBanner = new ZombieRapido(0, entorno);
        this.zombieColosalBanner = new ZombieColosal(entorno);
        
-       this.zombieNormalBanner.setX(800);
-       this.zombieNormalBanner.setY(20);
-       this.zombieNormalBanner.setVivo(true);
+       this.zombieNormalBanner.x = 800;
+       this.zombieNormalBanner.y = 20;
+       this.zombieNormalBanner.vivo = true;
        
-       this.zombieRapidoBanner.setX(900);
-       this.zombieRapidoBanner.setY(20);
-       this.zombieRapidoBanner.setVivo(true);
+       this.zombieRapidoBanner.x = 900;
+       this.zombieRapidoBanner.y = 20;
+       this.zombieRapidoBanner.vivo = true;
        
-       this.zombieColosalBanner.setX(1000);
-       this.zombieColosalBanner.setY(20);
-       this.zombieColosalBanner.setVivo(true);
+       this.zombieColosalBanner.x = 1000;
+       this.zombieColosalBanner.y = 20;
+       this.zombieColosalBanner.vivo = true;
    }
    
    private boolean agregarPlanta(planta nuevaPlanta) {
@@ -192,47 +192,44 @@ public class Juego extends InterfaceJuego {
    }
 
    private void actualizarPlantas() {
-	    int tickActual = entorno.numeroDeTick();
-	    
-	    for(int i = 0; i < plantas.length; i++) {
-	        planta p = plantas[i];
-	        if(p != null && p.isPlantada()) {
-	            p.dibujar();
-	            p.actualizar(tickActual);
-	            
-	            //Cada planta ejecuta su comportamiento
-	            p.ejecutarComportamientoEspecifico(tickActual, this);
-	        }
-	    }
-	}
-
+       int tickActual = entorno.numeroDeTick();
+       
+       for(int i = 0; i < plantas.length; i++) {
+           planta p = plantas[i];
+           if(p != null && p.plantada) {
+               p.dibujar();
+               p.actualizar(tickActual);
+               p.ejecutarComportamientoEspecifico(tickActual, this);
+           }
+       }
+   }
 
    private void dibujarZombiesBanner() {
-	    if (zombieNormalBanner != null && zombieNormalBanner.getImagen() != null) {
-	        zombieNormalBanner.setX(770);
-	        zombieNormalBanner.setY(40);
-	        entorno.dibujarImagen(zombieNormalBanner.getImagen(), 
-	                            zombieNormalBanner.getX(), zombieNormalBanner.getY(), 0, 0.1);
+	    if (zombieNormalBanner != null && zombieNormalBanner.imagen != null) {
+	        zombieNormalBanner.x = 770;
+	        zombieNormalBanner.y = 40;
+	        entorno.dibujarImagen(zombieNormalBanner.imagen, 
+	                            zombieNormalBanner.x, zombieNormalBanner.y, 0, 0.1);
 	        entorno.cambiarFont("Arial", 12, Color.WHITE);
-	        entorno.escribirTexto("Grinch", zombieNormalBanner.getX() - 15, zombieNormalBanner.getY() + 45);
+	        entorno.escribirTexto("Grinch", zombieNormalBanner.x - 15, zombieNormalBanner.y + 45);
 	    }
 	    
-	    if (zombieRapidoBanner != null && zombieRapidoBanner.getImagen() != null) {
-	        zombieRapidoBanner.setX(870);
-	        zombieRapidoBanner.setY(40);
-	        entorno.dibujarImagen(zombieRapidoBanner.getImagen(), 
-	                            zombieRapidoBanner.getX(), zombieRapidoBanner.getY(), 0, 0.1);
+	    if (zombieRapidoBanner != null && zombieRapidoBanner.imagen != null) {
+	        zombieRapidoBanner.x = 870;
+	        zombieRapidoBanner.y = 40;
+	        entorno.dibujarImagen(zombieRapidoBanner.imagen, 
+	                            zombieRapidoBanner.x, zombieRapidoBanner.y, 0, 0.1);
 	        entorno.cambiarFont("Arial", 12, Color.WHITE);
-	        entorno.escribirTexto("Rápido", zombieRapidoBanner.getX() - 15, zombieRapidoBanner.getY() + 45);
+	        entorno.escribirTexto("Rápido", zombieRapidoBanner.x - 15, zombieRapidoBanner.y + 45);
 	    }
 	    
-	    if (zombieColosalBanner != null && zombieColosalBanner.getImagen() != null) {
-	        zombieColosalBanner.setX(970);
-	        zombieColosalBanner.setY(40);
-	        entorno.dibujarImagen(zombieColosalBanner.getImagen(), 
-	                            zombieColosalBanner.getX(), zombieColosalBanner.getY(), 0, 0.1);
+	    if (zombieColosalBanner != null && zombieColosalBanner.imagen != null) {
+	        zombieColosalBanner.x = 970;
+	        zombieColosalBanner.y = 40;
+	        entorno.dibujarImagen(zombieColosalBanner.imagen, 
+	                            zombieColosalBanner.x, zombieColosalBanner.y, 0, 0.1);
 	        entorno.cambiarFont("Arial", 12, Color.WHITE);
-	        entorno.escribirTexto("Colosal", zombieColosalBanner.getX() - 15, zombieColosalBanner.getY() + 45);
+	        entorno.escribirTexto("Colosal", zombieColosalBanner.x - 15, zombieColosalBanner.y + 45);
 	    }
 	}
 
@@ -240,8 +237,8 @@ public class Juego extends InterfaceJuego {
 	    int tickActual = entorno.numeroDeTick();
 	    
 	    for (int i = 0; i < zombies.length; i++) {
-	        if (zombies[i] != null && zombies[i].estaVivo() && 
-	            zombies[i].puedeDisparar(tickActual) && !zombies[i].estaBloqueado()) {
+	        if (zombies[i] != null && zombies[i].vivo && 
+	            zombies[i].puedeDisparar(tickActual) && !zombies[i].bloqueadoPorPlanta) {
 	            
 	            BolaNieve nuevaBola = zombies[i].disparar(tickActual);
 	            if (nuevaBola != null) {
@@ -266,7 +263,7 @@ public class Juego extends InterfaceJuego {
            if (bolasNieve[i] != null) {
                bolasNieve[i].mover();
                bolasNieve[i].dibujar();
-               if (!bolasNieve[i].isActiva()) {
+               if (!bolasNieve[i].activa) {
                    bolasNieve[i] = null;
                    cantidadBolasNieveActivas--;
                }
@@ -276,22 +273,22 @@ public class Juego extends InterfaceJuego {
 
    private void verificarColisionesBolasNieve() {
        for (int i = 0; i < bolasNieve.length; i++) {
-           if (bolasNieve[i] != null && bolasNieve[i].isActiva()) {
+           if (bolasNieve[i] != null && bolasNieve[i].activa) {
                for (int j = 0; j < plantas.length; j++) {
-                   if (plantas[j] != null && plantas[j].isPlantada() &&
+                   if (plantas[j] != null && plantas[j].plantada &&
                        bolasNieve[i].colisionaCon(plantas[j])) {
                        
                        plantas[j].recibirAtaque(entorno.numeroDeTick());
                        
-                       if (!plantas[j].isPlantada()) {
-                           int indiceX = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).x;
-                           int indiceY = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).y;
+                       if (!plantas[j].plantada) {
+                           int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                           int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                            cuadricula.setOcupado(indiceX, indiceY, false);
                            
                            eliminarPlanta(j);
                        }
                        
-                       bolasNieve[i].setActiva(false);
+                       bolasNieve[i].activa = false;
                        bolasNieve[i] = null;
                        cantidadBolasNieveActivas--;
                        break;
@@ -326,7 +323,7 @@ public class Juego extends InterfaceJuego {
                juegoPerdido = true;
            }
            
-           if (!zombieRapido.estaVivo()) {
+           if (!zombieRapido.vivo) {
                zombieRapido = null;
                zombiesEliminados += 1;
            }
@@ -334,15 +331,15 @@ public class Juego extends InterfaceJuego {
    }
 
    private void verificarColisionesConRapido() {
-       if (zombieRapido == null || !zombieRapido.estaVivo()) return;
+       if (zombieRapido == null || !zombieRapido.vivo) return;
        
        for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].isActiva()) {
-               double distancia = Math.sqrt(Math.pow(disparos[i].getX() - zombieRapido.getX(), 2) +
-                                         Math.pow(disparos[i].getY() - zombieRapido.getY(), 2));
+           if (disparos[i] != null && disparos[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparos[i].x - zombieRapido.x, 2) +
+                                         Math.pow(disparos[i].y - zombieRapido.y, 2));
                if (distancia < 40) {
                    zombieRapido.recibirDanio();
-                   disparos[i].setActiva(false);
+                   disparos[i].activa = false;
                    disparos[i] = null;
                    cantidadDisparosActivos--;
                    break;
@@ -351,12 +348,12 @@ public class Juego extends InterfaceJuego {
        }
        
        for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].isActiva()) {
-               double distancia = Math.sqrt(Math.pow(disparosHielo[i].getX() - zombieRapido.getX(), 2) +
-                                         Math.pow(disparosHielo[i].getY() - zombieRapido.getY(), 2));
+           if (disparosHielo[i] != null && disparosHielo[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombieRapido.x, 2) +
+                                         Math.pow(disparosHielo[i].y - zombieRapido.y, 2));
                if (distancia < 40) {
-                   zombieRapido.ralentizar(disparosHielo[i].getDuracionRalentizacion());
-                   disparosHielo[i].setActiva(false);
+                   zombieRapido.ralentizar(disparosHielo[i].duracionRalentizacion);
+                   disparosHielo[i].activa = false;
                    disparosHielo[i] = null;
                    cantidadDisparosHieloActivos--;
                    break;
@@ -366,24 +363,24 @@ public class Juego extends InterfaceJuego {
    }
 
    private void verificarAtaquesZombieRapido() {
-       if (zombieRapido == null || !zombieRapido.estaVivo()) return;
+       if (zombieRapido == null || !zombieRapido.vivo) return;
        
        int tickActual = entorno.numeroDeTick();
        
        for (int j = 0; j < plantas.length; j++) {
-           if (plantas[j] != null && plantas[j].isPlantada() &&
+           if (plantas[j] != null && plantas[j].plantada &&
                zombieRapido.colisionaConPlanta(plantas[j])) {
                
-               if (!zombieRapido.estaBloqueado()) {
+               if (!zombieRapido.bloqueadoPorPlanta) {
                    zombieRapido.bloquear(plantas[j]);
                }
                
                if (zombieRapido.puedeAtacar(tickActual)) {
                    plantas[j].recibirAtaque(tickActual);
                    
-                   if (!plantas[j].isPlantada()) {
-                       int indiceX = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).x;
-                       int indiceY = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).y;
+                   if (!plantas[j].plantada) {
+                       int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                       int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                        cuadricula.setOcupado(indiceX, indiceY, false);
                        
                        eliminarPlanta(j);
@@ -401,37 +398,37 @@ public class Juego extends InterfaceJuego {
    private void verificarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
        if (cereza.debeExplotar(tickActual)) {
            for (int i = 0; i < zombies.length; i++) {
-               if (zombies[i] != null && zombies[i].estaVivo()) {
-                   double distancia = Math.sqrt(Math.pow(zombies[i].getX() - cereza.getX(), 2) +
-                                              Math.pow(zombies[i].getY() - cereza.getY(), 2));
-                   if (distancia < cereza.getRadioExplosion()) {
+               if (zombies[i] != null && zombies[i].vivo) {
+                   double distancia = Math.sqrt(Math.pow(zombies[i].x - cereza.x, 2) +
+                                              Math.pow(zombies[i].y - cereza.y, 2));
+                   if (distancia < cereza.radioExplosion) {
                        zombies[i].morir();
                        zombiesEliminados++;
                    }
                }
            }
           
-           if (zombieRapido != null && zombieRapido.estaVivo()) {
-               double distancia = Math.sqrt(Math.pow(zombieRapido.getX() - cereza.getX(), 2) +
-                                          Math.pow(zombieRapido.getY() - cereza.getY(), 2));
-               if (distancia < cereza.getRadioExplosion()) {
+           if (zombieRapido != null && zombieRapido.vivo) {
+               double distancia = Math.sqrt(Math.pow(zombieRapido.x - cereza.x, 2) +
+                                          Math.pow(zombieRapido.y - cereza.y, 2));
+               if (distancia < cereza.radioExplosion) {
                    zombieRapido.morir();
                    zombiesEliminados += 2;
                }
            }
           
-           if (zombieColosal != null && zombieColosal.estaVivo()) {
-               double distancia = Math.sqrt(Math.pow(zombieColosal.getX() - cereza.getX(), 2) +
-                                          Math.pow(zombieColosal.getY() - cereza.getY(), 2));
-               if (distancia < cereza.getRadioExplosion()) {
+           if (zombieColosal != null && zombieColosal.vivo) {
+               double distancia = Math.sqrt(Math.pow(zombieColosal.x - cereza.x, 2) +
+                                          Math.pow(zombieColosal.y - cereza.y, 2));
+               if (distancia < cereza.radioExplosion) {
                    zombieColosal.morir();
                    zombiesEliminados += 5;
                }
            }
           
-           cereza.setPlantada(false);
-           int indiceX = cuadricula.cercanoL(cereza.getX(), cereza.getY()).x;
-           int indiceY = cuadricula.cercanoL(cereza.getX(), cereza.getY()).y;
+           cereza.plantada = false;
+           int indiceX = cuadricula.cercanoL(cereza.x, cereza.y).x;
+           int indiceY = cuadricula.cercanoL(cereza.x, cereza.y).y;
            cuadricula.setOcupado(indiceX, indiceY, false);
           
            for (int i = 0; i < plantas.length; i++) {
@@ -467,7 +464,7 @@ public class Juego extends InterfaceJuego {
                juegoPerdido = true;
            }
           
-           if (!zombieColosal.estaVivo()) {
+           if (!zombieColosal.vivo) {
                zombieColosal = null;
                zombiesEliminados += 1;
            }
@@ -475,15 +472,15 @@ public class Juego extends InterfaceJuego {
    }
   
    private void verificarColisionesConColosal() {
-       if (zombieColosal == null || !zombieColosal.estaVivo()) return;
+       if (zombieColosal == null || !zombieColosal.vivo) return;
       
        for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].isActiva()) {
-               double distancia = Math.sqrt(Math.pow(disparos[i].getX() - zombieColosal.getX(), 2) +
-                                          Math.pow(disparos[i].getY() - zombieColosal.getY(), 2));
+           if (disparos[i] != null && disparos[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparos[i].x - zombieColosal.x, 2) +
+                                          Math.pow(disparos[i].y - zombieColosal.y, 2));
                if (distancia < 70) {
                    zombieColosal.recibirDanio();
-                   disparos[i].setActiva(false);
+                   disparos[i].activa = false;
                    disparos[i] = null;
                    cantidadDisparosActivos--;
                    break;
@@ -492,12 +489,12 @@ public class Juego extends InterfaceJuego {
        }
       
        for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].isActiva()) {
-               double distancia = Math.sqrt(Math.pow(disparosHielo[i].getX() - zombieColosal.getX(), 2) +
-                                          Math.pow(disparosHielo[i].getY() - zombieColosal.getY(), 2));
+           if (disparosHielo[i] != null && disparosHielo[i].activa) {
+               double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombieColosal.x, 2) +
+                                          Math.pow(disparosHielo[i].y - zombieColosal.y, 2));
                if (distancia < 70) {
-                   zombieColosal.ralentizar(disparosHielo[i].getDuracionRalentizacion());
-                   disparosHielo[i].setActiva(false);
+                   zombieColosal.ralentizar(disparosHielo[i].duracionRalentizacion);
+                   disparosHielo[i].activa = false;
                    disparosHielo[i] = null;
                    cantidadDisparosHieloActivos--;
                    break;
@@ -507,12 +504,12 @@ public class Juego extends InterfaceJuego {
    }
   
    private void verificarAtaquesZombieColosal() {
-       if (zombieColosal == null || !zombieColosal.estaVivo()) return;
+       if (zombieColosal == null || !zombieColosal.vivo) return;
       
        int tickActual = entorno.numeroDeTick();
       
        for (int j = 0; j < plantas.length; j++) {
-           if (plantas[j] != null && plantas[j].isPlantada() &&
+           if (plantas[j] != null && plantas[j].plantada &&
                zombieColosal.colisionaConPlanta(plantas[j])) {
               
                if (zombieColosal.puedeAtacar(tickActual)) {
@@ -522,9 +519,9 @@ public class Juego extends InterfaceJuego {
                        wallnut.recibirAtaque(tickActual);
                    } else {
                        plantas[j].recibirAtaque(tickActual);
-                       if (!plantas[j].isPlantada()) {
-                           int indiceX = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).x;
-                           int indiceY = cuadricula.cercanoL(plantas[j].getX(), plantas[j].getY()).y;
+                       if (!plantas[j].plantada) {
+                           int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
+                           int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
                            cuadricula.setOcupado(indiceX, indiceY, false);
                            eliminarPlanta(j);
                        }
@@ -571,7 +568,7 @@ public class Juego extends InterfaceJuego {
    private void manejarMovimientoTeclado() {
 	       planta plantaSeleccionada = null;
 	       for (planta p : plantas) {
-	           if (p != null && p.isSeleccionada()) {
+	           if (p != null && p.seleccionada) {
 	               plantaSeleccionada = p;
 	               break;
 	           }
@@ -582,8 +579,8 @@ public class Juego extends InterfaceJuego {
 	       }
 	       
 	       double velocidad = 105;
-	       double nuevaX = plantaSeleccionada.getX();
-	       double nuevaY = plantaSeleccionada.getY();
+	       double nuevaX = plantaSeleccionada.x;
+	       double nuevaY = plantaSeleccionada.y;
 	       
 	       if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
 	           nuevaY -= velocidad;
@@ -611,20 +608,20 @@ public class Juego extends InterfaceJuego {
        int tickActual = entorno.numeroDeTick();
        
        for (int i = 0; i < zombies.length; i++) {
-           if (zombies[i] != null && zombies[i].estaVivo()) {
+           if (zombies[i] != null && zombies[i].vivo) {
                
                zombies[i].verificarPlantaBloqueadora();
                
-               if (zombies[i].estaBloqueado()) {
-                   planta plantaBloqueadora = zombies[i].getPlantaBloqueadora();
-                   if (plantaBloqueadora != null && plantaBloqueadora.isPlantada() && 
+               if (zombies[i].bloqueadoPorPlanta) {
+                   planta plantaBloqueadora = zombies[i].plantaBloqueadora;
+                   if (plantaBloqueadora != null && plantaBloqueadora.plantada && 
                        zombies[i].puedeAtacar(tickActual)) {
                        
                        plantaBloqueadora.recibirAtaque(tickActual);
                        
-                       if (!plantaBloqueadora.isPlantada()) {
-                           int indiceX = cuadricula.cercanoL(plantaBloqueadora.getX(), plantaBloqueadora.getY()).x;
-                           int indiceY = cuadricula.cercanoL(plantaBloqueadora.getX(), plantaBloqueadora.getY()).y;
+                       if (!plantaBloqueadora.plantada) {
+                           int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
+                           int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
                            cuadricula.setOcupado(indiceX, indiceY, false);
                            
                            for (int j = 0; j < plantas.length; j++) {
@@ -640,14 +637,14 @@ public class Juego extends InterfaceJuego {
                } 
                else {
                    for (int j = 0; j < plantas.length; j++) {
-                       if (plantas[j] != null && plantas[j].isPlantada() && 
+                       if (plantas[j] != null && plantas[j].plantada && 
                            zombies[i].colisionaConPlanta(plantas[j])) {
                            
                            zombies[i].bloquear(plantas[j]);
                            
                            if (plantas[j] instanceof CerezaExplosiva) {
                                CerezaExplosiva cereza = (CerezaExplosiva) plantas[j];
-                               if (!cereza.isExplotando()) {
+                               if (!cereza.explotando) {
                                    if (cereza.hayZombieCerca(zombies)) {
                                        verificarExplosionCereza(cereza, tickActual);
                                    }
@@ -774,37 +771,35 @@ public class Juego extends InterfaceJuego {
    }
   
    private int calcularSegundosRestantes(planta planta, int tickActual) {
-	    int tiempoTranscurrido = tickActual - planta.getTiempoUltimoPlantado();
-	    int tiempoRestante = Math.max(0, planta.getTiempoRecargaPlantado() - tiempoTranscurrido);
-	    
-	    // Conversión más realista basada en el entorno
-	    // Si cada tick son ~20ms, entonces 50 ticks = 1 segundo
+	    int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
+	    int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
 	    return (int) Math.ceil(tiempoRestante / 50.0);
 	}
-   public void agregarDisparo(BolaFuego disparo) {
-	    for (int i = 0; i < disparos.length; i++) {
-	        if (disparos[i] == null) {
-	            disparos[i] = disparo;
-	            cantidadDisparosActivos++;
-	            break;
-	        }
-	    }
-	}
 
-   public void agregarDisparoHielo(BolaEscarcha disparo) {
-	    for (int i = 0; i < disparosHielo.length; i++) {
-	        if (disparosHielo[i] == null) {
-	            disparosHielo[i] = disparo;
-	            cantidadDisparosHieloActivos++;
-	            break;
-	        }
-	    }
-	}
-   public void ejecutarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
-	    verificarExplosionCereza(cereza, tickActual);
-	}
- 
+   // MÉTODOS PÚBLICOS PARA QUE LAS PLANTAS LOS USEN
+   public void agregarDisparo(BolaFuego disparo) {
+       for (int i = 0; i < disparos.length; i++) {
+           if (disparos[i] == null) {
+               disparos[i] = disparo;
+               cantidadDisparosActivos++;
+               break;
+           }
+       }
+   }
   
+   public void agregarDisparoHielo(BolaEscarcha disparo) {
+       for (int i = 0; i < disparosHielo.length; i++) {
+           if (disparosHielo[i] == null) {
+               disparosHielo[i] = disparo;
+               cantidadDisparosHieloActivos++;
+               break;
+           }
+       }
+   }
+  
+   public void ejecutarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
+       verificarExplosionCereza(cereza, tickActual);
+   }
   
    private void generarZombie() {
        if (Math.random() < 0.01 && zombiesEliminados < zombiesTotales) {
@@ -829,7 +824,7 @@ public class Juego extends InterfaceJuego {
                    juegoPerdido = true;
                }
               
-               if (!zombies[i].estaVivo()) {
+               if (!zombies[i].vivo) {
                    zombies[i] = null;
                    zombiesEliminados++;
                    cantidadZombiesActivos--;
@@ -843,7 +838,7 @@ public class Juego extends InterfaceJuego {
            if (disparos[i] != null) {
                disparos[i].mover();
                disparos[i].dibujar();
-               if (!disparos[i].isActiva()) {
+               if (!disparos[i].activa) {
                    disparos[i] = null;
                    cantidadDisparosActivos--;
                }
@@ -856,7 +851,7 @@ public class Juego extends InterfaceJuego {
            if (disparosHielo[i] != null) {
                disparosHielo[i].mover();
                disparosHielo[i].dibujar();
-               if (!disparosHielo[i].isActiva()) {
+               if (!disparosHielo[i].activa) {
                    disparosHielo[i] = null;
                    cantidadDisparosHieloActivos--;
                }
@@ -866,12 +861,12 @@ public class Juego extends InterfaceJuego {
   
    private void verificarColisiones() {
        for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].isActiva()) {
+           if (disparos[i] != null && disparos[i].activa) {
                for (int j = 0; j < zombies.length; j++) {
-                   if (zombies[j] != null && zombies[j].estaVivo() &&
+                   if (zombies[j] != null && zombies[j].vivo &&
                        disparos[i].colisionaCon(zombies[j])) {
                        zombies[j].recibirDanio();
-                       disparos[i].setActiva(false);
+                       disparos[i].activa = false;
                        disparos[i] = null;
                        cantidadDisparosActivos--;
                        break;
@@ -883,12 +878,12 @@ public class Juego extends InterfaceJuego {
   
    private void verificarColisionesHielo() {
        for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].isActiva()) {
+           if (disparosHielo[i] != null && disparosHielo[i].activa) {
                for (int j = 0; j < zombies.length; j++) {
-                   if (zombies[j] != null && zombies[j].estaVivo() &&
+                   if (zombies[j] != null && zombies[j].vivo &&
                        disparosHielo[i].colisionaCon(zombies[j])) {
-                       zombies[j].ralentizar(disparosHielo[i].getDuracionRalentizacion());
-                       disparosHielo[i].setActiva(false);
+                       zombies[j].ralentizar(disparosHielo[i].duracionRalentizacion);
+                       disparosHielo[i].activa = false;
                        disparosHielo[i] = null;
                        cantidadDisparosHieloActivos--;
                        break;
@@ -902,7 +897,7 @@ public class Juego extends InterfaceJuego {
        if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
            for (int i = 0; i < plantas.length; i++) {
                if (plantas[i] != null) {
-                   plantas[i].setSeleccionada(false);
+                   plantas[i].seleccionada = false;
                }
            }
           
@@ -911,31 +906,31 @@ public class Juego extends InterfaceJuego {
            if (wallnutBanner != null && wallnutBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                WallNut wallnut = (WallNut) wallnutBanner;
                if (!wallnut.estaEnRecarga(tickActual)) {
-                   wallnutBanner.setSeleccionada(true);
+                   wallnutBanner.seleccionada = true;
                }
            }
            else if (hieloBanner != null && hieloBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
                if (!hielo.estaEnRecarga(tickActual)) {
-                   hieloBanner.setSeleccionada(true);
+                   hieloBanner.seleccionada = true;
                }
            }
            else if (roseBanner != null && roseBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                RoseBlade rose = (RoseBlade) roseBanner;
                if (!rose.estaEnRecarga(tickActual)) {
-                   roseBanner.setSeleccionada(true);
+                   roseBanner.seleccionada = true;
                }
            }
            else if (cerezaBanner != null && cerezaBanner.encima(entorno.mouseX(), entorno.mouseY())) {
                CerezaExplosiva cereza = (CerezaExplosiva) cerezaBanner;
                if (!cereza.estaEnRecarga(tickActual)) {
-                   cerezaBanner.setSeleccionada(true);
+                   cerezaBanner.seleccionada = true;
                }
            }
            else {
                for (int i = 0; i < plantas.length; i++) {
-                   if (plantas[i] != null && plantas[i].isPlantada() && plantas[i].encima(entorno.mouseX(), entorno.mouseY())) {
-                       plantas[i].setSeleccionada(true);
+                   if (plantas[i] != null && plantas[i].plantada && plantas[i].encima(entorno.mouseX(), entorno.mouseY())) {
+                       plantas[i].seleccionada = true;
                        break;
                    }
                }
@@ -944,7 +939,7 @@ public class Juego extends InterfaceJuego {
       
        if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
            for (int i = 0; i < plantas.length; i++) {
-               if (plantas[i] != null && plantas[i].isSeleccionada()) {
+               if (plantas[i] != null && plantas[i].seleccionada) {
                    plantas[i].arrastrar(entorno.mouseX(), entorno.mouseY());
                }
            }
@@ -958,16 +953,16 @@ public class Juego extends InterfaceJuego {
    private void manejarSueltaBoton() {
        int tickActual = entorno.numeroDeTick();
        
-       if (wallnutBanner != null && wallnutBanner.isSeleccionada()) {
+       if (wallnutBanner != null && wallnutBanner.seleccionada) {
            manejarSueltaWallNut(tickActual);
        }
-       else if (hieloBanner != null && hieloBanner.isSeleccionada()) {
+       else if (hieloBanner != null && hieloBanner.seleccionada) {
            manejarSueltaHielo(tickActual);
        }
-       else if (roseBanner != null && roseBanner.isSeleccionada()) {
+       else if (roseBanner != null && roseBanner.seleccionada) {
            manejarSueltaRose(tickActual);
        }
-       else if (cerezaBanner != null && cerezaBanner.isSeleccionada()) {
+       else if (cerezaBanner != null && cerezaBanner.seleccionada) {
            manejarSueltaCereza(tickActual);
        }
        else {
@@ -979,110 +974,110 @@ public class Juego extends InterfaceJuego {
        WallNut wallnut = (WallNut) wallnutBanner;
       
        if (entorno.mouseY() < 70) {
-           wallnutBanner.setPosicion(wallnutBanner.getXInicial(), wallnutBanner.getYInicial());
+           wallnutBanner.setPosicion(wallnutBanner.xInicial, wallnutBanner.yInicial);
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
+           if (indiceX > 0 && !cuadricula.Ocupado(indiceX, indiceY)) {
                WallNut nuevaWallnut = new WallNut(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
-               nuevaWallnut.setPlantada(true);
+               nuevaWallnut.plantada = true;
               
                if (agregarPlanta(nuevaWallnut)) {
-                   cuadricula.setOcupado(indiceX, indiceY, true);
+                   cuadricula.estaOcupado(indiceX, indiceY, true);
                    wallnut.usar(tickActual);
                }
            }
-           wallnutBanner.setPosicion(wallnutBanner.getXInicial(), wallnutBanner.getYInicial());
+           wallnutBanner.setPosicion(wallnutBanner.xInicial, wallnutBanner.yInicial);
        }
-       wallnutBanner.setSeleccionada(false);
+       wallnutBanner.seleccionada = false;
    }
    
    private void manejarSueltaHielo(int tickActual) {
        PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
       
        if (entorno.mouseY() < 70) {
-           hieloBanner.setPosicion(hieloBanner.getXInicial(), hieloBanner.getYInicial());
+           hieloBanner.setPosicion(hieloBanner.xInicial, hieloBanner.yInicial);
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
+           if (indiceX > 0 && !cuadricula.Ocupado(indiceX, indiceY)) {
                PlantaDeHielo nuevaHielo = new PlantaDeHielo(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
-               nuevaHielo.setPlantada(true);
+               nuevaHielo.plantada = true;
               
                if (agregarPlanta(nuevaHielo)) {
-                   cuadricula.setOcupado(indiceX, indiceY, true);
+                   cuadricula.estaOcupado(indiceX, indiceY, true);
                    hielo.usar(tickActual);
                }
            }
-           hieloBanner.setPosicion(hieloBanner.getXInicial(), hieloBanner.getYInicial());
+           hieloBanner.setPosicion(hieloBanner.xInicial, hieloBanner.yInicial);
        }
-       hieloBanner.setSeleccionada(false);
+       hieloBanner.seleccionada = false;
    }
    
    private void manejarSueltaRose(int tickActual) {
        RoseBlade rose = (RoseBlade) roseBanner;
       
        if (entorno.mouseY() < 70) {
-           roseBanner.setPosicion(roseBanner.getXInicial(), roseBanner.getYInicial());
+           roseBanner.setPosicion(roseBanner.xInicial, roseBanner.yInicial);
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
            if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
                RoseBlade nuevaRose = new RoseBlade(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
-               nuevaRose.setPlantada(true);
+               nuevaRose.plantada = true;
               
                if (agregarPlanta(nuevaRose)) {
                    cuadricula.setOcupado(indiceX, indiceY, true);
                    rose.usar(tickActual);
                }
            }
-           roseBanner.setPosicion(roseBanner.getXInicial(), roseBanner.getYInicial());
+           roseBanner.setPosicion(roseBanner.xInicial, roseBanner.yInicial);
        }
-       roseBanner.setSeleccionada(false);
+       roseBanner.seleccionada = false;
    }
    
    private void manejarSueltaCereza(int tickActual) {
        CerezaExplosiva cereza = (CerezaExplosiva) cerezaBanner;
       
        if (entorno.mouseY() < 70) {
-           cerezaBanner.setPosicion(cerezaBanner.getXInicial(), cerezaBanner.getYInicial());
+           cerezaBanner.setPosicion(cerezaBanner.xInicial, cerezaBanner.yInicial);
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
            if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
                CerezaExplosiva nuevaCereza = new CerezaExplosiva(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
-               nuevaCereza.setPlantada(true);
+               nuevaCereza.plantada = true;
               
                if (agregarPlanta(nuevaCereza)) {
                    cuadricula.setOcupado(indiceX, indiceY, true);
                    cereza.usar(tickActual);
                }
            }
-           cerezaBanner.setPosicion(cerezaBanner.getXInicial(), cerezaBanner.getYInicial());
+           cerezaBanner.setPosicion(cerezaBanner.xInicial, cerezaBanner.yInicial);
        }
-       cerezaBanner.setSeleccionada(false);
+       cerezaBanner.seleccionada = false;
    }
    
    private void manejarSueltaPlantaExistente() {
        for (int i = 0; i < plantas.length; i++) {
-           if (plantas[i] != null && plantas[i].isPlantada() && plantas[i].isSeleccionada()) {
-               int indiceX = cuadricula.cercanoL(plantas[i].getX(), plantas[i].getY()).x;
-               int indiceY = cuadricula.cercanoL(plantas[i].getX(), plantas[i].getY()).y;
+           if (plantas[i] != null && plantas[i].plantada && plantas[i].seleccionada) {
+               int indiceX = cuadricula.cercanoL(plantas[i].x, plantas[i].y).x;
+               int indiceY = cuadricula.cercanoL(plantas[i].x, plantas[i].y).y;
               
-               int indiceXAnterior = cuadricula.cercanoL(plantas[i].getXInicial(), plantas[i].getYInicial()).x;
-               int indiceYAnterior = cuadricula.cercanoL(plantas[i].getXInicial(), plantas[i].getYInicial()).y;
+               int indiceXAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).x;
+               int indiceYAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).y;
                cuadricula.setOcupado(indiceXAnterior, indiceYAnterior, false);
               
                if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
                    cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
                    cuadricula.setOcupado(indiceX, indiceY, true);
-                   plantas[i].setPosicionInicial(plantas[i].getX(), plantas[i].getY());
+                   plantas[i].setPosicionInicial(plantas[i].x, plantas[i].y);
                } else {
-                   plantas[i].setPosicion(plantas[i].getXInicial(), plantas[i].getYInicial());
+                   plantas[i].setPosicion(plantas[i].xInicial, plantas[i].yInicial);
                    cuadricula.setOcupado(indiceXAnterior, indiceYAnterior, true);
                }
            }
@@ -1096,19 +1091,19 @@ public class Juego extends InterfaceJuego {
 	   
 	    int zombiesEnPantalla = 0;
 	    for (Zombie z : zombies) {
-	        if (z != null && z.estaVivo()) {
+	        if (z != null && z.vivo) {
 	            zombiesEnPantalla++;
 	        }
 	    }
 	    entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
 	   
 	  //Aviso de que los zombies van a aparecer en pantalla
-	    if (zombieRapido != null && zombieRapido.estaVivo()) {
+	    if (zombieRapido != null && zombieRapido.vivo) {
 	        entorno.cambiarFont("Impact", 50, Color.ORANGE);
 	        entorno.escribirTexto("¡ZOMBIE RÁPIDO!", 330, 350);
 	    } 
 	    
-	    if (zombieColosal != null && zombieColosal.estaVivo()) {
+	    if (zombieColosal != null && zombieColosal.vivo) {
 	        entorno.cambiarFont("Impact", 50, Color.RED);
 	        entorno.escribirTexto("¡ZOMBIE COLOSAL!", 330, 350);
 	    }

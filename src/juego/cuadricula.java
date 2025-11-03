@@ -7,14 +7,15 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class cuadricula {
-    private double x, y;
-    private double escala;
-    private double ancho, alto;
-    private Image imagen1, imagen2;
-    private Entorno e;
-    private double[] coorX;
-    private double[] coorY;
-    private boolean[][] ocupado;
+   
+    public double x, y;
+    public double escala;
+    public double ancho, alto;
+    public Image imagen1, imagen2;
+    public Entorno e;
+    public double[] coorX;
+    public double[] coorY;
+    public boolean[][] ocupado;
     
     public cuadricula(double x, double y, Entorno e) {
         this.x = x;
@@ -117,27 +118,21 @@ public class cuadricula {
     
     public void centrarPlanta(planta p, int indiceX, int indiceY) {
         if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
-            p.setPosicion(this.coorX[indiceX], this.coorY[indiceY]);
-            p.setPosicionInicial(p.getX(), p.getY());
-            System.out.println("Planta centrada en: (" + p.getX() + ", " + p.getY() + ")");
+            p.x = this.coorX[indiceX];
+            p.y = this.coorY[indiceY];
+            p.xInicial = p.x;
+            p.yInicial = p.y;
+            System.out.println("Planta centrada en: (" + p.x + ", " + p.y + ")");
         }
     }
     
-    // Getters
-    public double[] getCoorX() { return coorX; }
-    public double[] getCoorY() { return coorY; }
-    public boolean[][] getOcupado() { return ocupado; }
-    public double getAncho() { return ancho; }
-    public double getAlto() { return alto; }
-    
-    // Setters para el array ocupado
-    public void setOcupado(int x, int y, boolean valor) {
+    public void Ocupado(int x, int y, boolean valor) {
         if (x >= 0 && x < ocupado.length && y >= 0 && y < ocupado[0].length) {
             ocupado[x][y] = valor;
         }
     }
     
-    public boolean isOcupado(int x, int y) {
+    public boolean estaOcupado(int x, int y) {
         if (x >= 0 && x < ocupado.length && y >= 0 && y < ocupado[0].length) {
             return ocupado[x][y];
         }

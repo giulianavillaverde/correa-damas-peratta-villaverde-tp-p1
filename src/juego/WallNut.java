@@ -8,41 +8,41 @@ public class WallNut extends planta {
     public WallNut(double x, double y, Entorno e) {
         super(x, y, e, "wallnut.png", "wallnut.png", 0.11);
         
-        this.setResistencia(10);
-        this.setResistenciaMaxima(10);
-        
+        this.resistencia = 10;
+        this.resistenciaMaxima = 10;
         this.tiempoRecargaPlantado = 360;
     }
     
-    @Override
     public void dibujar() {
         super.dibujar();
         
-        if (isBajoAtaque() && isPlantada()) {
-            getEntorno().dibujarCirculo(getX(), getY(), 45, new Color(255, 0, 0, 100));
+        if (bajoAtaque && plantada) {
+            e.dibujarCirculo(x, y, 45, new Color(255, 0, 0, 100));
         }
     }
     
-    @Override
     public void actualizar(int tickActual) {
-        if (isBajoAtaque() && tickActual >= getTiempoFinAtaque()) {
-            setBajoAtaque(false);
+        if (bajoAtaque && tickActual >= tiempoFinAtaque) {
+            bajoAtaque = false;
         }
     }
     
-    @Override
+    public void recibirAtaque(int tickActual) {
+        this.resistencia--;
+        this.bajoAtaque = true;
+        this.tiempoFinAtaque = tickActual + 30;
+        
+        if (this.resistencia <= 0) {
+            this.plantada = false;
+        }
+    }
+    
     public void usar(int tickActual) {
         this.disponibleParaPlantar = false;
         this.tiempoUltimoPlantado = tickActual;
     }
     
-    @Override
     public void ejecutarComportamientoEspecifico(int tickActual, Juego juego) {
         // WallNut no tiene comportamiento especial, solo defiende
-    }
-    
-    // Método específico para WallNut
-    public int getTiempoUltimoUso() {
-        return this.tiempoUltimoPlantado;
     }
 }
