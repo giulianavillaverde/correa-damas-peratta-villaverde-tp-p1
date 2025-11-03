@@ -159,7 +159,7 @@ public class ZombieRapido {
     
     public boolean estaVivo() {
         return vivo;
-    }
+    }  
     
     // Getters
     public double getX() { return x; }

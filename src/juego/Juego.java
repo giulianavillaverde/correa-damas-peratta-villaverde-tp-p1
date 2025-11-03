@@ -192,37 +192,20 @@ public class Juego extends InterfaceJuego {
    }
 
    private void actualizarPlantas() {
-       int tickActual = entorno.numeroDeTick();
-       
-       for(int i = 0; i < plantas.length; i++) {
-           planta p = plantas[i];
-           if(p != null && p.isPlantada()) {
-               p.dibujar();
-              
-               if (p instanceof RoseBlade) {
-                   RoseBlade rose = (RoseBlade) p;
-                   rose.actualizar(tickActual);
-                   BolaFuego nuevoDisparo = rose.disparar(tickActual);
-                   if (nuevoDisparo != null) {
-                       agregarDisparo(nuevoDisparo);
-                   }
-               }
-               else if (p instanceof PlantaDeHielo) {
-                   PlantaDeHielo plantaHielo = (PlantaDeHielo) p;
-                   plantaHielo.actualizar(tickActual);
-                   BolaEscarcha nuevoDisparoHielo = plantaHielo.disparar(tickActual);
-                   if (nuevoDisparoHielo != null) {
-                       agregarDisparoHielo(nuevoDisparoHielo);
-                   }
-               }
-               else if (p instanceof CerezaExplosiva) {
-                   CerezaExplosiva cereza = (CerezaExplosiva) p;
-                   cereza.actualizar(tickActual);
-                   verificarExplosionCereza(cereza, tickActual);
-               }
-           }
-       }
-   }
+	    int tickActual = entorno.numeroDeTick();
+	    
+	    for(int i = 0; i < plantas.length; i++) {
+	        planta p = plantas[i];
+	        if(p != null && p.isPlantada()) {
+	            p.dibujar();
+	            p.actualizar(tickActual);
+	            
+	            //Cada planta ejecuta su comportamiento
+	            p.ejecutarComportamientoEspecifico(tickActual, this);
+	        }
+	    }
+	}
+
 
    private void dibujarZombiesBanner() {
 	    if (zombieNormalBanner != null && zombieNormalBanner.getImagen() != null) {
@@ -791,49 +774,37 @@ public class Juego extends InterfaceJuego {
    }
   
    private int calcularSegundosRestantes(planta planta, int tickActual) {
-	    if (planta instanceof PlantaDeHielo) {
-	        PlantaDeHielo hielo = (PlantaDeHielo) planta;
-	        // Usar el método público para obtener el tiempo de recarga
-	        int tiempoTranscurrido = tickActual - hielo.getTiempoUltimoPlantado();
-	        int tiempoRestante = Math.max(0, hielo.getTiempoRecargaPlantado() - tiempoTranscurrido);
-	        return (int) Math.ceil(tiempoRestante / 6.0);
-	    } else if (planta instanceof RoseBlade) {
-	        RoseBlade rose = (RoseBlade) planta;
-	        int tiempoTranscurrido = tickActual - rose.getTiempoUltimoPlantado();
-	        int tiempoRestante = Math.max(0, rose.getTiempoRecargaPlantado() - tiempoTranscurrido);
-	        return (int) Math.ceil(tiempoRestante / 6.0);
-	    } else if (planta instanceof WallNut) {
-	        WallNut wallnut = (WallNut) planta;
-	        int tiempoTranscurrido = tickActual - wallnut.getTiempoUltimoUso();
-	        int tiempoRestante = Math.max(0, wallnut.getTiempoRecargaPlantado() - tiempoTranscurrido);
-	        return (int) Math.ceil(tiempoRestante / 6.0);
-	    } else if (planta instanceof CerezaExplosiva) {
-	        CerezaExplosiva cereza = (CerezaExplosiva) planta;
-	        int tiempoTranscurrido = tickActual - cereza.getTiempoUltimoPlantado();
-	        int tiempoRestante = Math.max(0, cereza.getTiempoRecargaPlantado() - tiempoTranscurrido);
-	        return (int) Math.ceil(tiempoRestante / 6.0);
-	    }
-	    return 0;
+	    int tiempoTranscurrido = tickActual - planta.getTiempoUltimoPlantado();
+	    int tiempoRestante = Math.max(0, planta.getTiempoRecargaPlantado() - tiempoTranscurrido);
+	    
+	    // Conversión más realista basada en el entorno
+	    // Si cada tick son ~20ms, entonces 50 ticks = 1 segundo
+	    return (int) Math.ceil(tiempoRestante / 50.0);
 	}
-   private void agregarDisparo(BolaFuego disparo) {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] == null) {
-               disparos[i] = disparo;
-               cantidadDisparosActivos++;
-               break;
-           }
-       }
-   }
+   public void agregarDisparo(BolaFuego disparo) {
+	    for (int i = 0; i < disparos.length; i++) {
+	        if (disparos[i] == null) {
+	            disparos[i] = disparo;
+	            cantidadDisparosActivos++;
+	            break;
+	        }
+	    }
+	}
+
+   public void agregarDisparoHielo(BolaEscarcha disparo) {
+	    for (int i = 0; i < disparosHielo.length; i++) {
+	        if (disparosHielo[i] == null) {
+	            disparosHielo[i] = disparo;
+	            cantidadDisparosHieloActivos++;
+	            break;
+	        }
+	    }
+	}
+   public void ejecutarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
+	    verificarExplosionCereza(cereza, tickActual);
+	}
+ 
   
-   private void agregarDisparoHielo(BolaEscarcha disparo) {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] == null) {
-               disparosHielo[i] = disparo;
-               cantidadDisparosHieloActivos++;
-               break;
-           }
-       }
-   }
   
    private void generarZombie() {
        if (Math.random() < 0.01 && zombiesEliminados < zombiesTotales) {

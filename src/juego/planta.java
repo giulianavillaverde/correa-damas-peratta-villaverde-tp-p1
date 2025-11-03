@@ -5,7 +5,7 @@ import java.awt.Color;
 import entorno.Entorno;
 import entorno.Herramientas;
 
-public class planta {
+public abstract class planta {
     private double x, y;
     private double xInicial, yInicial;
     private double escala;
@@ -18,6 +18,11 @@ public class planta {
     private boolean bajoAtaque;
     private int tiempoFinAtaque;
     
+    // ATRIBUTOS UNIFICADOS PARA TODAS LAS PLANTAS
+    protected int tiempoRecargaPlantado;
+    protected int tiempoUltimoPlantado;
+    protected boolean disponibleParaPlantar;
+    
     public planta(double x, double y, Entorno e, String imgNormal, String imgSeleccionada, double escala) {
         this.x = x;
         this.y = y;
@@ -27,10 +32,14 @@ public class planta {
         this.escala = escala;
         this.seleccionada = false;
         this.plantada = false;
-        this.resistencia = 1; // Valor por defecto
-        this.resistenciaMaxima = 1; // Valor por defecto
+        this.resistencia = 1;
+        this.resistenciaMaxima = 1;
         this.bajoAtaque = false;
         this.tiempoFinAtaque = 0;
+        
+        this.tiempoRecargaPlantado = 0;
+        this.tiempoUltimoPlantado = -100;
+        this.disponibleParaPlantar = true;
         
         try {
             this.imagen = Herramientas.cargarImagen(imgNormal);
@@ -48,42 +57,39 @@ public class planta {
     }
     
     public void dibujar() {
-        // Manejar efecto de ataque basado en ticks
         if (bajoAtaque && e.numeroDeTick() >= tiempoFinAtaque) {
             bajoAtaque = false;
         }
         
-        if (seleccionada) {
-            if (imagenSeleccionada != null) {
-                e.dibujarImagen(imagenSeleccionada, x, y, 0, escala);
-            } else if (imagen != null) {
-                e.dibujarImagen(imagen, x, y, 0, escala);
-            }
-        } else {
-            if (imagen != null) {
-                e.dibujarImagen(imagen, x, y, 0, escala);
-            }
+        Image imgActual = seleccionada && imagenSeleccionada != null ? imagenSeleccionada : imagen;
+        if (imgActual != null) {
+            e.dibujarImagen(imgActual, x, y, 0, escala);
         }
         
-        // Efecto visual cuando está bajo ataque
         if (bajoAtaque && plantada) {
             e.dibujarCirculo(x, y, 35, new Color(255, 0, 0, 100));
         }
     }
     
-    // Método para recibir daño
+    // MÉTODO UNIFICADO PARA RECIBIR ATAQUE
     public void recibirAtaque(int tickActual) {
         this.resistencia--;
         this.bajoAtaque = true;
-        this.tiempoFinAtaque = tickActual + 30; // 30 ticks ≈ 500ms
-        System.out.println(this.getClass().getSimpleName() + " recibió ataque, resistencia: " + resistencia + "/" + resistenciaMaxima);
+        this.tiempoFinAtaque = tickActual + 30;
         
         if (resistencia <= 0) {
-            System.out.println(this.getClass().getSimpleName() + " destruida!");
             plantada = false;
         }
     }
     
+    // MÉTODOS ABSTRACTOS QUE CADA PLANTA DEBE IMPLEMENTAR
+    public abstract void actualizar(int tickActual);
+    public abstract void usar(int tickActual);
+    
+    // MÉTODO PARA MANEJAR COMPORTAMIENTO ESPECÍFICO DE CADA PLANTA
+    public abstract void ejecutarComportamientoEspecifico(int tickActual, Juego juego);
+    
+    // MÉTODOS COMUNES PARA TODAS LAS PLANTAS
     public boolean encima(double xM, double yM) {
         double distancia = Math.sqrt((x - xM) * (x - xM) + (y - yM) * (y - yM));
         return distancia < 30;
@@ -94,7 +100,23 @@ public class planta {
         this.y = yM;
     }
     
-    // Getters
+    public boolean estaEnRecarga(int tickActual) {
+        if (disponibleParaPlantar) return false;
+        
+        if (tickActual - tiempoUltimoPlantado >= tiempoRecargaPlantado) {
+            disponibleParaPlantar = true;
+            return false;
+        }
+        return true;
+    }
+    
+    public double porcentajeRecarga(int tickActual) {
+        if (disponibleParaPlantar) return 1.0;
+        int tiempoTranscurrido = tickActual - tiempoUltimoPlantado;
+        return Math.min(1.0, (double) tiempoTranscurrido / tiempoRecargaPlantado);
+    }
+    
+    // GETTERS Y SETTERS
     public double getX() { return x; }
     public double getY() { return y; }
     public double getXInicial() { return xInicial; }
@@ -108,8 +130,9 @@ public class planta {
     public Image getImagen() { return imagen; }
     public Image getImagenSeleccionada() { return imagenSeleccionada; }
     public Entorno getEntorno() { return e; }
+    public int getTiempoRecargaPlantado() { return tiempoRecargaPlantado; }
+    public int getTiempoUltimoPlantado() { return tiempoUltimoPlantado; }
     
-    // Setters
     public void setSeleccionada(boolean seleccionada) { this.seleccionada = seleccionada; }
     public void setPlantada(boolean plantada) { this.plantada = plantada; }
     public void setResistencia(int resistencia) { this.resistencia = resistencia; }
