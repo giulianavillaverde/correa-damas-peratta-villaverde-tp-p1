@@ -17,7 +17,7 @@ public class Juego extends InterfaceJuego {
    private BolaFuego[] disparos;
    private BolaEscarcha[] disparosHielo;
    private BolaNieve[] bolasNieve;
-   private int contadorPlantas;
+   public int contadorPlantas;
    private int zombiesEliminados;
    private int zombiesTotales;
    private boolean juegoGanado;
@@ -39,11 +39,11 @@ public class Juego extends InterfaceJuego {
    private ZombieColosal zombieColosalBanner;
    
    // Contadores para optimización
-   private int cantidadPlantasActivas;
-   private int cantidadDisparosActivos;
-   private int cantidadDisparosHieloActivos;
-   private int cantidadBolasNieveActivas;
-   private int cantidadZombiesActivos;
+   public int cantidadPlantasActivas;
+   public int cantidadDisparosActivos;
+   public int cantidadDisparosHieloActivos;
+   public int cantidadBolasNieveActivas;
+   public int cantidadZombiesActivos;
   
    public Juego(){
        this.entorno = new Entorno(this, "Zombies Grinch", 1034, 585);
@@ -134,7 +134,7 @@ public class Juego extends InterfaceJuego {
        }
    }
    
-   private void compactarArrayPlantas() {
+   public void compactarArrayPlantas() {
        int writeIndex = 0;
        for (int readIndex = 0; readIndex < plantas.length; readIndex++) {
            if (plantas[readIndex] != null) {
@@ -283,7 +283,7 @@ public class Juego extends InterfaceJuego {
                        if (!plantas[j].plantada) {
                            int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                            int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                           cuadricula.setOcupado(indiceX, indiceY, false);
+                           cuadricula.Ocupado(indiceX, indiceY, false);
                            
                            eliminarPlanta(j);
                        }
@@ -381,7 +381,7 @@ public class Juego extends InterfaceJuego {
                    if (!plantas[j].plantada) {
                        int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                        int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                       cuadricula.setOcupado(indiceX, indiceY, false);
+                       cuadricula.Ocupado(indiceX, indiceY, false);
                        
                        eliminarPlanta(j);
                        zombieRapido.liberar();
@@ -429,7 +429,7 @@ public class Juego extends InterfaceJuego {
            cereza.plantada = false;
            int indiceX = cuadricula.cercanoL(cereza.x, cereza.y).x;
            int indiceY = cuadricula.cercanoL(cereza.x, cereza.y).y;
-           cuadricula.setOcupado(indiceX, indiceY, false);
+           cuadricula.Ocupado(indiceX, indiceY, false);
           
            for (int i = 0; i < plantas.length; i++) {
                if (plantas[i] == cereza) {
@@ -522,7 +522,7 @@ public class Juego extends InterfaceJuego {
                        if (!plantas[j].plantada) {
                            int indiceX = cuadricula.cercanoL(plantas[j].x, plantas[j].y).x;
                            int indiceY = cuadricula.cercanoL(plantas[j].x, plantas[j].y).y;
-                           cuadricula.setOcupado(indiceX, indiceY, false);
+                           cuadricula.Ocupado(indiceX, indiceY, false);
                            eliminarPlanta(j);
                        }
                    }
@@ -600,7 +600,8 @@ public class Juego extends InterfaceJuego {
 	       boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
 	       
 	       if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
-	           plantaSeleccionada.setPosicion(nuevaX, nuevaY);
+	           plantaSeleccionada.x = nuevaX;
+	           plantaSeleccionada.y = nuevaY;
 	       }
 	   }
    
@@ -622,7 +623,7 @@ public class Juego extends InterfaceJuego {
                        if (!plantaBloqueadora.plantada) {
                            int indiceX = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).x;
                            int indiceY = cuadricula.cercanoL(plantaBloqueadora.x, plantaBloqueadora.y).y;
-                           cuadricula.setOcupado(indiceX, indiceY, false);
+                           cuadricula.Ocupado(indiceX, indiceY, false);
                            
                            for (int j = 0; j < plantas.length; j++) {
                                if (plantas[j] == plantaBloqueadora) {
@@ -940,7 +941,8 @@ public class Juego extends InterfaceJuego {
        if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
            for (int i = 0; i < plantas.length; i++) {
                if (plantas[i] != null && plantas[i].seleccionada) {
-                   plantas[i].arrastrar(entorno.mouseX(), entorno.mouseY());
+                   plantas[i].x = entorno.mouseX();
+                   plantas[i].y = entorno.mouseY();
                }
            }
        }
@@ -974,21 +976,23 @@ public class Juego extends InterfaceJuego {
        WallNut wallnut = (WallNut) wallnutBanner;
       
        if (entorno.mouseY() < 70) {
-           wallnutBanner.setPosicion(wallnutBanner.xInicial, wallnutBanner.yInicial);
+           wallnutBanner.x = wallnutBanner.xInicial;
+           wallnutBanner.y = wallnutBanner.yInicial;
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.Ocupado(indiceX, indiceY)) {
-               WallNut nuevaWallnut = new WallNut(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
+           if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+               WallNut nuevaWallnut = new WallNut(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                nuevaWallnut.plantada = true;
               
                if (agregarPlanta(nuevaWallnut)) {
-                   cuadricula.estaOcupado(indiceX, indiceY, true);
+                   cuadricula.Ocupado(indiceX, indiceY, true);
                    wallnut.usar(tickActual);
                }
            }
-           wallnutBanner.setPosicion(wallnutBanner.xInicial, wallnutBanner.yInicial);
+           wallnutBanner.x = wallnutBanner.xInicial;
+           wallnutBanner.y = wallnutBanner.yInicial;
        }
        wallnutBanner.seleccionada = false;
    }
@@ -997,21 +1001,23 @@ public class Juego extends InterfaceJuego {
        PlantaDeHielo hielo = (PlantaDeHielo) hieloBanner;
       
        if (entorno.mouseY() < 70) {
-           hieloBanner.setPosicion(hieloBanner.xInicial, hieloBanner.yInicial);
+           hieloBanner.x = hieloBanner.xInicial;
+           hieloBanner.y = hieloBanner.yInicial;
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.Ocupado(indiceX, indiceY)) {
-               PlantaDeHielo nuevaHielo = new PlantaDeHielo(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
+           if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+               PlantaDeHielo nuevaHielo = new PlantaDeHielo(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                nuevaHielo.plantada = true;
               
                if (agregarPlanta(nuevaHielo)) {
-                   cuadricula.estaOcupado(indiceX, indiceY, true);
+                   cuadricula.Ocupado(indiceX, indiceY, true);
                    hielo.usar(tickActual);
                }
            }
-           hieloBanner.setPosicion(hieloBanner.xInicial, hieloBanner.yInicial);
+           hieloBanner.x = hieloBanner.xInicial;
+           hieloBanner.y = hieloBanner.yInicial;
        }
        hieloBanner.seleccionada = false;
    }
@@ -1020,21 +1026,23 @@ public class Juego extends InterfaceJuego {
        RoseBlade rose = (RoseBlade) roseBanner;
       
        if (entorno.mouseY() < 70) {
-           roseBanner.setPosicion(roseBanner.xInicial, roseBanner.yInicial);
+           roseBanner.x = roseBanner.xInicial;
+           roseBanner.y = roseBanner.yInicial;
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
-               RoseBlade nuevaRose = new RoseBlade(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
+           if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+               RoseBlade nuevaRose = new RoseBlade(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                nuevaRose.plantada = true;
               
                if (agregarPlanta(nuevaRose)) {
-                   cuadricula.setOcupado(indiceX, indiceY, true);
+                   cuadricula.Ocupado(indiceX, indiceY, true);
                    rose.usar(tickActual);
                }
            }
-           roseBanner.setPosicion(roseBanner.xInicial, roseBanner.yInicial);
+           roseBanner.x = roseBanner.xInicial;
+           roseBanner.y = roseBanner.yInicial;
        }
        roseBanner.seleccionada = false;
    }
@@ -1043,21 +1051,23 @@ public class Juego extends InterfaceJuego {
        CerezaExplosiva cereza = (CerezaExplosiva) cerezaBanner;
       
        if (entorno.mouseY() < 70) {
-           cerezaBanner.setPosicion(cerezaBanner.xInicial, cerezaBanner.yInicial);
+           cerezaBanner.x = cerezaBanner.xInicial;
+           cerezaBanner.y = cerezaBanner.yInicial;
        } else {
            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
           
-           if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
-               CerezaExplosiva nuevaCereza = new CerezaExplosiva(cuadricula.getCoorX()[indiceX], cuadricula.getCoorY()[indiceY], entorno);
+           if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+               CerezaExplosiva nuevaCereza = new CerezaExplosiva(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
                nuevaCereza.plantada = true;
               
                if (agregarPlanta(nuevaCereza)) {
-                   cuadricula.setOcupado(indiceX, indiceY, true);
+                   cuadricula.Ocupado(indiceX, indiceY, true);
                    cereza.usar(tickActual);
                }
            }
-           cerezaBanner.setPosicion(cerezaBanner.xInicial, cerezaBanner.yInicial);
+           cerezaBanner.x = cerezaBanner.xInicial;
+           cerezaBanner.y = cerezaBanner.yInicial;
        }
        cerezaBanner.seleccionada = false;
    }
@@ -1070,15 +1080,17 @@ public class Juego extends InterfaceJuego {
               
                int indiceXAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).x;
                int indiceYAnterior = cuadricula.cercanoL(plantas[i].xInicial, plantas[i].yInicial).y;
-               cuadricula.setOcupado(indiceXAnterior, indiceYAnterior, false);
+               cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
               
-               if (indiceX > 0 && !cuadricula.isOcupado(indiceX, indiceY)) {
+               if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
                    cuadricula.centrarPlanta(plantas[i], indiceX, indiceY);
-                   cuadricula.setOcupado(indiceX, indiceY, true);
-                   plantas[i].setPosicionInicial(plantas[i].x, plantas[i].y);
+                   cuadricula.Ocupado(indiceX, indiceY, true);
+                   plantas[i].xInicial = plantas[i].x;
+                   plantas[i].yInicial = plantas[i].y;
                } else {
-                   plantas[i].setPosicion(plantas[i].xInicial, plantas[i].yInicial);
-                   cuadricula.setOcupado(indiceXAnterior, indiceYAnterior, true);
+                   plantas[i].x = plantas[i].xInicial;
+                   plantas[i].y = plantas[i].yInicial;
+                   cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
                }
            }
        }
@@ -1097,7 +1109,6 @@ public class Juego extends InterfaceJuego {
 	    }
 	    entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
 	   
-	  //Aviso de que los zombies van a aparecer en pantalla
 	    if (zombieRapido != null && zombieRapido.vivo) {
 	        entorno.cambiarFont("Impact", 50, Color.ORANGE);
 	        entorno.escribirTexto("¡ZOMBIE RÁPIDO!", 330, 350);
@@ -1138,3 +1149,4 @@ public class Juego extends InterfaceJuego {
 	       new Juego();
 	   }
 }
+
