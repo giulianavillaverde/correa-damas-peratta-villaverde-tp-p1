@@ -26,4 +26,4 @@ public class Banner {
         // Pone la imagen en las coordenadas especificadas con la escala aplicada
         e.dibujarImagen(imagen, x, y, 0.0, escala);
     }
-}
+} //:)

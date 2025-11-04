@@ -113,41 +113,25 @@ public class cuadricula {
         return new Point(jm, im);
     }
     
-    // Métodos específicos para cada tipo de planta
-    public void centrarWallnut(WallNut p, int indiceX, int indiceY) {
-        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
-            p.x = this.coorX[indiceX];
-            p.y = this.coorY[indiceY];
-            p.xInicial = p.x;
-            p.yInicial = p.y;
-        }
+ // En la clase cuadricula, asegúrate de tener estos métodos:
+    public void centrarWallnut(WallNut planta, int indiceX, int indiceY) {
+        planta.x = coorX[indiceX];
+        planta.y = coorY[indiceY];
     }
-    
-    public void centrarPlantaHielo(PlantaDeHielo p, int indiceX, int indiceY) {
-        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
-            p.x = this.coorX[indiceX];
-            p.y = this.coorY[indiceY];
-            p.xInicial = p.x;
-            p.yInicial = p.y;
-        }
+
+    public void centrarPlantaHielo(PlantaDeHielo planta, int indiceX, int indiceY) {
+        planta.x = coorX[indiceX];
+        planta.y = coorY[indiceY];
     }
-    
-    public void centrarRoseBlade(RoseBlade p, int indiceX, int indiceY) {
-        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
-            p.x = this.coorX[indiceX];
-            p.y = this.coorY[indiceY];
-            p.xInicial = p.x;
-            p.yInicial = p.y;
-        }
+
+    public void centrarRoseBlade(RoseBlade planta, int indiceX, int indiceY) {
+        planta.x = coorX[indiceX];
+        planta.y = coorY[indiceY];
     }
-    
-    public void centrarCereza(CerezaExplosiva p, int indiceX, int indiceY) {
-        if (indiceX >= 0 && indiceX < coorX.length && indiceY >= 0 && indiceY < coorY.length) {
-            p.x = this.coorX[indiceX];
-            p.y = this.coorY[indiceY];
-            p.xInicial = p.x;
-            p.yInicial = p.y;
-        }
+
+    public void centrarCereza(CerezaExplosiva planta, int indiceX, int indiceY) {
+        planta.x = coorX[indiceX];
+        planta.y = coorY[indiceY];
     }
     
     public void Ocupado(int x, int y, boolean valor) {

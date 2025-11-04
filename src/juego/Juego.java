@@ -619,338 +619,391 @@ public class Juego extends InterfaceJuego {
            cerezaBanner.dibujar();
        }
    }
-   
-   private void manejarMovimientoTeclado() {
-        // Buscar planta seleccionada en todos los arrays
-        WallNut wallnutSeleccionada = null;
-        PlantaDeHielo hieloSeleccionada = null;
-        RoseBlade roseSeleccionada = null;
-        CerezaExplosiva cerezaSeleccionada = null;
-        
-        for (WallNut p : plantasWallnut) {
-            if (p != null && p.seleccionada) {
-                wallnutSeleccionada = p;
-                break;
-            }
-        }
-        
-        if (wallnutSeleccionada == null) {
-            for (PlantaDeHielo p : plantasHielo) {
-                if (p != null && p.seleccionada) {
-                    hieloSeleccionada = p;
-                    break;
-                }
-            }
-        }
-        
-        if (wallnutSeleccionada == null && hieloSeleccionada == null) {
-            for (RoseBlade p : plantasRose) {
-                if (p != null && p.seleccionada) {
-                    roseSeleccionada = p;
-                    break;
-                }
-            }
-        }
-        
-        if (wallnutSeleccionada == null && hieloSeleccionada == null && roseSeleccionada == null) {
-            for (CerezaExplosiva p : plantasCereza) {
-                if (p != null && p.seleccionada) {
-                    cerezaSeleccionada = p;
-                    break;
-                }
-            }
-        }
-        
-        // Mover la planta seleccionada
-        if (wallnutSeleccionada != null) {
-            moverWallnut(wallnutSeleccionada);
-        } else if (hieloSeleccionada != null) {
-            moverPlantaHielo(hieloSeleccionada);
-        } else if (roseSeleccionada != null) {
-            moverRoseBlade(roseSeleccionada);
-        } else if (cerezaSeleccionada != null) {
-            moverCerezaExplosiva(cerezaSeleccionada);
-        }
-    }
+   private boolean puedeMover = true;
+private int ticksBloqueoMovimiento = 0;
 
-    private void moverWallnut(WallNut planta) {
-        double velocidad = 105;
-        double nuevaX = planta.x;
-        double nuevaY = planta.y;
-        
-        if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
-            nuevaY -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
-            nuevaY += velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
-            nuevaX -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
-            nuevaX += velocidad;
-        }
-        
-        boolean enBanner = nuevaY < 100;
-        boolean enPrimeraColumna = nuevaX < 100;
-        boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
-        
-        if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
-            planta.x = nuevaX;
-            planta.y = nuevaY;
-        }
-    }
+private void manejarMovimientoTeclado() {
+	   
+	   if (!puedeMover) {
+		    ticksBloqueoMovimiento--;
+		    if (ticksBloqueoMovimiento <= 0) {
+		        puedeMover = true;
+		    }
+		    return; 
+	   }
+	    // Buscar planta seleccionada en todos los arrays
+	    WallNut wallnutSeleccionada = null;
+	    PlantaDeHielo hieloSeleccionada = null;
+	    RoseBlade roseSeleccionada = null;
+	    CerezaExplosiva cerezaSeleccionada = null;
+	    
+	    for (WallNut p : plantasWallnut) {
+	        if (p != null && p.seleccionada) {
+	            wallnutSeleccionada = p;
+	            break;
+	        }
+	    }
+	    
+	    if (wallnutSeleccionada == null) {
+	        for (PlantaDeHielo p : plantasHielo) {
+	            if (p != null && p.seleccionada) {
+	                hieloSeleccionada = p;
+	                break;
+	            }
+	        }
+	    }
+	    
+	    if (wallnutSeleccionada == null && hieloSeleccionada == null) {
+	        for (RoseBlade p : plantasRose) {
+	            if (p != null && p.seleccionada) {
+	                roseSeleccionada = p;
+	                break;
+	            }
+	        }
+	    }
+	    
+	    if (wallnutSeleccionada == null && hieloSeleccionada == null && roseSeleccionada == null) {
+	        for (CerezaExplosiva p : plantasCereza) {
+	            if (p != null && p.seleccionada) {
+	                cerezaSeleccionada = p;
+	                break;
+	            }
+	        }
+	    }
+	    
+	    // Mover la planta seleccionada por cuadrícula
+	    if (wallnutSeleccionada != null) {
+	        moverWallnutCuadricula(wallnutSeleccionada);
+	    } else if (hieloSeleccionada != null) {
+	        moverPlantaHieloCuadricula(hieloSeleccionada);
+	    } else if (roseSeleccionada != null) {
+	        moverRoseBladeCuadricula(roseSeleccionada);
+	    } else if (cerezaSeleccionada != null) {
+	        moverCerezaCuadricula(cerezaSeleccionada);
+	    }
+	}
 
-    private void moverPlantaHielo(PlantaDeHielo planta) {
-        double velocidad = 105;
-        double nuevaX = planta.x;
-        double nuevaY = planta.y;
-        
-        if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
-            nuevaY -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
-            nuevaY += velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
-            nuevaX -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
-            nuevaX += velocidad;
-        }
-        
-        boolean enBanner = nuevaY < 100;
-        boolean enPrimeraColumna = nuevaX < 100;
-        boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
-        
-        if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
-            planta.x = nuevaX;
-            planta.y = nuevaY;
-        }
-    }
 
-    private void moverRoseBlade(RoseBlade planta) {
-        double velocidad = 105;
-        double nuevaX = planta.x;
-        double nuevaY = planta.y;
-        
-        if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
-            nuevaY -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
-            nuevaY += velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
-            nuevaX -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
-            nuevaX += velocidad;
-        }
-        
-        boolean enBanner = nuevaY < 100;
-        boolean enPrimeraColumna = nuevaX < 100;
-        boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
-        
-        if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
-            planta.x = nuevaX;
-            planta.y = nuevaY;
-        }
-    }
+	   private void moverWallnutCuadricula(WallNut planta) {
+		    int indiceXActual = cuadricula.cercanoL(planta.x, planta.y).x;
+		    int indiceYActual = cuadricula.cercanoL(planta.x, planta.y).y;
 
-    private void moverCerezaExplosiva(CerezaExplosiva planta) {
-        double velocidad = 105;
-        double nuevaX = planta.x;
-        double nuevaY = planta.y;
-        
-        if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
-            nuevaY -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
-            nuevaY += velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
-            nuevaX -= velocidad;
-        }
-        if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
-            nuevaX += velocidad;
-        }
-        
-        boolean enBanner = nuevaY < 100;
-        boolean enPrimeraColumna = nuevaX < 100;
-        boolean dentroDeLimites = nuevaX >= 30 && nuevaX <= 1000 && nuevaY >= 30 && nuevaY <= 550;
-        
-        if (!enBanner && !enPrimeraColumna && dentroDeLimites) {
-            planta.x = nuevaX;
-            planta.y = nuevaY;
-        }
-    }
+		    int nuevoIndiceX = indiceXActual;
+		    int nuevoIndiceY = indiceYActual;
 
-    private void verificarAtaquesZombies() {
-        int tickActual = entorno.numeroDeTick();
-        
-        // Ataques de zombies Grinch
-        for (int i = 0; i < zombiesGrinch.length; i++) {
-            if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
-                zombiesGrinch[i].verificarPlantaBloqueadora();
-                
-                if (zombiesGrinch[i].bloqueadoPorPlanta) {
-                    Object plantaBloqueadora = zombiesGrinch[i].plantaBloqueadora;
-                    
-                    // Verificar WallNuts
-                    for (int j = 0; j < plantasWallnut.length; j++) {
-                        if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
-                            zombiesGrinch[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueWallnut(plantasWallnut[j], tickActual);
-                            
-                            if (!WallnutPlantada(plantasWallnut[j])) {
-                                liberarYLimpiarWallnut(plantasWallnut[j]);
-                                zombiesGrinch[i].liberar();
-                            }
-                            zombiesGrinch[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar Plantas de Hielo
-                    for (int j = 0; j < plantasHielo.length; j++) {
-                        if (plantasHielo[j] == plantaBloqueadora && PlantaHieloPlantada(plantasHielo[j]) && 
-                            zombiesGrinch[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaquePlantaHielo(plantasHielo[j], tickActual);
-                            
-                            if (!PlantaHieloPlantada(plantasHielo[j])) {
-                                liberarYLimpiarPlantaHielo(plantasHielo[j]);
-                                zombiesGrinch[i].liberar();
-                            }
-                            zombiesGrinch[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar RoseBlades
-                    for (int j = 0; j < plantasRose.length; j++) {
-                        if (plantasRose[j] == plantaBloqueadora && estaRoseBladePlantada(plantasRose[j]) && 
-                            zombiesGrinch[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueRoseBlade(plantasRose[j], tickActual);
-                            
-                            if (!estaRoseBladePlantada(plantasRose[j])) {
-                                liberarYLimpiarRoseBlade(plantasRose[j]);
-                                zombiesGrinch[i].liberar();
-                            }
-                            zombiesGrinch[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar Cerezas
-                    for (int j = 0; j < plantasCereza.length; j++) {
-                        if (plantasCereza[j] == plantaBloqueadora && estaCerezaPlantada(plantasCereza[j]) && 
-                            zombiesGrinch[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueCereza(plantasCereza[j], tickActual);
-                            
-                            if (!estaCerezaPlantada(plantasCereza[j])) {
-                                liberarYLimpiarCereza(plantasCereza[j]);
-                                zombiesGrinch[i].liberar();
-                            }
-                            zombiesGrinch[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                } else {
-                    buscarYBloquearPlantaGrinch(zombiesGrinch[i], tickActual);
-                }
-            }
-        }
-        
-        // Ataques de zombies Rápidos
-        for (int i = 0; i < zombiesRapidos.length; i++) {
-            if (zombiesRapidos[i] != null && zombiesRapidos[i].vivo) {
-                zombiesRapidos[i].verificarPlantaBloqueadora();
-                
-                if (zombiesRapidos[i].bloqueadoPorPlanta) {
-                    Object plantaBloqueadora = zombiesRapidos[i].plantaBloqueadora;
-                    
-                    // Verificar WallNuts
-                    for (int j = 0; j < plantasWallnut.length; j++) {
-                        if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
-                            zombiesRapidos[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueWallnut(plantasWallnut[j], tickActual);
-                            
-                            if (!WallnutPlantada(plantasWallnut[j])) {
-                                liberarYLimpiarWallnut(plantasWallnut[j]);
-                                zombiesRapidos[i].liberar();
-                            }
-                            zombiesRapidos[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar Plantas de Hielo
-                    for (int j = 0; j < plantasHielo.length; j++) {
-                        if (plantasHielo[j] == plantaBloqueadora && PlantaHieloPlantada(plantasHielo[j]) && 
-                            zombiesRapidos[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaquePlantaHielo(plantasHielo[j], tickActual);
-                            
-                            if (!PlantaHieloPlantada(plantasHielo[j])) {
-                                liberarYLimpiarPlantaHielo(plantasHielo[j]);
-                                zombiesRapidos[i].liberar();
-                            }
-                            zombiesRapidos[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar RoseBlades
-                    for (int j = 0; j < plantasRose.length; j++) {
-                        if (plantasRose[j] == plantaBloqueadora && estaRoseBladePlantada(plantasRose[j]) && 
-                            zombiesRapidos[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueRoseBlade(plantasRose[j], tickActual);
-                            
-                            if (!estaRoseBladePlantada(plantasRose[j])) {
-                                liberarYLimpiarRoseBlade(plantasRose[j]);
-                                zombiesRapidos[i].liberar();
-                            }
-                            zombiesRapidos[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                    
-                    // Verificar Cerezas
-                    for (int j = 0; j < plantasCereza.length; j++) {
-                        if (plantasCereza[j] == plantaBloqueadora && estaCerezaPlantada(plantasCereza[j]) && 
-                            zombiesRapidos[i].puedeAtacar(tickActual)) {
-                            
-                            aplicarAtaqueCereza(plantasCereza[j], tickActual);
-                            
-                            if (!estaCerezaPlantada(plantasCereza[j])) {
-                                liberarYLimpiarCereza(plantasCereza[j]);
-                                zombiesRapidos[i].liberar();
-                            }
-                            zombiesRapidos[i].registrarAtaque(tickActual);
-                            break;
-                        }
-                    }
-                } else {
-                    buscarYBloquearPlantaRapido(zombiesRapidos[i]);
-                }
-            }
-        }
-        
-        // Ataques de zombies Colosales
-        for (int i = 0; i < zombiesColosales.length; i++) {
-            if (zombiesColosales[i] != null && zombiesColosales[i].vivo) {
-                buscarYAtacarPlantaColosal(zombiesColosales[i], tickActual);
-            }
-        }
-    }
+		    if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
+		        nuevoIndiceY = indiceYActual - 1;
+		    } else if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
+		        nuevoIndiceY = indiceYActual + 1;
+		    } else if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
+		        nuevoIndiceX = indiceXActual - 1;
+		    } else if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
+		        nuevoIndiceX = indiceXActual + 1;
+		    }
 
-   private boolean WallnutPlantada(WallNut planta) {
+		    if ((nuevoIndiceX != indiceXActual || nuevoIndiceY != indiceYActual) &&
+		        !cuadricula.estaOcupado(nuevoIndiceX, nuevoIndiceY)) {
+		        
+		        cuadricula.Ocupado(indiceXActual, indiceYActual, false);
+		        planta.x = cuadricula.coorX[nuevoIndiceX];
+		        planta.y = cuadricula.coorY[nuevoIndiceY];
+		        planta.xInicial = planta.x;
+		        planta.yInicial = planta.y;
+		        cuadricula.Ocupado(nuevoIndiceX, nuevoIndiceY, true);
+
+		        System.out.println("Movido de [" + indiceXActual + "," + indiceYActual + "] a [" + nuevoIndiceX + "," + nuevoIndiceY + "]");
+
+		      
+		        puedeMover = false;
+		        ticksBloqueoMovimiento = 10;
+		    }
+		}
+
+private void moverPlantaHieloCuadricula(PlantaDeHielo planta) {
+	    int indiceXActual = cuadricula.cercanoL(planta.x, planta.y).x;
+	    int indiceYActual = cuadricula.cercanoL(planta.x, planta.y).y;
+	    
+	    int nuevoIndiceX = indiceXActual;
+	    int nuevoIndiceY = indiceYActual;
+	    
+	    // MOVER SOLO UNA CASILLA POR VEZ
+	    if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
+	        nuevoIndiceY = indiceYActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
+	        nuevoIndiceY = indiceYActual + 1;  
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
+	        nuevoIndiceX = indiceXActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
+	        nuevoIndiceX = indiceXActual + 1;
+	    }
+	    
+	    // Verificar límites
+	    
+	    if ((nuevoIndiceX != indiceXActual || nuevoIndiceY != indiceYActual) && 
+	        !cuadricula.estaOcupado(nuevoIndiceX, nuevoIndiceY)) {
+	        
+	        cuadricula.Ocupado(indiceXActual, indiceYActual, false);
+	        planta.x = cuadricula.coorX[nuevoIndiceX];
+	        planta.y = cuadricula.coorY[nuevoIndiceY];
+	        planta.xInicial = planta.x;
+	        planta.yInicial = planta.y;
+	        cuadricula.Ocupado(nuevoIndiceX, nuevoIndiceY, true);
+	        puedeMover = false;
+	        ticksBloqueoMovimiento = 10;
+	    }
+	}
+
+	private void moverRoseBladeCuadricula(RoseBlade planta) {
+	    int indiceXActual = cuadricula.cercanoL(planta.x, planta.y).x;
+	    int indiceYActual = cuadricula.cercanoL(planta.x, planta.y).y;
+	    
+	    int nuevoIndiceX = indiceXActual;
+	    int nuevoIndiceY = indiceYActual;
+	    
+	    // MOVER SOLO UNA CASILLA POR VEZ
+	    if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
+	        nuevoIndiceY = indiceYActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
+	        nuevoIndiceY = indiceYActual + 1;  
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
+	        nuevoIndiceX = indiceXActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
+	        nuevoIndiceX = indiceXActual + 1;
+	    }
+	    
+	    // Verificar límites
+	    if (nuevoIndiceX < 0) nuevoIndiceX = 0;
+	    if (nuevoIndiceX > 10) nuevoIndiceX =10;
+	    if (nuevoIndiceY < 0) nuevoIndiceY = 0;
+	    if (nuevoIndiceY > 5) nuevoIndiceY = 5;
+	    
+	    if ((nuevoIndiceX != indiceXActual || nuevoIndiceY != indiceYActual) && 
+	        !cuadricula.estaOcupado(nuevoIndiceX, nuevoIndiceY)) {
+	        
+	        cuadricula.Ocupado(indiceXActual, indiceYActual, false);
+	        planta.x = cuadricula.coorX[nuevoIndiceX];
+	        planta.y = cuadricula.coorY[nuevoIndiceY];
+	        planta.xInicial = planta.x;
+	        planta.yInicial = planta.y;
+	        cuadricula.Ocupado(nuevoIndiceX, nuevoIndiceY, true);
+	        
+	        puedeMover = false;
+	        ticksBloqueoMovimiento = 10;
+	    }
+	}
+
+	private void moverCerezaCuadricula(CerezaExplosiva planta) {
+	    int indiceXActual = cuadricula.cercanoL(planta.x, planta.y).x;
+	    int indiceYActual = cuadricula.cercanoL(planta.x, planta.y).y;
+	    
+	    int nuevoIndiceX = indiceXActual;
+	    int nuevoIndiceY = indiceYActual;
+	    
+	    // MOVER SOLO UNA CASILLA POR VEZ
+	    if (entorno.sePresiono(entorno.TECLA_ARRIBA) || entorno.sePresiono('w')) {
+	        nuevoIndiceY = indiceYActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_ABAJO) || entorno.sePresiono('s')) {
+	        nuevoIndiceY = indiceYActual + 1;  
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_IZQUIERDA) || entorno.sePresiono('a')) {
+	        nuevoIndiceX = indiceXActual - 1;
+	    }
+	    else if (entorno.sePresiono(entorno.TECLA_DERECHA) || entorno.sePresiono('d')) {
+	        nuevoIndiceX = indiceXActual + 1;
+	    }
+	    
+	    // Verificar límites
+	    if (nuevoIndiceX < 0) nuevoIndiceX = 0;
+	    if (nuevoIndiceX > 8) nuevoIndiceX = 8;
+	    if (nuevoIndiceY < 0) nuevoIndiceY = 0;
+	    if (nuevoIndiceY > 4) nuevoIndiceY = 4;
+	    
+	    if ((nuevoIndiceX != indiceXActual || nuevoIndiceY != indiceYActual) && 
+	        !cuadricula.estaOcupado(nuevoIndiceX, nuevoIndiceY)) {
+	        
+	        cuadricula.Ocupado(indiceXActual, indiceYActual, false);
+	        planta.x = cuadricula.coorX[nuevoIndiceX];
+	        planta.y = cuadricula.coorY[nuevoIndiceY];
+	        planta.xInicial = planta.x;
+	        planta.yInicial = planta.y;
+	        cuadricula.Ocupado(nuevoIndiceX, nuevoIndiceY, true);
+	        puedeMover = false;
+	        ticksBloqueoMovimiento = 10;
+	    }
+	}
+ private void verificarAtaquesZombies() {
+     int tickActual = entorno.numeroDeTick();
+     
+     // Ataques de zombies Grinch
+     for (int i = 0; i < zombiesGrinch.length; i++) {
+         if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
+             zombiesGrinch[i].verificarPlantaBloqueadora();
+             
+             if (zombiesGrinch[i].bloqueadoPorPlanta) {
+                 Object plantaBloqueadora = zombiesGrinch[i].plantaBloqueadora;
+                 
+                 // Verificar WallNuts
+                 for (int j = 0; j < plantasWallnut.length; j++) {
+                     if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
+                         zombiesGrinch[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueWallnut(plantasWallnut[j], tickActual);
+                         
+                         if (!WallnutPlantada(plantasWallnut[j])) {
+                             liberarYLimpiarWallnut(plantasWallnut[j]);
+                             zombiesGrinch[i].liberar();
+                         }
+                         zombiesGrinch[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar Plantas de Hielo
+                 for (int j = 0; j < plantasHielo.length; j++) {
+                     if (plantasHielo[j] == plantaBloqueadora && PlantaHieloPlantada(plantasHielo[j]) && 
+                         zombiesGrinch[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaquePlantaHielo(plantasHielo[j], tickActual);
+                         
+                         if (!PlantaHieloPlantada(plantasHielo[j])) {
+                             liberarYLimpiarPlantaHielo(plantasHielo[j]);
+                             zombiesGrinch[i].liberar();
+                         }
+                         zombiesGrinch[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar RoseBlades
+                 for (int j = 0; j < plantasRose.length; j++) {
+                     if (plantasRose[j] == plantaBloqueadora && estaRoseBladePlantada(plantasRose[j]) && 
+                         zombiesGrinch[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueRoseBlade(plantasRose[j], tickActual);
+                         
+                         if (!estaRoseBladePlantada(plantasRose[j])) {
+                             liberarYLimpiarRoseBlade(plantasRose[j]);
+                             zombiesGrinch[i].liberar();
+                         }
+                         zombiesGrinch[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar Cerezas
+                 for (int j = 0; j < plantasCereza.length; j++) {
+                     if (plantasCereza[j] == plantaBloqueadora && estaCerezaPlantada(plantasCereza[j]) && 
+                         zombiesGrinch[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueCereza(plantasCereza[j], tickActual);
+                         
+                         if (!estaCerezaPlantada(plantasCereza[j])) {
+                             liberarYLimpiarCereza(plantasCereza[j]);
+                             zombiesGrinch[i].liberar();
+                         }
+                         zombiesGrinch[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+             } else {
+                 buscarYBloquearPlantaGrinch(zombiesGrinch[i], tickActual);
+             }
+         }
+     }
+     
+     // Ataques de zombies Rápidos
+     for (int i = 0; i < zombiesRapidos.length; i++) {
+         if (zombiesRapidos[i] != null && zombiesRapidos[i].vivo) {
+             zombiesRapidos[i].verificarPlantaBloqueadora();
+             
+             if (zombiesRapidos[i].bloqueadoPorPlanta) {
+                 Object plantaBloqueadora = zombiesRapidos[i].plantaBloqueadora;
+                 
+                 // Verificar WallNuts
+                 for (int j = 0; j < plantasWallnut.length; j++) {
+                     if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
+                         zombiesRapidos[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueWallnut(plantasWallnut[j], tickActual);
+                         
+                         if (!WallnutPlantada(plantasWallnut[j])) {
+                             liberarYLimpiarWallnut(plantasWallnut[j]);
+                             zombiesRapidos[i].liberar();
+                         }
+                         zombiesRapidos[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar Plantas de Hielo
+                 for (int j = 0; j < plantasHielo.length; j++) {
+                     if (plantasHielo[j] == plantaBloqueadora && PlantaHieloPlantada(plantasHielo[j]) && 
+                         zombiesRapidos[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaquePlantaHielo(plantasHielo[j], tickActual);
+                         
+                         if (!PlantaHieloPlantada(plantasHielo[j])) {
+                             liberarYLimpiarPlantaHielo(plantasHielo[j]);
+                             zombiesRapidos[i].liberar();
+                         }
+                         zombiesRapidos[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar RoseBlades
+                 for (int j = 0; j < plantasRose.length; j++) {
+                     if (plantasRose[j] == plantaBloqueadora && estaRoseBladePlantada(plantasRose[j]) && 
+                         zombiesRapidos[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueRoseBlade(plantasRose[j], tickActual);
+                         
+                         if (!estaRoseBladePlantada(plantasRose[j])) {
+                             liberarYLimpiarRoseBlade(plantasRose[j]);
+                             zombiesRapidos[i].liberar();
+                         }
+                         zombiesRapidos[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+                 
+                 // Verificar Cerezas
+                 for (int j = 0; j < plantasCereza.length; j++) {
+                     if (plantasCereza[j] == plantaBloqueadora && estaCerezaPlantada(plantasCereza[j]) && 
+                         zombiesRapidos[i].puedeAtacar(tickActual)) {
+                         
+                         aplicarAtaqueCereza(plantasCereza[j], tickActual);
+                         
+                         if (!estaCerezaPlantada(plantasCereza[j])) {
+                             liberarYLimpiarCereza(plantasCereza[j]);
+                             zombiesRapidos[i].liberar();
+                         }
+                         zombiesRapidos[i].registrarAtaque(tickActual);
+                         break;
+                     }
+                 }
+             } else {
+                 buscarYBloquearPlantaRapido(zombiesRapidos[i]);
+             }
+         }
+     }
+     
+     // Ataques de zombies Colosales
+     for (int i = 0; i < zombiesColosales.length; i++) {
+         if (zombiesColosales[i] != null && zombiesColosales[i].vivo) {
+             buscarYAtacarPlantaColosal(zombiesColosales[i], tickActual);
+         }
+     }
+ }
+
+private boolean WallnutPlantada(WallNut planta) {
 	    return planta.plantada;
 	}
 
@@ -1010,981 +1063,1055 @@ public class Juego extends InterfaceJuego {
 	    eliminarCerezaExplosivaDeArray(planta);
 	}
 
-    private void eliminarWallnutDeArray(WallNut wallnut) {
-        for (int i = 0; i < plantasWallnut.length; i++) {
-            if (plantasWallnut[i] == wallnut) {
-                eliminarWallnut(i);
-                break;
-            }
+ private void eliminarWallnutDeArray(WallNut wallnut) {
+     for (int i = 0; i < plantasWallnut.length; i++) {
+         if (plantasWallnut[i] == wallnut) {
+             eliminarWallnut(i);
+             break;
+         }
+     }
+ }
+
+ private void eliminarPlantaHieloDeArray(PlantaDeHielo planta) {
+     for (int i = 0; i < plantasHielo.length; i++) {
+         if (plantasHielo[i] == planta) {
+             eliminarPlantaHielo(i);
+             break;
+         }
+     }
+ }
+
+ private void eliminarRoseBladeDeArray(RoseBlade rose) {
+     for (int i = 0; i < plantasRose.length; i++) {
+         if (plantasRose[i] == rose) {
+             eliminarRoseBlade(i);
+             break;
+         }
+     }
+ }
+
+ private void buscarYBloquearPlantaGrinch(ZombieGrinch zombie, int tickActual) {
+     // Buscar en WallNuts
+     for (int j = 0; j < plantasWallnut.length; j++) {
+         if (plantasWallnut[j] != null && plantasWallnut[j].plantada && 
+             zombie.colisionaConWallnut(plantasWallnut[j])) {
+             zombie.bloquear(plantasWallnut[j]);
+             return;
+         }
+     }
+     
+     // Buscar en Plantas de Hielo
+     for (int j = 0; j < plantasHielo.length; j++) {
+         if (plantasHielo[j] != null && plantasHielo[j].plantada && 
+             zombie.colisionaConPlantaHielo(plantasHielo[j])) {
+             zombie.bloquear(plantasHielo[j]);
+             return;
+         }
+     }
+     
+     // Buscar en RoseBlades
+     for (int j = 0; j < plantasRose.length; j++) {
+         if (plantasRose[j] != null && plantasRose[j].plantada && 
+             zombie.colisionaConRoseBlade(plantasRose[j])) {
+             zombie.bloquear(plantasRose[j]);
+             return;
+         }
+     }
+     
+     // Buscar en Cerezas
+     for (int j = 0; j < plantasCereza.length; j++) {
+         if (plantasCereza[j] != null && plantasCereza[j].plantada && 
+             zombie.colisionaConCereza(plantasCereza[j])) {
+             zombie.bloquear(plantasCereza[j]);
+             
+             // Verificar explosión de cereza
+             if (!plantasCereza[j].explotando && hayZombieCercaCereza(plantasCereza[j])) {
+                 verificarExplosionCereza(plantasCereza[j], tickActual);
+             }
+             return;
+         }
+     }
+ }
+
+ private boolean hayZombieCercaCereza(CerezaExplosiva cereza) {
+     for (int i = 0; i < zombiesGrinch.length; i++) {
+         if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
+             double distancia = Math.sqrt(Math.pow(zombiesGrinch[i].x - cereza.x, 2) +
+                                       Math.pow(zombiesGrinch[i].y - cereza.y, 2));
+             if (distancia < cereza.radioExplosion) {
+                 return true;
+             }
+         }
+     }
+     return false;
+ }
+
+ private void buscarYBloquearPlantaRapido(ZombieRapido zombie) {
+     // Buscar en todas las plantas
+     for (int j = 0; j < plantasWallnut.length; j++) {
+         if (plantasWallnut[j] != null && plantasWallnut[j].plantada && 
+             zombie.colisionaConWallnut(plantasWallnut[j])) {
+             zombie.bloquear(plantasWallnut[j]);
+             return;
+         }
+     }
+     for (int j = 0; j < plantasHielo.length; j++) {
+         if (plantasHielo[j] != null && plantasHielo[j].plantada && 
+             zombie.colisionaConPlantaHielo(plantasHielo[j])) {
+             zombie.bloquear(plantasHielo[j]);
+             return;
+         }
+     }
+     for (int j = 0; j < plantasRose.length; j++) {
+         if (plantasRose[j] != null && plantasRose[j].plantada && 
+             zombie.colisionaConRoseBlade(plantasRose[j])) {
+             zombie.bloquear(plantasRose[j]);
+             return;
+         }
+     }
+     for (int j = 0; j < plantasCereza.length; j++) {
+         if (plantasCereza[j] != null && plantasCereza[j].plantada && 
+             zombie.colisionaConCereza(plantasCereza[j])) {
+             zombie.bloquear(plantasCereza[j]);
+             return;
+         }
+     }
+ }
+
+ private void buscarYAtacarPlantaColosal(ZombieColosal zombie, int tickActual) {
+     // Buscar en WallNuts
+     for (int j = 0; j < plantasWallnut.length; j++) {
+         if (plantasWallnut[j] != null && plantasWallnut[j].plantada &&
+             zombie.colisionaConWallnut(plantasWallnut[j])) {
+             
+             if (zombie.puedeAtacar(tickActual)) {
+                 plantasWallnut[j].recibirAtaque(tickActual);
+                 plantasWallnut[j].recibirAtaque(tickActual);
+                 
+                 if (!plantasWallnut[j].plantada) {
+                     int indiceX = cuadricula.cercanoL(plantasWallnut[j].x, plantasWallnut[j].y).x;
+                     int indiceY = cuadricula.cercanoL(plantasWallnut[j].x, plantasWallnut[j].y).y;
+                     cuadricula.Ocupado(indiceX, indiceY, false);
+                     eliminarWallnut(j);
+                 }
+                 zombie.registrarAtaque(tickActual);
+             }
+             return;
+         }
+     }
+     
+     // Buscar en otras plantas
+     for (int j = 0; j < plantasHielo.length; j++) {
+         if (plantasHielo[j] != null && plantasHielo[j].plantada &&
+             zombie.colisionaConPlantaHielo(plantasHielo[j])) {
+             
+             if (zombie.puedeAtacar(tickActual)) {
+                 plantasHielo[j].recibirAtaque(tickActual);
+                 
+                 if (!plantasHielo[j].plantada) {
+                     int indiceX = cuadricula.cercanoL(plantasHielo[j].x, plantasHielo[j].y).x;
+                     int indiceY = cuadricula.cercanoL(plantasHielo[j].x, plantasHielo[j].y).y;
+                     cuadricula.Ocupado(indiceX, indiceY, false);
+                     eliminarPlantaHielo(j);
+                 }
+                 zombie.registrarAtaque(tickActual);
+             }
+             return;
+         }
+     }
+     
+     for (int j = 0; j < plantasRose.length; j++) {
+         if (plantasRose[j] != null && plantasRose[j].plantada &&
+             zombie.colisionaConRoseBlade(plantasRose[j])) {
+             
+             if (zombie.puedeAtacar(tickActual)) {
+                 plantasRose[j].recibirAtaque(tickActual);
+                 
+                 if (!plantasRose[j].plantada) {
+                     int indiceX = cuadricula.cercanoL(plantasRose[j].x, plantasRose[j].y).x;
+                     int indiceY = cuadricula.cercanoL(plantasRose[j].x, plantasRose[j].y).y;
+                     cuadricula.Ocupado(indiceX, indiceY, false);
+                     eliminarRoseBlade(j);
+                 }
+                 zombie.registrarAtaque(tickActual);
+             }
+             return;
+         }
+     }
+     
+     for (int j = 0; j < plantasCereza.length; j++) {
+         if (plantasCereza[j] != null && plantasCereza[j].plantada &&
+             zombie.colisionaConCereza(plantasCereza[j])) {
+             
+             if (zombie.puedeAtacar(tickActual)) {
+                 plantasCereza[j].recibirAtaque(tickActual);
+                 
+                 if (!plantasCereza[j].plantada) {
+                     int indiceX = cuadricula.cercanoL(plantasCereza[j].x, plantasCereza[j].y).x;
+                     int indiceY = cuadricula.cercanoL(plantasCereza[j].x, plantasCereza[j].y).y;
+                     cuadricula.Ocupado(indiceX, indiceY, false);
+                     eliminarCerezaExplosiva(j);
+                 }
+                 zombie.registrarAtaque(tickActual);
+             }
+             return;
+         }
+     }
+ }
+
+private void dibujarBarrasRecarga() {
+     int tickActual = entorno.numeroDeTick();
+     
+     // WallNut
+     if (wallnutBanner != null) {
+         double porcentaje = wallnutBanner.porcentajeRecarga(tickActual);
+         dibujarBarraRecargaWallnut(50, 75, porcentaje, tickActual);
+     }
+     
+     // PlantaDeHielo
+     if (hieloBanner != null) {
+         double porcentaje = hieloBanner.porcentajeRecarga(tickActual);
+         dibujarBarraRecargaPlantaHielo(150, 75, porcentaje, tickActual);
+     }
+     
+     // RoseBlade
+     if (roseBanner != null) {
+         double porcentaje = roseBanner.porcentajeRecarga(tickActual);
+         dibujarBarraRecargaRoseBlade(250, 75, porcentaje, tickActual);
+     }
+     
+     // CerezaExplosiva
+     if (cerezaBanner != null) {
+         double porcentaje = cerezaBanner.porcentajeRecarga(tickActual);
+         dibujarBarraRecargaCereza(350, 75, porcentaje, tickActual);
+     }
+ }
+
+ private void dibujarBarraRecargaWallnut(double x, double y, double porcentaje, int tickActual) {
+     Color colorFondo = new Color(139, 69, 19);
+     Color colorBorde = new Color(160, 82, 45);
+     dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "WallNut", wallnutBanner, tickActual);
+ }
+
+ private void dibujarBarraRecargaPlantaHielo(double x, double y, double porcentaje, int tickActual) {
+     Color colorFondo = new Color(135, 206, 250);
+     Color colorBorde = new Color(173, 216, 230);
+     dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "Escarchi", hieloBanner, tickActual);
+ }
+
+ private void dibujarBarraRecargaRoseBlade(double x, double y, double porcentaje, int tickActual) {
+     Color colorFondo = new Color(255, 0, 0);
+     Color colorBorde = new Color(255, 69, 0);
+     dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "RoseBlade", roseBanner, tickActual);
+ }
+
+ private void dibujarBarraRecargaCereza(double x, double y, double porcentaje, int tickActual) {
+     Color colorFondo = new Color(148, 0, 211);
+     Color colorBorde = new Color(186, 85, 211);
+     dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "Cereza", cerezaBanner, tickActual);
+ }
+
+private void dibujarBarraRecargaCompleta(double x, double y, double porcentaje, Color colorFondo, Color colorBorde, String texto, Object planta, int tickActual) {
+     double anchoBarra = 80;
+     double altoBarra = 12;
+     
+     Color fondoOscuro = oscurecerColor(colorFondo, 0.5f);
+     entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, fondoOscuro);
+     
+     if (porcentaje > 0) {
+         double anchoLleno = anchoBarra * porcentaje;
+         
+         if (porcentaje < 1.0) {
+             for (int i = 0; i < anchoLleno; i += 4) {
+                 double onda = Math.sin((tickActual * 0.3) + (i * 0.2)) * 2;
+                 double alturaOnda = altoBarra + onda;
+                 double posY = y - onda/2;
+                 
+                 if (i + 2 <= anchoLleno) {
+                     entorno.dibujarRectangulo(
+                         x - anchoBarra/2 + i + 2, 
+                         posY, 
+                         2, 
+                         alturaOnda, 
+                         0, 
+                         aclararColor(colorFondo, 0.1f)
+                     );
+                 }
+             }
+         }
+         
+         entorno.dibujarRectangulo(x - anchoBarra/2 + anchoLleno/2, y, anchoLleno, altoBarra, 0, colorFondo);
+     }
+     
+     entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
+     
+     entorno.cambiarFont("Arial", 12, Color.WHITE);
+     entorno.escribirTexto(texto, x - 25, y - 5);
+     
+     if (porcentaje < 1.0) {
+         int segundosRestantes = 0;
+         if (planta == wallnutBanner) {
+             segundosRestantes = calcularSegundosRestantesWallnut((WallNut)planta, tickActual);
+         } else if (planta == hieloBanner) {
+             segundosRestantes = calcularSegundosRestantesPlantaHielo((PlantaDeHielo)planta, tickActual);
+         } else if (planta == roseBanner) {
+             segundosRestantes = calcularSegundosRestantesRoseBlade((RoseBlade)planta, tickActual);
+         } else if (planta == cerezaBanner) {
+             segundosRestantes = calcularSegundosRestantesCereza((CerezaExplosiva)planta, tickActual);
+         }
+         
+         Color colorTiempo = esColorOscuro(colorFondo) ? Color.WHITE : Color.BLACK;
+         entorno.cambiarFont("Arial", 10, colorTiempo);
+         
+         if (segundosRestantes <= 5) {
+             entorno.cambiarFont("Arial", 10, Color.YELLOW);
+         } else if (segundosRestantes <= 10) {
+             entorno.cambiarFont("Arial", 10, Color.ORANGE);
+         }
+         
+         entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 20);
+     } else {
+         Color colorListo = esColorOscuro(colorFondo) ? Color.GREEN : new Color(0, 100, 0);
+         entorno.cambiarFont("Arial", 10, colorListo);
+         entorno.escribirTexto("Listo", x - 12, y + 20);
+     }
+ }
+
+private Color aclararColor(Color color, float factor) {
+     int rojo = Math.min(255, (int)(color.getRed() + (255 - color.getRed()) * factor));
+     int verde = Math.min(255, (int)(color.getGreen() + (255 - color.getGreen()) * factor));
+     int azul = Math.min(255, (int)(color.getBlue() + (255 - color.getBlue()) * factor));
+     return new Color(rojo, verde, azul);
+ }
+
+ private Color oscurecerColor(Color color, float factor) {
+     int rojo = Math.max(0, (int)(color.getRed() * factor));
+     int verde = Math.max(0, (int)(color.getGreen() * factor));
+     int azul = Math.max(0, (int)(color.getBlue() * factor));
+     return new Color(rojo, verde, azul);
+ }
+
+ private boolean esColorOscuro(Color color) {
+     double luminosidad = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+     return luminosidad < 0.5;
+ }
+
+ private int calcularSegundosRestantesWallnut(WallNut planta, int tickActual) {
+     int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
+     int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
+     return (int) Math.ceil(tiempoRestante / 50.0);
+ }
+
+ private int calcularSegundosRestantesPlantaHielo(PlantaDeHielo planta, int tickActual) {
+     int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
+     int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
+     return (int) Math.ceil(tiempoRestante / 50.0);
+ }
+
+ private int calcularSegundosRestantesRoseBlade(RoseBlade planta, int tickActual) {
+     int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
+     int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
+     return (int) Math.ceil(tiempoRestante / 50.0);
+ }
+
+ private int calcularSegundosRestantesCereza(CerezaExplosiva planta, int tickActual) {
+     int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
+     int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
+     return (int) Math.ceil(tiempoRestante / 50.0);
+ }
+
+
+public void agregarDisparo(BolaFuego disparo) {
+    for (int i = 0; i < disparos.length; i++) {
+        if (disparos[i] == null) {
+            disparos[i] = disparo;
+            cantidadDisparosActivos++;
+            break;
         }
     }
-
-    private void eliminarPlantaHieloDeArray(PlantaDeHielo planta) {
-        for (int i = 0; i < plantasHielo.length; i++) {
-            if (plantasHielo[i] == planta) {
-                eliminarPlantaHielo(i);
-                break;
-            }
-        }
-    }
-
-    private void eliminarRoseBladeDeArray(RoseBlade rose) {
-        for (int i = 0; i < plantasRose.length; i++) {
-            if (plantasRose[i] == rose) {
-                eliminarRoseBlade(i);
-                break;
-            }
-        }
-    }
-
-    private void buscarYBloquearPlantaGrinch(ZombieGrinch zombie, int tickActual) {
-        // Buscar en WallNuts
-        for (int j = 0; j < plantasWallnut.length; j++) {
-            if (plantasWallnut[j] != null && plantasWallnut[j].plantada && 
-                zombie.colisionaConWallnut(plantasWallnut[j])) {
-                zombie.bloquear(plantasWallnut[j]);
-                return;
-            }
-        }
-        
-        // Buscar en Plantas de Hielo
-        for (int j = 0; j < plantasHielo.length; j++) {
-            if (plantasHielo[j] != null && plantasHielo[j].plantada && 
-                zombie.colisionaConPlantaHielo(plantasHielo[j])) {
-                zombie.bloquear(plantasHielo[j]);
-                return;
-            }
-        }
-        
-        // Buscar en RoseBlades
-        for (int j = 0; j < plantasRose.length; j++) {
-            if (plantasRose[j] != null && plantasRose[j].plantada && 
-                zombie.colisionaConRoseBlade(plantasRose[j])) {
-                zombie.bloquear(plantasRose[j]);
-                return;
-            }
-        }
-        
-        // Buscar en Cerezas
-        for (int j = 0; j < plantasCereza.length; j++) {
-            if (plantasCereza[j] != null && plantasCereza[j].plantada && 
-                zombie.colisionaConCereza(plantasCereza[j])) {
-                zombie.bloquear(plantasCereza[j]);
-                
-                // Verificar explosión de cereza
-                if (!plantasCereza[j].explotando && hayZombieCercaCereza(plantasCereza[j])) {
-                    verificarExplosionCereza(plantasCereza[j], tickActual);
-                }
-                return;
-            }
-        }
-    }
-
-    private boolean hayZombieCercaCereza(CerezaExplosiva cereza) {
-        for (int i = 0; i < zombiesGrinch.length; i++) {
-            if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
-                double distancia = Math.sqrt(Math.pow(zombiesGrinch[i].x - cereza.x, 2) +
-                                          Math.pow(zombiesGrinch[i].y - cereza.y, 2));
-                if (distancia < cereza.radioExplosion) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private void buscarYBloquearPlantaRapido(ZombieRapido zombie) {
-        // Buscar en todas las plantas
-        for (int j = 0; j < plantasWallnut.length; j++) {
-            if (plantasWallnut[j] != null && plantasWallnut[j].plantada && 
-                zombie.colisionaConWallnut(plantasWallnut[j])) {
-                zombie.bloquear(plantasWallnut[j]);
-                return;
-            }
-        }
-        for (int j = 0; j < plantasHielo.length; j++) {
-            if (plantasHielo[j] != null && plantasHielo[j].plantada && 
-                zombie.colisionaConPlantaHielo(plantasHielo[j])) {
-                zombie.bloquear(plantasHielo[j]);
-                return;
-            }
-        }
-        for (int j = 0; j < plantasRose.length; j++) {
-            if (plantasRose[j] != null && plantasRose[j].plantada && 
-                zombie.colisionaConRoseBlade(plantasRose[j])) {
-                zombie.bloquear(plantasRose[j]);
-                return;
-            }
-        }
-        for (int j = 0; j < plantasCereza.length; j++) {
-            if (plantasCereza[j] != null && plantasCereza[j].plantada && 
-                zombie.colisionaConCereza(plantasCereza[j])) {
-                zombie.bloquear(plantasCereza[j]);
-                return;
-            }
-        }
-    }
-
-    private void buscarYAtacarPlantaColosal(ZombieColosal zombie, int tickActual) {
-        // Buscar en WallNuts
-        for (int j = 0; j < plantasWallnut.length; j++) {
-            if (plantasWallnut[j] != null && plantasWallnut[j].plantada &&
-                zombie.colisionaConWallnut(plantasWallnut[j])) {
-                
-                if (zombie.puedeAtacar(tickActual)) {
-                    plantasWallnut[j].recibirAtaque(tickActual);
-                    plantasWallnut[j].recibirAtaque(tickActual);
-                    
-                    if (!plantasWallnut[j].plantada) {
-                        int indiceX = cuadricula.cercanoL(plantasWallnut[j].x, plantasWallnut[j].y).x;
-                        int indiceY = cuadricula.cercanoL(plantasWallnut[j].x, plantasWallnut[j].y).y;
-                        cuadricula.Ocupado(indiceX, indiceY, false);
-                        eliminarWallnut(j);
-                    }
-                    zombie.registrarAtaque(tickActual);
-                }
-                return;
-            }
-        }
-        
-        // Buscar en otras plantas
-        for (int j = 0; j < plantasHielo.length; j++) {
-            if (plantasHielo[j] != null && plantasHielo[j].plantada &&
-                zombie.colisionaConPlantaHielo(plantasHielo[j])) {
-                
-                if (zombie.puedeAtacar(tickActual)) {
-                    plantasHielo[j].recibirAtaque(tickActual);
-                    
-                    if (!plantasHielo[j].plantada) {
-                        int indiceX = cuadricula.cercanoL(plantasHielo[j].x, plantasHielo[j].y).x;
-                        int indiceY = cuadricula.cercanoL(plantasHielo[j].x, plantasHielo[j].y).y;
-                        cuadricula.Ocupado(indiceX, indiceY, false);
-                        eliminarPlantaHielo(j);
-                    }
-                    zombie.registrarAtaque(tickActual);
-                }
-                return;
-            }
-        }
-        
-        for (int j = 0; j < plantasRose.length; j++) {
-            if (plantasRose[j] != null && plantasRose[j].plantada &&
-                zombie.colisionaConRoseBlade(plantasRose[j])) {
-                
-                if (zombie.puedeAtacar(tickActual)) {
-                    plantasRose[j].recibirAtaque(tickActual);
-                    
-                    if (!plantasRose[j].plantada) {
-                        int indiceX = cuadricula.cercanoL(plantasRose[j].x, plantasRose[j].y).x;
-                        int indiceY = cuadricula.cercanoL(plantasRose[j].x, plantasRose[j].y).y;
-                        cuadricula.Ocupado(indiceX, indiceY, false);
-                        eliminarRoseBlade(j);
-                    }
-                    zombie.registrarAtaque(tickActual);
-                }
-                return;
-            }
-        }
-        
-        for (int j = 0; j < plantasCereza.length; j++) {
-            if (plantasCereza[j] != null && plantasCereza[j].plantada &&
-                zombie.colisionaConCereza(plantasCereza[j])) {
-                
-                if (zombie.puedeAtacar(tickActual)) {
-                    plantasCereza[j].recibirAtaque(tickActual);
-                    
-                    if (!plantasCereza[j].plantada) {
-                        int indiceX = cuadricula.cercanoL(plantasCereza[j].x, plantasCereza[j].y).x;
-                        int indiceY = cuadricula.cercanoL(plantasCereza[j].x, plantasCereza[j].y).y;
-                        cuadricula.Ocupado(indiceX, indiceY, false);
-                        eliminarCerezaExplosiva(j);
-                    }
-                    zombie.registrarAtaque(tickActual);
-                }
-                return;
-            }
-        }
-    }
-   
-   private void dibujarBarrasRecarga() {
-        int tickActual = entorno.numeroDeTick();
-        
-        // WallNut
-        if (wallnutBanner != null) {
-            double porcentaje = wallnutBanner.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaWallnut(50, 75, porcentaje, tickActual);
-        }
-        
-        // PlantaDeHielo
-        if (hieloBanner != null) {
-            double porcentaje = hieloBanner.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaPlantaHielo(150, 75, porcentaje, tickActual);
-        }
-        
-        // RoseBlade
-        if (roseBanner != null) {
-            double porcentaje = roseBanner.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaRoseBlade(250, 75, porcentaje, tickActual);
-        }
-        
-        // CerezaExplosiva
-        if (cerezaBanner != null) {
-            double porcentaje = cerezaBanner.porcentajeRecarga(tickActual);
-            dibujarBarraRecargaCereza(350, 75, porcentaje, tickActual);
-        }
-    }
-
-    private void dibujarBarraRecargaWallnut(double x, double y, double porcentaje, int tickActual) {
-        Color colorFondo = new Color(139, 69, 19);
-        Color colorBorde = new Color(160, 82, 45);
-        dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "WallNut", wallnutBanner, tickActual);
-    }
-
-    private void dibujarBarraRecargaPlantaHielo(double x, double y, double porcentaje, int tickActual) {
-        Color colorFondo = new Color(135, 206, 250);
-        Color colorBorde = new Color(173, 216, 230);
-        dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "Escarchi", hieloBanner, tickActual);
-    }
-
-    private void dibujarBarraRecargaRoseBlade(double x, double y, double porcentaje, int tickActual) {
-        Color colorFondo = new Color(255, 0, 0);
-        Color colorBorde = new Color(255, 69, 0);
-        dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "RoseBlade", roseBanner, tickActual);
-    }
-
-    private void dibujarBarraRecargaCereza(double x, double y, double porcentaje, int tickActual) {
-        Color colorFondo = new Color(148, 0, 211);
-        Color colorBorde = new Color(186, 85, 211);
-        dibujarBarraRecargaCompleta(x, y, porcentaje, colorFondo, colorBorde, "Cereza", cerezaBanner, tickActual);
-    }
-   
-   private void dibujarBarraRecargaCompleta(double x, double y, double porcentaje, Color colorFondo, Color colorBorde, String texto, Object planta, int tickActual) {
-        double anchoBarra = 80;
-        double altoBarra = 12;
-        
-        Color fondoOscuro = oscurecerColor(colorFondo, 0.5f);
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, fondoOscuro);
-        
-        if (porcentaje > 0) {
-            double anchoLleno = anchoBarra * porcentaje;
-            
-            if (porcentaje < 1.0) {
-                for (int i = 0; i < anchoLleno; i += 4) {
-                    double onda = Math.sin((tickActual * 0.3) + (i * 0.2)) * 2;
-                    double alturaOnda = altoBarra + onda;
-                    double posY = y - onda/2;
-                    
-                    if (i + 2 <= anchoLleno) {
-                        entorno.dibujarRectangulo(
-                            x - anchoBarra/2 + i + 2, 
-                            posY, 
-                            2, 
-                            alturaOnda, 
-                            0, 
-                            aclararColor(colorFondo, 0.1f)
-                        );
-                    }
-                }
-            }
-            
-            entorno.dibujarRectangulo(x - anchoBarra/2 + anchoLleno/2, y, anchoLleno, altoBarra, 0, colorFondo);
-        }
-        
-        entorno.dibujarRectangulo(x, y, anchoBarra, altoBarra, 0, colorBorde);
-        
-        entorno.cambiarFont("Arial", 12, Color.WHITE);
-        entorno.escribirTexto(texto, x - 25, y - 5);
-        
-        if (porcentaje < 1.0) {
-            int segundosRestantes = 0;
-            if (planta == wallnutBanner) {
-                segundosRestantes = calcularSegundosRestantesWallnut((WallNut)planta, tickActual);
-            } else if (planta == hieloBanner) {
-                segundosRestantes = calcularSegundosRestantesPlantaHielo((PlantaDeHielo)planta, tickActual);
-            } else if (planta == roseBanner) {
-                segundosRestantes = calcularSegundosRestantesRoseBlade((RoseBlade)planta, tickActual);
-            } else if (planta == cerezaBanner) {
-                segundosRestantes = calcularSegundosRestantesCereza((CerezaExplosiva)planta, tickActual);
-            }
-            
-            Color colorTiempo = esColorOscuro(colorFondo) ? Color.WHITE : Color.BLACK;
-            entorno.cambiarFont("Arial", 10, colorTiempo);
-            
-            if (segundosRestantes <= 5) {
-                entorno.cambiarFont("Arial", 10, Color.YELLOW);
-            } else if (segundosRestantes <= 10) {
-                entorno.cambiarFont("Arial", 10, Color.ORANGE);
-            }
-            
-            entorno.escribirTexto(segundosRestantes + "s", x - 8, y + 20);
-        } else {
-            Color colorListo = esColorOscuro(colorFondo) ? Color.GREEN : new Color(0, 100, 0);
-            entorno.cambiarFont("Arial", 10, colorListo);
-            entorno.escribirTexto("Listo", x - 12, y + 20);
-        }
-    }
-   
-   private Color aclararColor(Color color, float factor) {
-        int rojo = Math.min(255, (int)(color.getRed() + (255 - color.getRed()) * factor));
-        int verde = Math.min(255, (int)(color.getGreen() + (255 - color.getGreen()) * factor));
-        int azul = Math.min(255, (int)(color.getBlue() + (255 - color.getBlue()) * factor));
-        return new Color(rojo, verde, azul);
-    }
-
-    private Color oscurecerColor(Color color, float factor) {
-        int rojo = Math.max(0, (int)(color.getRed() * factor));
-        int verde = Math.max(0, (int)(color.getGreen() * factor));
-        int azul = Math.max(0, (int)(color.getBlue() * factor));
-        return new Color(rojo, verde, azul);
-    }
-
-    private boolean esColorOscuro(Color color) {
-        double luminosidad = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
-        return luminosidad < 0.5;
-    }
-
-    private int calcularSegundosRestantesWallnut(WallNut planta, int tickActual) {
-        int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
-        int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
-        return (int) Math.ceil(tiempoRestante / 50.0);
-    }
-
-    private int calcularSegundosRestantesPlantaHielo(PlantaDeHielo planta, int tickActual) {
-        int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
-        int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
-        return (int) Math.ceil(tiempoRestante / 50.0);
-    }
-
-    private int calcularSegundosRestantesRoseBlade(RoseBlade planta, int tickActual) {
-        int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
-        int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
-        return (int) Math.ceil(tiempoRestante / 50.0);
-    }
-
-    private int calcularSegundosRestantesCereza(CerezaExplosiva planta, int tickActual) {
-        int tiempoTranscurrido = tickActual - planta.tiempoUltimoPlantado;
-        int tiempoRestante = Math.max(0, planta.tiempoRecargaPlantado - tiempoTranscurrido);
-        return (int) Math.ceil(tiempoRestante / 50.0);
-    }
-
-   
-   public void agregarDisparo(BolaFuego disparo) {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] == null) {
-               disparos[i] = disparo;
-               cantidadDisparosActivos++;
-               break;
-           }
-       }
-   }
-  
-   public void agregarDisparoHielo(BolaEscarcha disparo) {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] == null) {
-               disparosHielo[i] = disparo;
-               cantidadDisparosHieloActivos++;
-               break;
-           }
-       }
-   }
-  
-   public void ejecutarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
-       verificarExplosionCereza(cereza, tickActual);
-   }
-  
-   private void generarZombieGrinch() {
-       if (Math.random() < 0.01 && zombiesEliminados < zombiesTotales && 
-           cantidadZombiesGrinchActivos < zombiesGrinch.length) {
-           int fila = (int)(Math.random() * 5);
-           ZombieGrinch nuevoZombie = new ZombieGrinch(fila, entorno);
-           agregarZombieGrinch(nuevoZombie);
-       }
-   }
-  
-   private void actualizarZombies() {
-       actualizarZombiesGrinch();
-       actualizarZombiesRapidos();
-       actualizarZombiesColosales();
-   }
-  
-   private void actualizarZombiesGrinch() {
-       for (int i = 0; i < zombiesGrinch.length; i++) {
-           if (zombiesGrinch[i] != null) {
-               zombiesGrinch[i].mover();
-               zombiesGrinch[i].dibujar();
-              
-               if (zombiesGrinch[i].llegoARegalos()) {
-                   juegoPerdido = true;
-               }
-              
-               if (!zombiesGrinch[i].vivo) {
-                   eliminarZombieGrinch(i);
-                   zombiesEliminados++;
-               }
-           }
-       }
-   }
-
-   private void actualizarZombiesRapidos() {
-       for (int i = 0; i < zombiesRapidos.length; i++) {
-           if (zombiesRapidos[i] != null) {
-               zombiesRapidos[i].mover();
-               zombiesRapidos[i].dibujar();
-              
-               if (zombiesRapidos[i].llegoARegalos()) {
-                   juegoPerdido = true;
-               }
-              
-               if (!zombiesRapidos[i].vivo) {
-                   eliminarZombieRapido(i);
-                   zombiesEliminados += 2;
-               }
-           }
-       }
-   }
-
-   private void actualizarZombiesColosales() {
-       for (int i = 0; i < zombiesColosales.length; i++) {
-           if (zombiesColosales[i] != null) {
-               zombiesColosales[i].mover();
-               zombiesColosales[i].dibujar();
-              
-               if (zombiesColosales[i].llegoARegalos()) {
-                   juegoPerdido = true;
-               }
-              
-               if (!zombiesColosales[i].vivo) {
-                   eliminarZombieColosal(i);
-                   zombiesEliminados += 5;
-               }
-           }
-       }
-   }
-  
-   private void actualizarDisparos() {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null) {
-               disparos[i].mover();
-               disparos[i].dibujar();
-               if (!disparos[i].activa) {
-                   disparos[i] = null;
-                   cantidadDisparosActivos--;
-               }
-           }
-       }
-   }
-  
-   private void actualizarDisparosHielo() {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null) {
-               disparosHielo[i].mover();
-               disparosHielo[i].dibujar();
-               if (!disparosHielo[i].activa) {
-                   disparosHielo[i] = null;
-                   cantidadDisparosHieloActivos--;
-               }
-           }
-       }
-   }
-  
-   private void verificarColisiones() {
-       verificarColisionesConGrinch();
-       verificarColisionesConRapidos();
-       verificarColisionesConColosales();
-   }
-  
-   private void verificarColisionesConGrinch() {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].activa) {
-               for (int j = 0; j < zombiesGrinch.length; j++) {
-                   if (zombiesGrinch[j] != null && zombiesGrinch[j].vivo &&
-                       disparos[i].colisionaConGrinch(zombiesGrinch[j])) {
-                       zombiesGrinch[j].recibirDanio();
-                       disparos[i].activa = false;
-                       disparos[i] = null;
-                       cantidadDisparosActivos--;
-                       break;
-                   }
-               }
-           }
-       }
-   }
-
-   private void verificarColisionesConRapidos() {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].activa) {
-               for (int j = 0; j < zombiesRapidos.length; j++) {
-                   if (zombiesRapidos[j] != null && zombiesRapidos[j].vivo) {
-                       double distancia = Math.sqrt(Math.pow(disparos[i].x - zombiesRapidos[j].x, 2) +
-                                                 Math.pow(disparos[i].y - zombiesRapidos[j].y, 2));
-                       if (distancia < 40) {
-                           zombiesRapidos[j].recibirDanio();
-                           disparos[i].activa = false;
-                           disparos[i] = null;
-                           cantidadDisparosActivos--;
-                           break;
-                       }
-                   }
-               }
-           }
-       }
-   }
-
-   private void verificarColisionesConColosales() {
-       for (int i = 0; i < disparos.length; i++) {
-           if (disparos[i] != null && disparos[i].activa) {
-               for (int j = 0; j < zombiesColosales.length; j++) {
-                   if (zombiesColosales[j] != null && zombiesColosales[j].vivo) {
-                       double distancia = Math.sqrt(Math.pow(disparos[i].x - zombiesColosales[j].x, 2) +
-                                                 Math.pow(disparos[i].y - zombiesColosales[j].y, 2));
-                       if (distancia < 70) {
-                           zombiesColosales[j].recibirDanio();
-                           disparos[i].activa = false;
-                           disparos[i] = null;
-                           cantidadDisparosActivos--;
-                           break;
-                       }
-                   }
-               }
-           }
-       }
-   }
-  
-   private void verificarColisionesHielo() {
-       verificarColisionesHieloConGrinch();
-       verificarColisionesHieloConRapidos();
-       verificarColisionesHieloConColosales();
-   }
-
-   private void verificarColisionesHieloConGrinch() {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].activa) {
-               for (int j = 0; j < zombiesGrinch.length; j++) {
-                   if (zombiesGrinch[j] != null && zombiesGrinch[j].vivo &&
-                       disparosHielo[i].colisionaConGrinch(zombiesGrinch[j])) {
-                       zombiesGrinch[j].ralentizar(disparosHielo[i].duracionRalentizacion);
-                       disparosHielo[i].activa = false;
-                       disparosHielo[i] = null;
-                       cantidadDisparosHieloActivos--;
-                       break;
-                   }
-               }
-           }
-       }
-   }
-
-   private void verificarColisionesHieloConRapidos() {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].activa) {
-               for (int j = 0; j < zombiesRapidos.length; j++) {
-                   if (zombiesRapidos[j] != null && zombiesRapidos[j].vivo) {
-                       double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombiesRapidos[j].x, 2) +
-                                                 Math.pow(disparosHielo[i].y - zombiesRapidos[j].y, 2));
-                       if (distancia < 40) {
-                           zombiesRapidos[j].ralentizar(disparosHielo[i].duracionRalentizacion);
-                           disparosHielo[i].activa = false;
-                           disparosHielo[i] = null;
-                           cantidadDisparosHieloActivos--;
-                           break;
-                       }
-                   }
-               }
-           }
-       }
-   }
-
-   private void verificarColisionesHieloConColosales() {
-       for (int i = 0; i < disparosHielo.length; i++) {
-           if (disparosHielo[i] != null && disparosHielo[i].activa) {
-               for (int j = 0; j < zombiesColosales.length; j++) {
-                   if (zombiesColosales[j] != null && zombiesColosales[j].vivo) {
-                       double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombiesColosales[j].x, 2) +
-                                                 Math.pow(disparosHielo[i].y - zombiesColosales[j].y, 2));
-                       if (distancia < 70) {
-                           zombiesColosales[j].ralentizar(disparosHielo[i].duracionRalentizacion);
-                           disparosHielo[i].activa = false;
-                           disparosHielo[i] = null;
-                           cantidadDisparosHieloActivos--;
-                           break;
-                       }
-                   }
-               }
-           }
-       }
-   }
-  
-   private void manejarSeleccionYPlantado() {
-        if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
-            deseleccionarTodasLasPlantas();
-            
-            int tickActual = entorno.numeroDeTick();
-            double mouseX = entorno.mouseX();
-            double mouseY = entorno.mouseY();
-            
-            // Verificar banners
-            if (wallnutBanner != null && wallnutBanner.encima(mouseX, mouseY) && !wallnutBanner.estaEnRecarga(tickActual)) {
-                wallnutBanner.seleccionada = true;
-            }
-            else if (hieloBanner != null && hieloBanner.encima(mouseX, mouseY) && !hieloBanner.estaEnRecarga(tickActual)) {
-                hieloBanner.seleccionada = true;
-            }
-            else if (roseBanner != null && roseBanner.encima(mouseX, mouseY) && !roseBanner.estaEnRecarga(tickActual)) {
-                roseBanner.seleccionada = true;
-            }
-            else if (cerezaBanner != null && cerezaBanner.encima(mouseX, mouseY) && !cerezaBanner.estaEnRecarga(tickActual)) {
-                cerezaBanner.seleccionada = true;
-            }
-            else {
-                seleccionarPlantaPlantada(mouseX, mouseY);
-            }
-        }
-        
-        if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
-            moverPlantasSeleccionadas();
-        }
-        
-        if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
-            manejarSueltaBoton();
-        }
-    }
-
-    private void deseleccionarTodasLasPlantas() {
-        for (WallNut p : plantasWallnut) {
-            if (p != null) p.seleccionada = false;
-        }
-        for (PlantaDeHielo p : plantasHielo) {
-            if (p != null) p.seleccionada = false;
-        }
-        for (RoseBlade p : plantasRose) {
-            if (p != null) p.seleccionada = false;
-        }
-        for (CerezaExplosiva p : plantasCereza) {
-            if (p != null) p.seleccionada = false;
-        }
-    }
-
-    private void seleccionarPlantaPlantada(double mouseX, double mouseY) {
-        for (WallNut p : plantasWallnut) {
-            if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
-                p.seleccionada = true;
-                return;
-            }
-        }
-        for (PlantaDeHielo p : plantasHielo) {
-            if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
-                p.seleccionada = true;
-                return;
-            }
-        }
-        for (RoseBlade p : plantasRose) {
-            if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
-                p.seleccionada = true;
-                return;
-            }
-        }
-        for (CerezaExplosiva p : plantasCereza) {
-            if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
-                p.seleccionada = true;
-                return;
-            }
-        }
-    }
-
-    private void moverPlantasSeleccionadas() {
-        for (WallNut p : plantasWallnut) {
-            if (p != null && p.seleccionada) {
-                p.x = entorno.mouseX();
-                p.y = entorno.mouseY();
-            }
-        }
-        for (PlantaDeHielo p : plantasHielo) {
-            if (p != null && p.seleccionada) {
-                p.x = entorno.mouseX();
-                p.y = entorno.mouseY();
-            }
-        }
-        for (RoseBlade p : plantasRose) {
-            if (p != null && p.seleccionada) {
-                p.x = entorno.mouseX();
-                p.y = entorno.mouseY();
-            }
-        }
-        for (CerezaExplosiva p : plantasCereza) {
-            if (p != null && p.seleccionada) {
-                p.x = entorno.mouseX();
-                p.y = entorno.mouseY();
-            }
-        }
-    }
-
-   private void manejarSueltaBoton() {
-        int tickActual = entorno.numeroDeTick();
-        
-        if (wallnutBanner != null && wallnutBanner.seleccionada) {
-            manejarSueltaWallnutBanner(tickActual);
-        }
-        else if (hieloBanner != null && hieloBanner.seleccionada) {
-            manejarSueltaHieloBanner(tickActual);
-        }
-        else if (roseBanner != null && roseBanner.seleccionada) {
-            manejarSueltaRoseBanner(tickActual);
-        }
-        else if (cerezaBanner != null && cerezaBanner.seleccionada) {
-            manejarSueltaCerezaBanner(tickActual);
-        }
-        else {
-            manejarSueltaPlantaExistente();
-        }
-    }
-   
-   private void manejarSueltaWallnutBanner(int tickActual) {
-        if (entorno.mouseY() < 70) {
-            wallnutBanner.x = wallnutBanner.xInicial;
-            wallnutBanner.y = wallnutBanner.yInicial;
-        } else {
-            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
-            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
-            
-            if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-                WallNut nuevaPlanta = new WallNut(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
-                
-                if (agregarWallnut(nuevaPlanta)) {
-                    nuevaPlanta.plantada = true;
-                    cuadricula.Ocupado(indiceX, indiceY, true);
-                    wallnutBanner.usar(tickActual);
-                }
-            }
-            wallnutBanner.x = wallnutBanner.xInicial;
-            wallnutBanner.y = wallnutBanner.yInicial;
-        }
-        wallnutBanner.seleccionada = false;
-    }
-
-    private void manejarSueltaHieloBanner(int tickActual) {
-        if (entorno.mouseY() < 70) {
-            hieloBanner.x = hieloBanner.xInicial;
-            hieloBanner.y = hieloBanner.yInicial;
-        } else {
-            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
-            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
-            
-            if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-                PlantaDeHielo nuevaPlanta = new PlantaDeHielo(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
-                
-                if (agregarPlantaHielo(nuevaPlanta)) {
-                    nuevaPlanta.plantada = true;
-                    cuadricula.Ocupado(indiceX, indiceY, true);
-                    hieloBanner.usar(tickActual);
-                }
-            }
-            hieloBanner.x = hieloBanner.xInicial;
-            hieloBanner.y = hieloBanner.yInicial;
-        }
-        hieloBanner.seleccionada = false;
-    }
-
-    private void manejarSueltaRoseBanner(int tickActual) {
-        if (entorno.mouseY() < 70) {
-            roseBanner.x = roseBanner.xInicial;
-            roseBanner.y = roseBanner.yInicial;
-        } else {
-            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
-            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
-            
-            if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-                RoseBlade nuevaPlanta = new RoseBlade(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
-                
-                if (agregarRoseBlade(nuevaPlanta)) {
-                    nuevaPlanta.plantada = true;
-                    cuadricula.Ocupado(indiceX, indiceY, true);
-                    roseBanner.usar(tickActual);
-                }
-            }
-            roseBanner.x = roseBanner.xInicial;
-            roseBanner.y = roseBanner.yInicial;
-        }
-        roseBanner.seleccionada = false;
-    }
-
-    private void manejarSueltaCerezaBanner(int tickActual) {
-        if (entorno.mouseY() < 70) {
-            cerezaBanner.x = cerezaBanner.xInicial;
-            cerezaBanner.y = cerezaBanner.yInicial;
-        } else {
-            int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
-            int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
-            
-            if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-                CerezaExplosiva nuevaPlanta = new CerezaExplosiva(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
-                
-                if (agregarCerezaExplosiva(nuevaPlanta)) {
-                    nuevaPlanta.plantada = true;
-                    cuadricula.Ocupado(indiceX, indiceY, true);
-                    cerezaBanner.usar(tickActual);
-                }
-            }
-            cerezaBanner.x = cerezaBanner.xInicial;
-            cerezaBanner.y = cerezaBanner.yInicial;
-        }
-        cerezaBanner.seleccionada = false;
-    }
-
-   
-    private void manejarSueltaPlantaExistente() {
-        // Buscar y manejar WallNuts seleccionadas
-        for (int i = 0; i < plantasWallnut.length; i++) {
-            if (plantasWallnut[i] != null && plantasWallnut[i].plantada && plantasWallnut[i].seleccionada) {
-                manejarSueltaWallnutExistente(plantasWallnut[i]);
-                plantasWallnut[i].seleccionada = false;
-                return;
-            }
-        }
-        
-        // Buscar y manejar Plantas de Hielo seleccionadas
-        for (int i = 0; i < plantasHielo.length; i++) {
-            if (plantasHielo[i] != null && plantasHielo[i].plantada && plantasHielo[i].seleccionada) {
-                manejarSueltaPlantaHieloExistente(plantasHielo[i]);
-                plantasHielo[i].seleccionada = false;
-                return;
-            }
-        }
-        
-        // Buscar y manejar RoseBlades seleccionadas
-        for (int i = 0; i < plantasRose.length; i++) {
-            if (plantasRose[i] != null && plantasRose[i].plantada && plantasRose[i].seleccionada) {
-                manejarSueltaRoseBladeExistente(plantasRose[i]);
-                plantasRose[i].seleccionada = false;
-                return;
-            }
-        }
-        
-        // Buscar y manejar Cerezas seleccionadas
-        for (int i = 0; i < plantasCereza.length; i++) {
-            if (plantasCereza[i] != null && plantasCereza[i].plantada && plantasCereza[i].seleccionada) {
-                manejarSueltaCerezaExistente(plantasCereza[i]);
-                plantasCereza[i].seleccionada = false;
-                return;
-            }
-        }
-    }
-
-    private void manejarSueltaWallnutExistente(WallNut planta) {
-        int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
-        int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
-        
-        int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
-        int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
-        cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
-        
-        if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-            cuadricula.centrarWallnut(planta, indiceX, indiceY);
-            cuadricula.Ocupado(indiceX, indiceY, true);
-            planta.xInicial = planta.x;
-            planta.yInicial = planta.y;
-        } else {
-            planta.x = planta.xInicial;
-            planta.y = planta.yInicial;
-            cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
-        }
-    }
-
-    private void manejarSueltaPlantaHieloExistente(PlantaDeHielo planta) {
-        int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
-        int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
-        
-        int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
-        int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
-        cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
-        
-        if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-            cuadricula.centrarPlantaHielo(planta, indiceX, indiceY);
-            cuadricula.Ocupado(indiceX, indiceY, true);
-            planta.xInicial = planta.x;
-            planta.yInicial = planta.y;
-        } else {
-            planta.x = planta.xInicial;
-            planta.y = planta.yInicial;
-            cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
-        }
-    }
-
-    private void manejarSueltaRoseBladeExistente(RoseBlade planta) {
-        int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
-        int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
-        
-        int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
-        int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
-        cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
-        
-        if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-            cuadricula.centrarRoseBlade(planta, indiceX, indiceY);
-            cuadricula.Ocupado(indiceX, indiceY, true);
-            planta.xInicial = planta.x;
-            planta.yInicial = planta.y;
-        } else {
-            planta.x = planta.xInicial;
-            planta.y = planta.yInicial;
-            cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
-        }
-    }
-
-    private void manejarSueltaCerezaExistente(CerezaExplosiva planta) {
-        int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
-        int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
-        
-        int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
-        int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
-        cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
-        
-        if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
-            cuadricula.centrarCereza(planta, indiceX, indiceY);
-            cuadricula.Ocupado(indiceX, indiceY, true);
-            planta.xInicial = planta.x;
-            planta.yInicial = planta.y;
-        } else {
-            planta.x = planta.xInicial;
-            planta.y = planta.yInicial;
-            cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
-        }
-    }
-  
-   private void dibujarUI() {
-        entorno.cambiarFont("Arial", 20, Color.WHITE);
-        entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 400, 40);
-        entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 400, 80);
-       
-        int zombiesEnPantalla = cantidadZombiesGrinchActivos + cantidadZombiesRapidosActivos + cantidadZombiesColosalesActivos;
-        entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
- 
-        }
-    
-
-    private void verificarFinJuego() {
-        if (zombiesEliminados >= zombiesTotales) {
-            juegoGanado = true;
-        }
-    }
-
-    private void dibujarPantallaFin() {
-        entorno.colorFondo(Color.BLACK);
-        if (juegoGanado) {
-            entorno.cambiarFont("Arial", 40, Color.GREEN);
-            entorno.escribirTexto("¡VICTORIA!", 400, 300);
-            entorno.cambiarFont("Arial", 24, Color.WHITE);
-            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
-            entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
-            entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 410);
-            entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 440);
-        } else if (juegoPerdido) {
-            entorno.cambiarFont("Arial", 40, Color.RED);
-            entorno.escribirTexto("¡DERROTA!", 400, 300);
-            entorno.cambiarFont("Arial", 24, Color.WHITE);
-            entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
-          
-        }
-    }
-      
-    public static void main(String[] args) {
-           new Juego();
-       }
 }
+
+public void agregarDisparoHielo(BolaEscarcha disparo) {
+    for (int i = 0; i < disparosHielo.length; i++) {
+        if (disparosHielo[i] == null) {
+            disparosHielo[i] = disparo;
+            cantidadDisparosHieloActivos++;
+            break;
+        }
+    }
+}
+
+public void ejecutarExplosionCereza(CerezaExplosiva cereza, int tickActual) {
+    verificarExplosionCereza(cereza, tickActual);
+}
+
+private void generarZombieGrinch() {
+    if (Math.random() < 0.01 && zombiesEliminados < zombiesTotales && 
+        cantidadZombiesGrinchActivos < zombiesGrinch.length) {
+        int fila = (int)(Math.random() * 5);
+        ZombieGrinch nuevoZombie = new ZombieGrinch(fila, entorno);
+        agregarZombieGrinch(nuevoZombie);
+    }
+}
+
+private void actualizarZombies() {
+    actualizarZombiesGrinch();
+    actualizarZombiesRapidos();
+    actualizarZombiesColosales();
+}
+
+private void actualizarZombiesGrinch() {
+    for (int i = 0; i < zombiesGrinch.length; i++) {
+        if (zombiesGrinch[i] != null) {
+            zombiesGrinch[i].mover();
+            zombiesGrinch[i].dibujar();
+           
+            if (zombiesGrinch[i].llegoARegalos()) {
+                juegoPerdido = true;
+            }
+           
+            if (!zombiesGrinch[i].vivo) {
+                eliminarZombieGrinch(i);
+                zombiesEliminados++;
+            }
+        }
+    }
+}
+
+private void actualizarZombiesRapidos() {
+    for (int i = 0; i < zombiesRapidos.length; i++) {
+        if (zombiesRapidos[i] != null) {
+            zombiesRapidos[i].mover();
+            zombiesRapidos[i].dibujar();
+           
+            if (zombiesRapidos[i].llegoARegalos()) {
+                juegoPerdido = true;
+            }
+           
+            if (!zombiesRapidos[i].vivo) {
+                eliminarZombieRapido(i);
+                zombiesEliminados += 2;
+            }
+        }
+    }
+}
+
+private void actualizarZombiesColosales() {
+    for (int i = 0; i < zombiesColosales.length; i++) {
+        if (zombiesColosales[i] != null) {
+            zombiesColosales[i].mover();
+            zombiesColosales[i].dibujar();
+           
+            if (zombiesColosales[i].llegoARegalos()) {
+                juegoPerdido = true;
+            }
+           
+            if (!zombiesColosales[i].vivo) {
+                eliminarZombieColosal(i);
+                zombiesEliminados += 5;
+            }
+        }
+    }
+}
+
+private void actualizarDisparos() {
+    for (int i = 0; i < disparos.length; i++) {
+        if (disparos[i] != null) {
+            disparos[i].mover();
+            disparos[i].dibujar();
+            if (!disparos[i].activa) {
+                disparos[i] = null;
+                cantidadDisparosActivos--;
+            }
+        }
+    }
+}
+
+private void actualizarDisparosHielo() {
+    for (int i = 0; i < disparosHielo.length; i++) {
+        if (disparosHielo[i] != null) {
+            disparosHielo[i].mover();
+            disparosHielo[i].dibujar();
+            if (!disparosHielo[i].activa) {
+                disparosHielo[i] = null;
+                cantidadDisparosHieloActivos--;
+            }
+        }
+    }
+}
+
+private void verificarColisiones() {
+    verificarColisionesConGrinch();
+    verificarColisionesConRapidos();
+    verificarColisionesConColosales();
+}
+
+private void verificarColisionesConGrinch() {
+    for (int i = 0; i < disparos.length; i++) {
+        if (disparos[i] != null && disparos[i].activa) {
+            for (int j = 0; j < zombiesGrinch.length; j++) {
+                if (zombiesGrinch[j] != null && zombiesGrinch[j].vivo &&
+                    disparos[i].colisionaConGrinch(zombiesGrinch[j])) {
+                    zombiesGrinch[j].recibirDanio();
+                    disparos[i].activa = false;
+                    disparos[i] = null;
+                    cantidadDisparosActivos--;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+private void verificarColisionesConRapidos() {
+    for (int i = 0; i < disparos.length; i++) {
+        if (disparos[i] != null && disparos[i].activa) {
+            for (int j = 0; j < zombiesRapidos.length; j++) {
+                if (zombiesRapidos[j] != null && zombiesRapidos[j].vivo) {
+                    double distancia = Math.sqrt(Math.pow(disparos[i].x - zombiesRapidos[j].x, 2) +
+                                              Math.pow(disparos[i].y - zombiesRapidos[j].y, 2));
+                    if (distancia < 40) {
+                        zombiesRapidos[j].recibirDanio();
+                        disparos[i].activa = false;
+                        disparos[i] = null;
+                        cantidadDisparosActivos--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+private void verificarColisionesConColosales() {
+    for (int i = 0; i < disparos.length; i++) {
+        if (disparos[i] != null && disparos[i].activa) {
+            for (int j = 0; j < zombiesColosales.length; j++) {
+                if (zombiesColosales[j] != null && zombiesColosales[j].vivo) {
+                    double distancia = Math.sqrt(Math.pow(disparos[i].x - zombiesColosales[j].x, 2) +
+                                              Math.pow(disparos[i].y - zombiesColosales[j].y, 2));
+                    if (distancia < 70) {
+                        zombiesColosales[j].recibirDanio();
+                        disparos[i].activa = false;
+                        disparos[i] = null;
+                        cantidadDisparosActivos--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+private void verificarColisionesHielo() {
+    verificarColisionesHieloConGrinch();
+    verificarColisionesHieloConRapidos();
+    verificarColisionesHieloConColosales();
+}
+
+private void verificarColisionesHieloConGrinch() {
+    for (int i = 0; i < disparosHielo.length; i++) {
+        if (disparosHielo[i] != null && disparosHielo[i].activa) {
+            for (int j = 0; j < zombiesGrinch.length; j++) {
+                if (zombiesGrinch[j] != null && zombiesGrinch[j].vivo &&
+                    disparosHielo[i].colisionaConGrinch(zombiesGrinch[j])) {
+                    zombiesGrinch[j].ralentizar(disparosHielo[i].duracionRalentizacion);
+                    disparosHielo[i].activa = false;
+                    disparosHielo[i] = null;
+                    cantidadDisparosHieloActivos--;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+private void verificarColisionesHieloConRapidos() {
+    for (int i = 0; i < disparosHielo.length; i++) {
+        if (disparosHielo[i] != null && disparosHielo[i].activa) {
+            for (int j = 0; j < zombiesRapidos.length; j++) {
+                if (zombiesRapidos[j] != null && zombiesRapidos[j].vivo) {
+                    double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombiesRapidos[j].x, 2) +
+                                              Math.pow(disparosHielo[i].y - zombiesRapidos[j].y, 2));
+                    if (distancia < 40) {
+                        zombiesRapidos[j].ralentizar(disparosHielo[i].duracionRalentizacion);
+                        disparosHielo[i].activa = false;
+                        disparosHielo[i] = null;
+                        cantidadDisparosHieloActivos--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+private void verificarColisionesHieloConColosales() {
+    for (int i = 0; i < disparosHielo.length; i++) {
+        if (disparosHielo[i] != null && disparosHielo[i].activa) {
+            for (int j = 0; j < zombiesColosales.length; j++) {
+                if (zombiesColosales[j] != null && zombiesColosales[j].vivo) {
+                    double distancia = Math.sqrt(Math.pow(disparosHielo[i].x - zombiesColosales[j].x, 2) +
+                                              Math.pow(disparosHielo[i].y - zombiesColosales[j].y, 2));
+                    if (distancia < 70) {
+                        zombiesColosales[j].ralentizar(disparosHielo[i].duracionRalentizacion);
+                        disparosHielo[i].activa = false;
+                        disparosHielo[i] = null;
+                        cantidadDisparosHieloActivos--;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+private void manejarSeleccionYPlantado() {
+	    if (entorno.sePresionoBoton(entorno.BOTON_IZQUIERDO)) {
+	        double mouseX = entorno.mouseX();
+	        double mouseY = entorno.mouseY();
+	        int tickActual = entorno.numeroDeTick();
+	        
+	        // Primero verificar si clickeamos una planta ya plantada
+	        boolean clickEnPlantaPlantada = false;
+	        
+	        // Verificar todas las plantas plantadas
+	        for (WallNut p : plantasWallnut) {
+	            if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+	                // Solo deseleccionar las otras, no esta
+	                deseleccionarOtrasPlantas(p);
+	                p.seleccionada = true;
+	                clickEnPlantaPlantada = true;
+	                break;
+	            }
+	        }
+	        
+	        if (!clickEnPlantaPlantada) {
+	            for (PlantaDeHielo p : plantasHielo) {
+	                if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+	                    deseleccionarOtrasPlantas(p);
+	                    p.seleccionada = true;
+	                    clickEnPlantaPlantada = true;
+	                    break;
+	                }
+	            }
+	        }
+	        
+	        if (!clickEnPlantaPlantada) {
+	            for (RoseBlade p : plantasRose) {
+	                if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+	                    deseleccionarOtrasPlantas(p);
+	                    p.seleccionada = true;
+	                    clickEnPlantaPlantada = true;
+	                    break;
+	                }
+	            }
+	        }
+	        
+	        if (!clickEnPlantaPlantada) {
+	            for (CerezaExplosiva p : plantasCereza) {
+	                if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+	                    deseleccionarOtrasPlantas(p);
+	                    p.seleccionada = true;
+	                    clickEnPlantaPlantada = true;
+	                    break;
+	                }
+	            }
+	        }
+	        
+	        // Si no clickeamos una planta plantada, manejar banners normalmente
+	        if (!clickEnPlantaPlantada) {
+	            deseleccionarTodasLasPlantas();
+	            
+	            if (wallnutBanner != null && wallnutBanner.encima(mouseX, mouseY) && !wallnutBanner.estaEnRecarga(tickActual)) {
+	                wallnutBanner.seleccionada = true;
+	            }
+	            else if (hieloBanner != null && hieloBanner.encima(mouseX, mouseY) && !hieloBanner.estaEnRecarga(tickActual)) {
+	                hieloBanner.seleccionada = true;
+	            }
+	            else if (roseBanner != null && roseBanner.encima(mouseX, mouseY) && !roseBanner.estaEnRecarga(tickActual)) {
+	                roseBanner.seleccionada = true;
+	            }
+	            else if (cerezaBanner != null && cerezaBanner.encima(mouseX, mouseY) && !cerezaBanner.estaEnRecarga(tickActual)) {
+	                cerezaBanner.seleccionada = true;
+	            }
+	        }
+	    }
+	    
+	    // El resto del método se mantiene igual...
+	    if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
+	        moverPlantasSeleccionadas();
+	    }
+	    
+	    if (entorno.seLevantoBoton(entorno.BOTON_IZQUIERDO)) {
+	        manejarSueltaBoton();
+	    }
+	    
+	    manejarMovimientoTeclado();
+	}
+
+	// Método para deseleccionar otras plantas pero mantener una seleccionada
+	private void deseleccionarOtrasPlantas(Object plantaAMantener) {
+	    for (WallNut p : plantasWallnut) {
+	        if (p != null && p != plantaAMantener) {
+	            p.seleccionada = false;
+	        }
+	    }
+	    for (PlantaDeHielo p : plantasHielo) {
+	        if (p != null && p != plantaAMantener) {
+	            p.seleccionada = false;
+	        }
+	    }
+	    for (RoseBlade p : plantasRose) {
+	        if (p != null && p != plantaAMantener) {
+	            p.seleccionada = false;
+	        }
+	    }
+	    for (CerezaExplosiva p : plantasCereza) {
+	        if (p != null && p != plantaAMantener) {
+	            p.seleccionada = false;
+	        }
+	    }
+	}
+	
+	
+//nuevo
+ private void deseleccionarTodasLasPlantas() {
+     for (WallNut p : plantasWallnut) {
+         if (p != null) p.seleccionada = false;
+     }
+     for (PlantaDeHielo p : plantasHielo) {
+         if (p != null) p.seleccionada = false;
+     }
+     for (RoseBlade p : plantasRose) {
+         if (p != null) p.seleccionada = false;
+     }
+     for (CerezaExplosiva p : plantasCereza) {
+         if (p != null) p.seleccionada = false;
+     }
+ }
+
+ private void seleccionarPlantaPlantada(double mouseX, double mouseY) {
+     for (WallNut p : plantasWallnut) {
+         if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+             p.seleccionada = true;
+             return;
+         }
+     }
+     for (PlantaDeHielo p : plantasHielo) {
+         if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+             p.seleccionada = true;
+             return;
+         }
+     }
+     for (RoseBlade p : plantasRose) {
+         if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+             p.seleccionada = true;
+             return;
+         }
+     }
+     for (CerezaExplosiva p : plantasCereza) {
+         if (p != null && p.plantada && p.encima(mouseX, mouseY)) {
+             p.seleccionada = true;
+             return;
+         }
+     }
+ }
+
+ private void moverPlantasSeleccionadas() {
+     for (WallNut p : plantasWallnut) {
+         if (p != null && p.seleccionada) {
+             p.x = entorno.mouseX();
+             p.y = entorno.mouseY();
+         }
+     }
+     for (PlantaDeHielo p : plantasHielo) {
+         if (p != null && p.seleccionada) {
+             p.x = entorno.mouseX();
+             p.y = entorno.mouseY();
+         }
+     }
+     for (RoseBlade p : plantasRose) {
+         if (p != null && p.seleccionada) {
+             p.x = entorno.mouseX();
+             p.y = entorno.mouseY();
+         }
+     }
+     for (CerezaExplosiva p : plantasCereza) {
+         if (p != null && p.seleccionada) {
+             p.x = entorno.mouseX();
+             p.y = entorno.mouseY();
+         }
+     }
+ }
+
+private void manejarSueltaBoton() {
+     int tickActual = entorno.numeroDeTick();
+     
+     if (wallnutBanner != null && wallnutBanner.seleccionada) {
+         manejarSueltaWallnutBanner(tickActual);
+     }
+     else if (hieloBanner != null && hieloBanner.seleccionada) {
+         manejarSueltaHieloBanner(tickActual);
+     }
+     else if (roseBanner != null && roseBanner.seleccionada) {
+         manejarSueltaRoseBanner(tickActual);
+     }
+     else if (cerezaBanner != null && cerezaBanner.seleccionada) {
+         manejarSueltaCerezaBanner(tickActual);
+     }
+     else {
+         manejarSueltaPlantaExistente();
+     }
+ }
+
+private void manejarSueltaWallnutBanner(int tickActual) {
+     if (entorno.mouseY() < 70) {
+         wallnutBanner.x = wallnutBanner.xInicial;
+         wallnutBanner.y = wallnutBanner.yInicial;
+     } else {
+         int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+         int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+         
+         if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+             WallNut nuevaPlanta = new WallNut(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+             
+             if (agregarWallnut(nuevaPlanta)) {
+                 nuevaPlanta.plantada = true;
+                 cuadricula.Ocupado(indiceX, indiceY, true);
+                 wallnutBanner.usar(tickActual);
+             }
+         }
+         wallnutBanner.x = wallnutBanner.xInicial;
+         wallnutBanner.y = wallnutBanner.yInicial;
+     }
+     wallnutBanner.seleccionada = false;
+ }
+
+ private void manejarSueltaHieloBanner(int tickActual) {
+     if (entorno.mouseY() < 70) {
+         hieloBanner.x = hieloBanner.xInicial;
+         hieloBanner.y = hieloBanner.yInicial;
+     } else {
+         int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+         int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+         
+         if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+             PlantaDeHielo nuevaPlanta = new PlantaDeHielo(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+             
+             if (agregarPlantaHielo(nuevaPlanta)) {
+                 nuevaPlanta.plantada = true;
+                 cuadricula.Ocupado(indiceX, indiceY, true);
+                 hieloBanner.usar(tickActual);
+             }
+         }
+         hieloBanner.x = hieloBanner.xInicial;
+         hieloBanner.y = hieloBanner.yInicial;
+     }
+     hieloBanner.seleccionada = false;
+ }
+
+ private void manejarSueltaRoseBanner(int tickActual) {
+     if (entorno.mouseY() < 70) {
+         roseBanner.x = roseBanner.xInicial;
+         roseBanner.y = roseBanner.yInicial;
+     } else {
+         int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+         int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+         
+         if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+             RoseBlade nuevaPlanta = new RoseBlade(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+             
+             if (agregarRoseBlade(nuevaPlanta)) {
+                 nuevaPlanta.plantada = true;
+                 cuadricula.Ocupado(indiceX, indiceY, true);
+                 roseBanner.usar(tickActual);
+             }
+         }
+         roseBanner.x = roseBanner.xInicial;
+         roseBanner.y = roseBanner.yInicial;
+     }
+     roseBanner.seleccionada = false;
+ }
+
+ private void manejarSueltaCerezaBanner(int tickActual) {
+     if (entorno.mouseY() < 70) {
+         cerezaBanner.x = cerezaBanner.xInicial;
+         cerezaBanner.y = cerezaBanner.yInicial;
+     } else {
+         int indiceX = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).x;
+         int indiceY = cuadricula.cercanoL(entorno.mouseX(), entorno.mouseY()).y;
+         
+         if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+             CerezaExplosiva nuevaPlanta = new CerezaExplosiva(cuadricula.coorX[indiceX], cuadricula.coorY[indiceY], entorno);
+             
+             if (agregarCerezaExplosiva(nuevaPlanta)) {
+                 nuevaPlanta.plantada = true;
+                 cuadricula.Ocupado(indiceX, indiceY, true);
+                 cerezaBanner.usar(tickActual);
+             }
+         }
+         cerezaBanner.x = cerezaBanner.xInicial;
+         cerezaBanner.y = cerezaBanner.yInicial;
+     }
+     cerezaBanner.seleccionada = false;
+ }
+
+ private void manejarSueltaPlantaExistente() {
+     // Buscar y manejar WallNuts seleccionadas
+     for (int i = 0; i < plantasWallnut.length; i++) {
+         if (plantasWallnut[i] != null && plantasWallnut[i].plantada && plantasWallnut[i].seleccionada) {
+             manejarSueltaWallnutExistente(plantasWallnut[i]);
+             // NO deseleccionar aquí - la planta queda seleccionada para teclado
+             return;
+         }
+     }
+     
+     // Buscar y manejar Plantas de Hielo seleccionadas
+     for (int i = 0; i < plantasHielo.length; i++) {
+         if (plantasHielo[i] != null && plantasHielo[i].plantada && plantasHielo[i].seleccionada) {
+             manejarSueltaPlantaHieloExistente(plantasHielo[i]);
+             // NO deseleccionar aquí
+             return;
+         }
+     }
+     
+     // Buscar y manejar RoseBlades seleccionadas
+     for (int i = 0; i < plantasRose.length; i++) {
+         if (plantasRose[i] != null && plantasRose[i].plantada && plantasRose[i].seleccionada) {
+             manejarSueltaRoseBladeExistente(plantasRose[i]);
+             // NO deseleccionar aquí
+             return;
+         }
+     }
+     
+     // Buscar y manejar Cerezas seleccionadas
+     for (int i = 0; i < plantasCereza.length; i++) {
+         if (plantasCereza[i] != null && plantasCereza[i].plantada && plantasCereza[i].seleccionada) {
+             manejarSueltaCerezaExistente(plantasCereza[i]);
+             // NO deseleccionar aquí
+             return;
+         }
+     }
+ }
+ private void manejarSueltaWallnutExistente(WallNut planta) {
+     int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
+     int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
+     
+     int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
+     int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
+     cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
+     
+     if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+         cuadricula.centrarWallnut(planta, indiceX, indiceY);
+         cuadricula.Ocupado(indiceX, indiceY, true);
+         planta.xInicial = planta.x;
+         planta.yInicial = planta.y;
+     } else {
+         planta.x = planta.xInicial;
+         planta.y = planta.yInicial;
+         cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
+     }
+ }
+
+ private void manejarSueltaPlantaHieloExistente(PlantaDeHielo planta) {
+     int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
+     int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
+     
+     int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
+     int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
+     cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
+     
+     if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+         cuadricula.centrarPlantaHielo(planta, indiceX, indiceY);
+         cuadricula.Ocupado(indiceX, indiceY, true);
+         planta.xInicial = planta.x;
+         planta.yInicial = planta.y;
+     } else {
+         planta.x = planta.xInicial;
+         planta.y = planta.yInicial;
+         cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
+     }
+ }
+
+ private void manejarSueltaRoseBladeExistente(RoseBlade planta) {
+     int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
+     int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
+     
+     int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
+     int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
+     cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
+     
+     if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+         cuadricula.centrarRoseBlade(planta, indiceX, indiceY);
+         cuadricula.Ocupado(indiceX, indiceY, true);
+         planta.xInicial = planta.x;
+         planta.yInicial = planta.y;
+     } else {
+         planta.x = planta.xInicial;
+         planta.y = planta.yInicial;
+         cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
+     }
+ }
+
+ private void manejarSueltaCerezaExistente(CerezaExplosiva planta) {
+     int indiceX = cuadricula.cercanoL(planta.x, planta.y).x;
+     int indiceY = cuadricula.cercanoL(planta.x, planta.y).y;
+     
+     int indiceXAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).x;
+     int indiceYAnterior = cuadricula.cercanoL(planta.xInicial, planta.yInicial).y;
+     cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, false);
+     
+     if (indiceX > 0 && !cuadricula.estaOcupado(indiceX, indiceY)) {
+         cuadricula.centrarCereza(planta, indiceX, indiceY);
+         cuadricula.Ocupado(indiceX, indiceY, true);
+         planta.xInicial = planta.x;
+         planta.yInicial = planta.y;
+     } else {
+         planta.x = planta.xInicial;
+         planta.y = planta.yInicial;
+         cuadricula.Ocupado(indiceXAnterior, indiceYAnterior, true);
+     }
+ }
+
+private void dibujarUI() {
+     entorno.cambiarFont("Arial", 20, Color.WHITE);
+     entorno.escribirTexto("Zombies: " + zombiesEliminados + "/" + zombiesTotales, 400, 40);
+     entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + "s", 400, 80);
+    
+     int zombiesEnPantalla = cantidadZombiesGrinchActivos + cantidadZombiesRapidosActivos + cantidadZombiesColosalesActivos;
+     entorno.escribirTexto("Zombies en pantalla: " + zombiesEnPantalla, 400, 60);
+
+     }
+ 
+
+ private void verificarFinJuego() {
+     if (zombiesEliminados >= zombiesTotales) {
+         juegoGanado = true;
+     }
+ }
+
+ private void dibujarPantallaFin() {
+     entorno.colorFondo(Color.BLACK);
+     if (juegoGanado) {
+         entorno.cambiarFont("Arial", 40, Color.GREEN);
+         entorno.escribirTexto("¡VICTORIA!", 400, 300);
+         entorno.cambiarFont("Arial", 24, Color.WHITE);
+         entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+         entorno.escribirTexto("Tiempo: " + entorno.tiempo()/1000 + " segundos", 400, 380);
+         entorno.escribirTexto("Rápidos derrotados: " + rapidosAparecidos, 400, 410);
+         entorno.escribirTexto("Colosales derrotados: " + colosalesAparecidos, 400, 440);
+     } else if (juegoPerdido) {
+         entorno.cambiarFont("Arial", 40, Color.RED);
+         entorno.escribirTexto("¡DERROTA!", 400, 300);
+         entorno.cambiarFont("Arial", 24, Color.WHITE);
+         entorno.escribirTexto("Zombies eliminados: " + zombiesEliminados, 400, 350);
+       
+     }
+ }
+   
+ public static void main(String[] args) {
+        new Juego();
+    }
+}
+   
