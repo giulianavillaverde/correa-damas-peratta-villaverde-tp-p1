@@ -39,8 +39,8 @@ public class RoseBlade {
         this.bajoAtaque = false;
         this.tiempoFinAtaque = 0;
         
-        this.resistencia = 5;
-        this.resistenciaMaxima = 5;
+        this.resistencia = 2;
+        this.resistenciaMaxima = 2;
         this.tiempoRecargaPlantado = 360;
         this.tiempoRecargaDisparo = 80;
         this.tiempoUltimoDisparo = -100;

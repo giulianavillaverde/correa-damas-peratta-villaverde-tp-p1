@@ -11,7 +11,7 @@ public class Juego extends InterfaceJuego {
    private cuadricula cuadricula;
    private regalos[] regalo;
    
-   // Arrays separados para cada tipo de planta
+   // Arrays de cada tipo de planta
    private WallNut[] plantasWallnut;
    private PlantaDeHielo[] plantasHielo;
    private RoseBlade[] plantasRose;
@@ -137,7 +137,7 @@ public class Juego extends InterfaceJuego {
    }
    
    // Métodos para agregar plantas a sus arrays correspondientes
-   private boolean agregarWallnut(WallNut nuevaPlanta) {
+   private boolean agregarWallnut(WallNut nuevaPlanta) {  //recorrer la lista de plantas buscando la primera posición vacía (null) para insertar la nueva planta y actualizar el contador de plantas activas
        for (int i = 0; i < plantasWallnut.length; i++) {
            if (plantasWallnut[i] == null) {
                plantasWallnut[i] = nuevaPlanta;
@@ -551,7 +551,7 @@ public class Juego extends InterfaceJuego {
            for (int i = 0; i < zombiesGrinch.length; i++) {
                if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
                    double distancia = Math.sqrt(Math.pow(zombiesGrinch[i].x - cereza.x, 2) +
-                                             Math.pow(zombiesGrinch[i].y - cereza.y, 2));
+                                             Math.pow(zombiesGrinch[i].y - cereza.y, 2));//calcular la distancia exacta entre el centro del zombie (zombiesGrinch[i].x, zombiesGrinch[i].y) y el centro de la cereza (cereza.x, cereza.y
                    if (distancia < cereza.radioExplosion) {
                        zombiesGrinch[i].morir();
                        zombiesEliminados++;
@@ -819,11 +819,7 @@ private void moverPlantaHieloCuadricula(PlantaDeHielo planta) {
 	        nuevoIndiceX = indiceXActual + 1;
 	    }
 	    
-	    // Verificar límites
-	    if (nuevoIndiceX < 0) nuevoIndiceX = 0;
-	    if (nuevoIndiceX > 8) nuevoIndiceX = 8;
-	    if (nuevoIndiceY < 0) nuevoIndiceY = 0;
-	    if (nuevoIndiceY > 4) nuevoIndiceY = 4;
+	  
 	    
 	    if ((nuevoIndiceX != indiceXActual || nuevoIndiceY != indiceYActual) && 
 	        !cuadricula.estaOcupado(nuevoIndiceX, nuevoIndiceY)) {
@@ -843,12 +839,11 @@ private void moverPlantaHieloCuadricula(PlantaDeHielo planta) {
      
      // Ataques de zombies Grinch
      for (int i = 0; i < zombiesGrinch.length; i++) {
-         if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
-             zombiesGrinch[i].verificarPlantaBloqueadora();
-             
-             if (zombiesGrinch[i].bloqueadoPorPlanta) {
-                 Object plantaBloqueadora = zombiesGrinch[i].plantaBloqueadora;
-                 
+    	    if (zombiesGrinch[i] != null && zombiesGrinch[i].vivo) {
+    	        zombiesGrinch[i].verificarPlantaBloqueadora(plantasWallnut, plantasHielo, plantasRose, plantasCereza);
+
+    	        if (zombiesGrinch[i].bloqueadoPorPlanta) {
+    	            Object plantaBloqueadora = zombiesGrinch[i].plantaBloqueadora;
                  // Verificar WallNuts
                  for (int j = 0; j < plantasWallnut.length; j++) {
                      if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
@@ -920,12 +915,11 @@ private void moverPlantaHieloCuadricula(PlantaDeHielo planta) {
      
      // Ataques de zombies Rápidos
      for (int i = 0; i < zombiesRapidos.length; i++) {
-         if (zombiesRapidos[i] != null && zombiesRapidos[i].vivo) {
-             zombiesRapidos[i].verificarPlantaBloqueadora();
-             
-             if (zombiesRapidos[i].bloqueadoPorPlanta) {
-                 Object plantaBloqueadora = zombiesRapidos[i].plantaBloqueadora;
-                 
+ 	    if (zombiesRapidos[i] != null && zombiesRapidos[i].vivo) {
+ 	        zombiesRapidos[i].verificarPlantaBloqueadora(plantasWallnut, plantasHielo, plantasRose, plantasCereza);
+
+ 	        if (zombiesRapidos[i].bloqueadoPorPlanta) {
+ 	            Object plantaBloqueadora = zombiesRapidos[i].plantaBloqueadora;
                  // Verificar WallNuts
                  for (int j = 0; j < plantasWallnut.length; j++) {
                      if (plantasWallnut[j] == plantaBloqueadora && WallnutPlantada(plantasWallnut[j]) && 
@@ -1555,7 +1549,7 @@ private void verificarColisionesConGrinch() {
                     zombiesGrinch[j].recibirDanio();
                     disparos[i].activa = false;
                     disparos[i] = null;
-                    cantidadDisparosActivos--;
+                    cantidadDisparosActivos--; // se va bajando si e
                     break;
                 }
             }
@@ -1738,7 +1732,7 @@ private void manejarSeleccionYPlantado() {
 	        }
 	    }
 	    
-	    // El resto del método se mantiene igual...
+	  
 	    if (entorno.estaPresionado(entorno.BOTON_IZQUIERDO)) {
 	        moverPlantasSeleccionadas();
 	    }
@@ -1962,7 +1956,7 @@ private void manejarSueltaWallnutBanner(int tickActual) {
      for (int i = 0; i < plantasWallnut.length; i++) {
          if (plantasWallnut[i] != null && plantasWallnut[i].plantada && plantasWallnut[i].seleccionada) {
              manejarSueltaWallnutExistente(plantasWallnut[i]);
-             // NO deseleccionar aquí - la planta queda seleccionada para teclado
+           
              return;
          }
      }
@@ -1971,7 +1965,7 @@ private void manejarSueltaWallnutBanner(int tickActual) {
      for (int i = 0; i < plantasHielo.length; i++) {
          if (plantasHielo[i] != null && plantasHielo[i].plantada && plantasHielo[i].seleccionada) {
              manejarSueltaPlantaHieloExistente(plantasHielo[i]);
-             // NO deseleccionar aquí
+          
              return;
          }
      }
@@ -1980,7 +1974,7 @@ private void manejarSueltaWallnutBanner(int tickActual) {
      for (int i = 0; i < plantasRose.length; i++) {
          if (plantasRose[i] != null && plantasRose[i].plantada && plantasRose[i].seleccionada) {
              manejarSueltaRoseBladeExistente(plantasRose[i]);
-             // NO deseleccionar aquí
+            
              return;
          }
      }
@@ -1989,7 +1983,7 @@ private void manejarSueltaWallnutBanner(int tickActual) {
      for (int i = 0; i < plantasCereza.length; i++) {
          if (plantasCereza[i] != null && plantasCereza[i].plantada && plantasCereza[i].seleccionada) {
              manejarSueltaCerezaExistente(plantasCereza[i]);
-             // NO deseleccionar aquí
+           
              return;
          }
      }

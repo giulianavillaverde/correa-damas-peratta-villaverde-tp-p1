@@ -82,27 +82,42 @@ public class ZombieGrinch {
             }
         }
     }
-    
-    public void verificarPlantaBloqueadora() {
+    public void verificarPlantaBloqueadora(WallNut[] wallnuts, PlantaDeHielo[] hielos, RoseBlade[] roses, CerezaExplosiva[] cerezas) {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
-            // Verificar si la planta sigue plantada
-            boolean plantaViva = false;
-            if (plantaBloqueadora instanceof WallNut) {
-                plantaViva = ((WallNut)plantaBloqueadora).plantada;
-            } else if (plantaBloqueadora instanceof PlantaDeHielo) {
-                plantaViva = ((PlantaDeHielo)plantaBloqueadora).plantada;
-            } else if (plantaBloqueadora instanceof RoseBlade) {
-                plantaViva = ((RoseBlade)plantaBloqueadora).plantada;
-            } else if (plantaBloqueadora instanceof CerezaExplosiva) {
-                plantaViva = ((CerezaExplosiva)plantaBloqueadora).plantada;
+            boolean siguePlantada = false;
+
+            for (int i = 0; i < wallnuts.length; i++) {
+                if (wallnuts[i] == plantaBloqueadora && wallnuts[i].plantada) {
+                    siguePlantada = true;
+                    break;
+                }
             }
-            
-            if (!plantaViva) {
-                liberar();
+            for (int i = 0; i < hielos.length; i++) {
+                if (hielos[i] == plantaBloqueadora && hielos[i].plantada) {
+                    siguePlantada = true;
+                    break;
+                }
+            }
+            for (int i = 0; i < roses.length; i++) {
+                if (roses[i] == plantaBloqueadora && roses[i].plantada) {
+                    siguePlantada = true;
+                    break;
+                }
+            }
+            for (int i = 0; i < cerezas.length; i++) {
+                if (cerezas[i] == plantaBloqueadora && cerezas[i].plantada) {
+                    siguePlantada = true;
+                    break;
+                }
+            }
+
+            if (!siguePlantada) {
+                bloqueadoPorPlanta = false;
+                plantaBloqueadora = null;
             }
         }
     }
-    
+
     public void bloquear(Object planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
