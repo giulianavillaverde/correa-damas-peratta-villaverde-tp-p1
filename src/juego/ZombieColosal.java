@@ -46,6 +46,7 @@ public class ZombieColosal {
         }
     }
     
+    // DIBUJA EL ZOMBIE CON EFECTO DE RALENTIZACIÓN
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {
@@ -55,16 +56,19 @@ public class ZombieColosal {
                 e.dibujarRectangulo(x, y, 80, 380, 0, Color.DARK_GRAY);
             }
             
+            // Efecto visual cuando está ralentizado
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 80, new Color(0, 150, 255, 100));
             }
         }
     }
     
+    // MUEVE EL ZOMBIE HACIA LA IZQUIERDA
     public void mover() {
         if (vivo) {
             x -= velocidad;
             
+            // Maneja el efecto de ralentización
             if (ralentizado) {
                 ticksRalentizacion--;
                 if (ticksRalentizacion <= 0) {
@@ -75,7 +79,9 @@ public class ZombieColosal {
         }
     }
     
-    // Métodos de colisión específicos
+    // MÉTODOS DE COLISIÓN - ZOMBIE COLOSAL vs PLANTAS
+    // Radio de colisión más grande debido a su tamaño
+    
     public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
         double distanciaX = Math.abs(x - p.x);
@@ -104,6 +110,7 @@ public class ZombieColosal {
         return distanciaX < 60 && distanciaY < 250;
     }
     
+    // MÉTODOS DE COMBATE DEL ZOMBIE
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
     }
@@ -126,6 +133,7 @@ public class ZombieColosal {
         }
     }
     
+    // EFECTO DE RALENTIZACIÓN POR HIELO
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
@@ -141,6 +149,7 @@ public class ZombieColosal {
         vivo = false;
     }
     
+    // VERIFICA SI LLEGÓ A LOS REGALOS 
     public boolean llegoARegalos() {
         return x <= 120;
     }

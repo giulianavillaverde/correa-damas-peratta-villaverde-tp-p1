@@ -21,7 +21,7 @@ public class ZombieRapido {
     public int tiempoUltimoAtaque;
     public int cooldownAtaque;
     public boolean bloqueadoPorPlanta;
-    public Object plantaBloqueadora; // Cambiado a Object
+    public Object plantaBloqueadora; 
     
     public ZombieRapido(int fila, Entorno e) {
         this.fila = fila;
@@ -52,6 +52,7 @@ public class ZombieRapido {
         }
     }
     
+    // DIBUJA EL ZOMBIE CON EFECTO DE RALENTIZACIÓN
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {
@@ -62,18 +63,21 @@ public class ZombieRapido {
                 e.dibujarRectangulo(x + 25, y, 10, 5, 0, Color.YELLOW);
             }
             
+            // Efecto visual cuando está ralentizado
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 35, new Color(0, 150, 255, 100));
             }
         }
     }
     
+    // MUEVE EL ZOMBIE HACIA LA IZQUIERDA SI NO ESTÁ BLOQUEADO
     public void mover() {
         if (vivo) {
             if (!bloqueadoPorPlanta) {
                 x -= velocidad;
             }
             
+            // Maneja el efecto de ralentización
             if (ralentizado) {
                 ticksRalentizacion--;
                 if (ticksRalentizacion <= 0) {
@@ -84,10 +88,12 @@ public class ZombieRapido {
         }
     }
     
+    // VERIFICA SI LA PLANTA BLOQUEADORA SIGUE EXISTIENDO
     public void verificarPlantaBloqueadora(WallNut[] wallnuts, PlantaDeHielo[] hielos, RoseBlade[] roses, CerezaExplosiva[] cerezas) {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
             boolean siguePlantada = false;
 
+            // Busca en todos los arrays de plantas
             for (int i = 0; i < wallnuts.length; i++) {
                 if (wallnuts[i] == plantaBloqueadora && wallnuts[i].plantada) {
                     siguePlantada = true;
@@ -113,6 +119,7 @@ public class ZombieRapido {
                 }
             }
 
+            // Si la planta ya no existe, se libera
             if (!siguePlantada) {
                 bloqueadoPorPlanta = false;
                 plantaBloqueadora = null;
@@ -120,19 +127,23 @@ public class ZombieRapido {
         }
     }
     
+    // BLOQUEA AL ZOMBIE CON UNA PLANTA
     public void bloquear(Object planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
         this.velocidad = 0;
     }
     
+    // LIBERA AL ZOMBIE DEL BLOQUEO
     public void liberar() {
         this.bloqueadoPorPlanta = false;
         this.plantaBloqueadora = null;
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
     }
     
-    // Métodos de colisión específicos
+    // MÉTODOS DE COLISIÓN - ZOMBIE RÁPIDO vs PLANTAS
+    // Usa distancia  con radio de 50 píxeles
+    
     public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
@@ -157,6 +168,7 @@ public class ZombieRapido {
         return distancia < 50;
     }
     
+    // MÉTODOS DE COMBATE
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
     }
@@ -172,6 +184,7 @@ public class ZombieRapido {
         }
     }
     
+    // EFECTO DE RALENTIZACIÓN POR HIELO
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
@@ -190,6 +203,7 @@ public class ZombieRapido {
         }
     }
     
+    // VERIFICA SI LLEGÓ A LOS REGALOS (CONDICIÓN DE DERROTA)
     public boolean llegoARegalos() {
         return x <= 70;
     }

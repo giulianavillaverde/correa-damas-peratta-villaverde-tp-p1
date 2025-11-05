@@ -23,7 +23,7 @@ public class ZombieGrinch {
     public int cooldownAtaque;
     public int cooldownDisparo;
     public boolean bloqueadoPorPlanta;
-    public Object plantaBloqueadora; // Cambiado a Object
+    public Object plantaBloqueadora; // Cambiado a Object para cualquier tipo de planta
     
     public ZombieGrinch(int fila, Entorno e) {
         this.fila = fila;
@@ -52,6 +52,7 @@ public class ZombieGrinch {
         }
     }
     
+    // DIBUJA EL ZOMBIE CON EFECTO DE RALENTIZACIÓN
     public void dibujar() {
         if (vivo) {
             if (imagen != null) {
@@ -61,18 +62,21 @@ public class ZombieGrinch {
                 e.dibujarRectangulo(x, y, 30, 70, 0, Color.DARK_GRAY);
             }
             
+            // Efecto visual cuando está ralentizado
             if (ralentizado) {
                 e.dibujarCirculo(x, y, 35, new Color(0, 150, 255, 100));
             }
         }
     }
     
+    // MUEVE EL ZOMBIE HACIA LA IZQUIERDA SI NO ESTÁ BLOQUEADO
     public void mover() {
         if (vivo) {
             if (!bloqueadoPorPlanta) {
                 x -= velocidad;
             }
             
+            // Maneja el efecto de ralentización
             if (ralentizado) {
                 ticksRalentizacion--;
                 if (ticksRalentizacion <= 0) {
@@ -82,10 +86,13 @@ public class ZombieGrinch {
             }
         }
     }
+    
+    // VERIFICA SI LA PLANTA BLOQUEADORA SIGUE EXISTIENDO
     public void verificarPlantaBloqueadora(WallNut[] wallnuts, PlantaDeHielo[] hielos, RoseBlade[] roses, CerezaExplosiva[] cerezas) {
         if (bloqueadoPorPlanta && plantaBloqueadora != null) {
             boolean siguePlantada = false;
 
+            // Busca en todos los arrays de plantas
             for (int i = 0; i < wallnuts.length; i++) {
                 if (wallnuts[i] == plantaBloqueadora && wallnuts[i].plantada) {
                     siguePlantada = true;
@@ -111,6 +118,7 @@ public class ZombieGrinch {
                 }
             }
 
+            // Si la planta ya no existe, se libera
             if (!siguePlantada) {
                 bloqueadoPorPlanta = false;
                 plantaBloqueadora = null;
@@ -118,19 +126,23 @@ public class ZombieGrinch {
         }
     }
 
+    // BLOQUEA AL ZOMBIE CON UNA PLANTA
     public void bloquear(Object planta) {
         this.bloqueadoPorPlanta = true;
         this.plantaBloqueadora = planta;
         this.velocidad = 0;
     }
     
+    // LIBERA AL ZOMBIE DEL BLOQUEO
     public void liberar() {
         this.bloqueadoPorPlanta = false;
         this.plantaBloqueadora = null;
         this.velocidad = ralentizado ? velocidadNormal * 0.2 : velocidadNormal;
     }
     
-    // Métodos de colisión específicos para cada tipo de planta
+    // MÉTODOS DE COLISIÓN - ZOMBIE GRINCH vs PLANTAS
+    // Usa distancia con radio de 50 píxeles
+    
     public boolean colisionaConWallnut(WallNut p) {
         if (!vivo || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
@@ -155,6 +167,7 @@ public class ZombieGrinch {
         return distancia < 50;
     }
     
+    // MÉTODOS DE COMBATE Y DISPARO
     public boolean puedeAtacar(int tickActual) {
         return (tickActual - tiempoUltimoAtaque) >= cooldownAtaque;
     }
@@ -167,6 +180,7 @@ public class ZombieGrinch {
         this.tiempoUltimoAtaque = tickActual;
     }
     
+    // DISPARA BOLAS DE NIEVE CONTRA PLANTAS
     public BolaNieve disparar(int tickActual) {
         if (puedeDisparar(tickActual)) {
             this.tiempoUltimoDisparo = tickActual;
@@ -182,6 +196,7 @@ public class ZombieGrinch {
         }
     }
     
+    // EFECTO DE RALENTIZACIÓN POR HIELO
     public void ralentizar(int duracion) {
         this.ralentizado = true;
         this.ticksRalentizacion = duracion;
@@ -200,6 +215,7 @@ public class ZombieGrinch {
         }
     }
     
+    // VERIFICA SI LLEGÓ A LOS REGALOS (CONDICIÓN DE DERROTA)
     public boolean llegoARegalos() {
         return x <= 70;
     }
@@ -208,6 +224,7 @@ public class ZombieGrinch {
         return vivo;
     }
     
+    // COLISIÓN CON PROYECTILES DE PLANTAS
     public boolean colisionaConBolaFuego(BolaFuego bola) {
         if (!vivo || bola == null || !bola.activa) return false;
         double distancia = Math.sqrt(Math.pow(x - bola.x, 2) + Math.pow(y - bola.y, 2));

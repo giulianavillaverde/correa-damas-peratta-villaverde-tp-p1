@@ -27,6 +27,7 @@ public class BolaNieve {
         }
     }
     
+    // Mueve la bola de nieve hacia la izquierda (dirección opuesta a las bolas de plantas)
     public void mover() {
         if (activa) {
             x -= velocidad;
@@ -36,34 +37,36 @@ public class BolaNieve {
         }
     }
     
+    // Dibuja la bola de nieve si está activa
     public void dibujar() {
         if (activa && imagen != null) {
             e.dibujarImagen(imagen, x, y, 0, 0.05);
         }
     }
     
-    // Método para colisión con WallNut
+  
+    // Estas colisiones son de ZOMBIES contra PLANTAS 
+    // Radio de colisión: 30 píxeles
+    // Efecto: La planta recibe daño
+    
     public boolean colisionaConWallnut(WallNut p) {
         if (!activa || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 30;
     }
     
-    // Método para colisión con PlantaDeHielo
     public boolean colisionaConPlantaHielo(PlantaDeHielo p) {
         if (!activa || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 30;
     }
     
-    // Método para colisión con RoseBlade
     public boolean colisionaConRoseBlade(RoseBlade p) {
         if (!activa || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));
         return distancia < 30;
     }
     
-    // Método para colisión con CerezaExplosiva
     public boolean colisionaConCereza(CerezaExplosiva p) {
         if (!activa || p == null || !p.plantada) return false;
         double distancia = Math.sqrt(Math.pow(x - p.x, 2) + Math.pow(y - p.y, 2));

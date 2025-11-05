@@ -5,7 +5,7 @@ import entorno.Entorno;
 import entorno.Herramientas;
 
 public class Banner {
-    // Variables públicas
+    // Variables 
     public double x, y, escala;
     public Image imagen;
     public Entorno e;
@@ -26,4 +26,4 @@ public class Banner {
         // Pone la imagen en las coordenadas especificadas con la escala aplicada
         e.dibujarImagen(imagen, x, y, 0.0, escala);
     }
-} //:)
+} 

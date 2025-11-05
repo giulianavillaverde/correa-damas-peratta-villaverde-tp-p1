@@ -60,6 +60,7 @@ public class RoseBlade {
         }
     }
     
+    // MÉTODOS DE MOVIMIENTO Y POSICIÓN DE LA PLANTA
     public void posicionActualPlanta(double x, double y) {
         this.x = x;
         this.y = y;
@@ -76,10 +77,12 @@ public class RoseBlade {
         }
     }
     
+    // Verifica si el click fue sobre esta planta
     public boolean encima(double x, double y) {
         return Math.abs(this.x - x) < 40 && Math.abs(this.y - y) < 40;
     }
     
+    // MÉTODOS DE RECARGA Y ESTADO
     public boolean estaEnRecarga(int tickActual) {
         return (tickActual - tiempoUltimoPlantado) < tiempoRecargaPlantado;
     }
@@ -94,7 +97,7 @@ public class RoseBlade {
         return plantada;
     }
     
-    // Métodos específicos de RoseBlade
+    // MÉTODOS ESPECÍFICOS DE ROSE BLADE
     public void actualizar(int tickActual) {
         if (!puedeDisparar && tickActual - tiempoUltimoDisparo > tiempoRecargaDisparo) {
             puedeDisparar = true;
@@ -120,6 +123,7 @@ public class RoseBlade {
         this.tiempoUltimoPlantado = tickActual;
     }
     
+    // COMPORTAMIENTO ESPECIAL: Dispara bolas de fuego
     public void ejecutarComportamientoEspecifico(int tickActual, Juego juego) {
         BolaFuego nuevoDisparo = disparar(tickActual);
         if (nuevoDisparo != null) {
@@ -127,6 +131,7 @@ public class RoseBlade {
         }
     }
     
+    // CREA NUEVAS BOLAS DE FUEGO
     public BolaFuego disparar(int tickActual) {
         if (puedeDisparar && plantada) {
             puedeDisparar = false;

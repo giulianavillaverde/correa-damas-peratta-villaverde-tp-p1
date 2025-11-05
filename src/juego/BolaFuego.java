@@ -27,12 +27,14 @@ public class BolaFuego {
         this.activa = true;
     }
     
+    // Dibuja la bola de fuego si está activa y tiene imagen
     public void dibujar() {
         if (activa && imagen != null) {
             e.dibujarImagen(imagen, x, y, 0, 0.05);
         }
     }
     
+    // Mueve la bola hacia la derecha y la desactiva si sale de pantalla
     public void mover() {
         if (activa) {
             x += velocidad;
@@ -42,7 +44,10 @@ public class BolaFuego {
         }
     }
     
-    // Métodos de colisión específicos para cada tipo de zombie
+ 
+    // Verifican colisión con diferentes tipos de zombies usando la distancia 
+    // Radio de colisión: 25 píxeles para todos los zombies
+    
     public boolean colisionaConGrinch(ZombieGrinch zombie) {
         if (!activa || !zombie.vivo) return false;
         double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));

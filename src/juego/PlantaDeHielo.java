@@ -60,6 +60,7 @@ public class PlantaDeHielo {
         }
     }
     
+    // MÉTODOS DE MOVIMIENTO Y POSICIÓN
     public void posicionActualPlanta(double x, double y) {
         this.x = x;
         this.y = y;
@@ -76,10 +77,12 @@ public class PlantaDeHielo {
         }
     }
     
+    // Verifica si las coordenadas están sobre esta planta
     public boolean encima(double x, double y) {
         return Math.abs(this.x - x) < 40 && Math.abs(this.y - y) < 40;
     }
     
+    // MÉTODOS DE RECARGA Y ESTADO
     public boolean estaEnRecarga(int tickActual) {
         return (tickActual - tiempoUltimoPlantado) < tiempoRecargaPlantado;
     }
@@ -94,7 +97,7 @@ public class PlantaDeHielo {
         return plantada;
     }
     
-    // Métodos específicos de PlantaDeHielo
+    // MÉTODOS ESPECÍFICOS DE PLANTA DE HIELO
     public void actualizar(int tickActual) {
         if (!puedeDisparar && tickActual - tiempoUltimoDisparo > tiempoRecargaDisparo) {
             puedeDisparar = true;
@@ -120,6 +123,7 @@ public class PlantaDeHielo {
         this.tiempoUltimoPlantado = tickActual;
     }
     
+    // COMPORTAMIENTO ESPECIAL: Dispara bolas de escarcha
     public void ejecutarComportamientoEspecifico(int tickActual, Juego juego) {
         BolaEscarcha nuevoDisparoHielo = disparar(tickActual);
         if (nuevoDisparoHielo != null) {
@@ -127,6 +131,7 @@ public class PlantaDeHielo {
         }
     }
     
+    // CREA NUEVOS BOLAS DE HIELO
     public BolaEscarcha disparar(int tickActual) {
         if (puedeDisparar && plantada) {
             puedeDisparar = false;

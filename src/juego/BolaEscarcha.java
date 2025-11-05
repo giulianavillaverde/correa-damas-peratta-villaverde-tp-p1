@@ -29,6 +29,7 @@ public class BolaEscarcha {
         }
     }
     
+    // Dibuja la bola de escarcha o un círculo de respaldo si no hay imagen
     public void dibujar() {
         if (activa) {
             if (imagen != null) {
@@ -40,6 +41,7 @@ public class BolaEscarcha {
         }
     }
     
+    // Mueve la bola hacia la derecha y la desactiva si sale de pantalla
     public void mover() {
         if (activa) {
             x += velocidad;
@@ -49,7 +51,10 @@ public class BolaEscarcha {
         }
     }
     
-    // Métodos de colisión específicos para cada tipo de zombie
+ 
+    // Estos métodos verifican si la bola colisiona con diferentes tipos de zombies
+    // Retornan true si la distancia es menor a 25 píxeles (radio de colisión)
+    
     public boolean colisionaConGrinch(ZombieGrinch zombie) {
         if (!activa || !zombie.vivo) return false;
         double distancia = Math.sqrt(Math.pow(x - zombie.x, 2) + Math.pow(y - zombie.y, 2));

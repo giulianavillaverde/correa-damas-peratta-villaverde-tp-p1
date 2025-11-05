@@ -60,6 +60,8 @@ public class CerezaExplosiva {
         }
     }
     
+    // MÉTODOS DE MOVIMIENTO Y SELECCIÓN
+    
     public void posicionActualPlanta(double x, double y) {
         this.x = x;
         this.y = y;
@@ -76,9 +78,12 @@ public class CerezaExplosiva {
         }
     }
     
+    // Verifica si el punto (x,y) está encima de esta planta
     public boolean encima(double x, double y) {
         return Math.abs(this.x - x) < 40 && Math.abs(this.y - y) < 40;
     }
+    
+    // MÉTODOS DE RECARGA Y ESTADO DE LA PLANTA 
     
     public boolean estaEnRecarga(int tickActual) {
         return (tickActual - tiempoUltimoPlantado) < tiempoRecargaPlantado;
@@ -94,7 +99,8 @@ public class CerezaExplosiva {
         return plantada;
     }
     
-    // Métodos específicos de CerezaExplosiva
+    // MÉTODOS ESPECÍFICOS DE CEREZA EXPLOSIVA
+    
     public void actualizar(int tickActual) {
         if (bajoAtaque && tickActual >= tiempoFinAtaque) {
             bajoAtaque = false;
@@ -123,11 +129,14 @@ public class CerezaExplosiva {
         }
     }
     
+    // MÉTODOS DE EXPLOSIÓN - COLISIÓN POR RADIO
+    
     public boolean hayZombieCerca(ZombieGrinch[] zombies) {
         if (!plantada || explotando) return false;
         
         for (ZombieGrinch zombie : zombies) {
             if (zombie != null && zombie.vivo) {
+                // COLISIÓN POR PROXIMIDAD: Si un zombie está a menos de 50 píxeles, explota
                 double distancia = Math.sqrt(Math.pow(zombie.x - x, 2) + 
                                            Math.pow(zombie.y - y, 2));
                 if (distancia < 50) {

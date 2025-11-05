@@ -47,17 +47,19 @@ public class WallNut {
         }
     }
     
+    // DIBUJA LA PLANTA CON EFECTO VISUAL CUANDO ES ATACADA
     public void dibujar() {
         if (imagen != null) {
             e.dibujarImagen(imagen, x, y, 0, escala);
         }
         
-        // Comportamiento específico de WallNut
+        // Comportamiento específico de WallNut: círculo rojo cuando es atacada
         if (bajoAtaque && plantada) {
             e.dibujarCirculo(x, y, 45, new Color(255, 0, 0, 100));
         }
     }
     
+    // MÉTODOS DE MOVIMIENTO Y POSICIÓN
     public void posicionActualPlanta(double x, double y) {
         this.x = x;
         this.y = y;
@@ -74,10 +76,12 @@ public class WallNut {
         }
     }
     
+    // Verifica colisión para selección con mouse
     public boolean encima(double x, double y) {
         return Math.abs(this.x - x) < 40 && Math.abs(this.y - y) < 40;
     }
     
+    // MÉTODOS DE RECARGA Y ESTADO
     public boolean estaEnRecarga(int tickActual) {
         return (tickActual - tiempoUltimoPlantado) < tiempoRecargaPlantado;
     }
@@ -92,7 +96,7 @@ public class WallNut {
         return plantada;
     }
     
-    // Métodos específicos de WallNut
+    // MÉTODOS ESPECÍFICOS DE WALLNUT 
     public void actualizar(int tickActual) {
         if (bajoAtaque && tickActual >= tiempoFinAtaque) {
             bajoAtaque = false;
@@ -114,6 +118,7 @@ public class WallNut {
         this.tiempoUltimoPlantado = tickActual;
     }
     
+   
     public void ejecutarComportamientoEspecifico(int tickActual, Juego juego) {
         // WallNut no tiene comportamiento especial, solo defiende
     }
